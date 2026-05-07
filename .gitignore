@@ -1,0 +1,62 @@
+# Dependências
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.env.local
+.env.*.local
+
+# Testes
+coverage/
+*.lcov
+.nyc_output/
+
+# Variáveis de ambiente
+.env
+.env.development
+.env.production
+.env.test
+
+# Arquivos do Sistema
+Thumbs.db
+.DS_Store
+
+# Arquivos de Build
+build/
+dist/
+*.apk
+*.aab
+*.ipa
+
+# Logs
+logs/
+*.log
+
+# Temporal
+tmp/
+temp/
+
+# Arquivos específicos do projeto
+.eas/
+eas.json.local
