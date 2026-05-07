@@ -10,8 +10,6 @@ O projeto foi desenvolvido no contexto acadêmico como proposta aplicada à miti
 
 #
 
-#
-
 ## Modelo
 
 A plataforma opera a partir da integração de diferentes fontes de dados climáticos, geográficos e colaborativos.
@@ -28,8 +26,6 @@ Além das fontes automatizadas, a plataforma incorpora mecanismos de participaç
 Esses dados contribuem para atualização dinâmica das informações apresentadas aos demais usuários e aos órgãos públicos envolvidos.
 
 O modelo da plataforma busca combinar monitoramento automatizado, análise de risco e comunicação acessível em um ambiente unificado.
-
-#
 
 #
 
@@ -54,8 +50,6 @@ Suporte operacional para órgãos públicos e agentes responsáveis pela gestão
 
 #
 
-#
-
 ## 🛠️ Tecnologias
 
 A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modernas voltadas à escalabilidade e integração de serviços.
@@ -71,8 +65,6 @@ A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modern
 
 #
 
-#
-
 ## Estrutura da Plataforma
 
 ```text
@@ -84,9 +76,6 @@ Backend / APIs REST
         ▼
 Banco de Dados + APIs Climáticas
 ```
-
-#
-
 #
 
 ## 📂 Projeto
@@ -100,8 +89,6 @@ O desenvolvimento da Conf-IA encontra-se organizado em etapas progressivas que a
 - validação da plataforma.
 
 Atualmente, o projeto encontra-se na fase de desenvolvimento da arquitetura backend e definição das interfaces principais da aplicação.
-
-#
 
 #
 
@@ -119,8 +106,6 @@ Fortalecimento da resiliência e adaptação climática.
 
 #
 
-#
-
 ## 👨‍💻 Equipe
 
 Projeto desenvolvido por:
@@ -129,8 +114,6 @@ Projeto desenvolvido por:
 - Danilo Santos Soares
 - João Pedro Silva de Oliveira
 - Matheus Curci Romano
-
-#
 
 #
 
