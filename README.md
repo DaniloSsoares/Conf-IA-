@@ -1,4 +1,4 @@
-# 🌎 Conf-IA — Plataforma de Prevenção e Resposta a Desastres Climáticos
+# Conf-IA — Plataforma de Prevenção e Resposta a Desastres Climáticos
 
 Bem-vindo ao projeto **Conf-IA**.
 
@@ -50,7 +50,7 @@ Suporte operacional para órgãos públicos e agentes responsáveis pela gestão
 
 #
 
-## 🛠️ Tecnologias
+## Tecnologias
 
 A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modernas voltadas à escalabilidade e integração de serviços.
 
