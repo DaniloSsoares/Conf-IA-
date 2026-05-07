@@ -12,7 +12,7 @@ O projeto foi desenvolvido no contexto acadêmico como proposta aplicada à miti
 
 #
 
-## 📌 Modelo
+## Modelo
 
 A plataforma opera a partir da integração de diferentes fontes de dados climáticos, geográficos e colaborativos.
 
@@ -20,10 +20,10 @@ Informações meteorológicas são obtidas por meio de APIs públicas nacionais 
 
 Além das fontes automatizadas, a plataforma incorpora mecanismos de participação colaborativa, permitindo que usuários reportem ocorrências em tempo real, incluindo registros de:
 
-- 🌧️ Alagamentos
-- ⛰️ Deslizamentos
-- 🚧 Bloqueios de vias
-- ⚠️ Ocorrências climáticas diversas
+- Alagamentos
+- Deslizamentos
+- Bloqueios de vias
+- Ocorrências climáticas diversas
 
 Esses dados contribuem para atualização dinâmica das informações apresentadas aos demais usuários e aos órgãos públicos envolvidos.
 
@@ -33,23 +33,23 @@ O modelo da plataforma busca combinar monitoramento automatizado, análise de ri
 
 #
 
-## 🚨 Funcionalidades
+## Funcionalidades
 
 A plataforma disponibiliza funcionalidades voltadas ao acompanhamento de riscos climáticos e apoio à tomada de decisão em situações emergenciais.
 
-### 📍 Alertas Personalizados
+### Alertas Personalizados
 Recebimento de notificações conforme localização e nível de risco identificado.
 
-### 🗺️ Mapas de Risco
+### Mapas de Risco
 Visualização de áreas monitoradas e regiões vulneráveis em tempo real.
 
-### 📸 Reporte Colaborativo
+### Reporte Colaborativo
 Envio de ocorrências pela população com descrição, localização e imagens.
 
-### 📚 Histórico de Eventos
+### Histórico de Eventos
 Consulta de ocorrências anteriores para análise e acompanhamento.
 
-### 🏛️ Apoio à Defesa Civil
+### Apoio à Defesa Civil
 Suporte operacional para órgãos públicos e agentes responsáveis pela gestão de emergências.
 
 #
@@ -73,7 +73,7 @@ A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modern
 
 #
 
-## 🏗️ Estrutura da Plataforma
+## Estrutura da Plataforma
 
 ```text
 Aplicação Mobile
@@ -105,15 +105,15 @@ Atualmente, o projeto encontra-se na fase de desenvolvimento da arquitetura back
 
 #
 
-## 🌍 Objetivos de Desenvolvimento Sustentável
+## Objetivos de Desenvolvimento Sustentável
 
 A proposta da Conf-IA está alinhada aos Objetivos de Desenvolvimento Sustentável da Organização das Nações Unidas, especialmente:
 
-### 🏙️ ODS 11 — Cidades e Comunidades Sustentáveis
+### ODS 11 — Cidades e Comunidades Sustentáveis
 
 Redução de impactos causados por desastres naturais em áreas urbanas.
 
-### 🌱 ODS 13 — Ação Contra a Mudança Global do Clima
+### ODS 13 — Ação Contra a Mudança Global do Clima
 
 Fortalecimento da resiliência e adaptação climática.
 
