@@ -131,32 +131,25 @@ A plataforma opera através de um fluxo contínuo de coleta, processamento e dis
 └──────────────────────────────────────────────┘
                     ↓
 ┌──────────────────────────────────────────────┐
-│ 3. Armazenamento no Supabase                │
-│    • Análise de risco                       │
-│    • Correlação histórica                   │
-└──────────────────────────────────────────────┘
-                    ↓
-┌──────────────────────────────────────────────┐
-│ 4. APIs climáticas processam os dados       │
+│ 3. APIs climáticas processam os dados       │
 │    • INMET                                 │
 │    • NOAA                                  │
 │    • Padrões meteorológicos                │
 └──────────────────────────────────────────────┘
                     ↓
 ┌──────────────────────────────────────────────┐
-│ 5. Algoritmo gera alertas personalizados    │
-│    • Cálculo do nível de risco              │
-│    • Classificação por área                 │
+│ 4. Algoritmo gera alertas personalizados    │
+│    • Será mostrado aos outro usuarios o risco│
 └──────────────────────────────────────────────┘
                     ↓
 ┌──────────────────────────────────────────────┐
-│ 6. Notificações push enviadas aos usuários  │
+│ 5. Notificações push enviadas aos usuários  │
 │    • Alertas em tempo real                  │
 │    • Diferentes níveis de severidade        │
 └──────────────────────────────────────────────┘
                     ↓
 ┌──────────────────────────────────────────────┐
-│ 7. Dashboard da Defesa Civil atualizado     │
+│ 6. Dashboard atualizado                     │
 │    • Monitoramento em tempo real            │
 │    • Apoio à tomada de decisão              │
 └──────────────────────────────────────────────┘
