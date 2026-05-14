@@ -91,7 +91,7 @@ A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modern
 │  • Usuários      │  │  • OpenWeatherMap          │
 │  • Ocorrências   │  │  • NOAA                    │
 │  • Histórico     │  │  • INMET                   │
-│  • Configurações │  │  • Satélites/Radar         │
+│  • Configurações │  |                            |
 └──────────────────┘  └────────────────────────────┘
 ```
 #
