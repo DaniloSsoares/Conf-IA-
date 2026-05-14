@@ -111,6 +111,43 @@ Atualmente, o projeto encontra-se na fase de desenvolvimento da arquitetura back
 
 #
 
+## 
+Fluxo de Dados em Tempo Real
+A plataforma opera através de um fluxo contínuo de coleta, processamento e disseminação de informações:
+1. Usuário relata ocorrência no app
+   └─ Foto + Localização + Descrição + Tipo de evento
+   
+         ↓
+         
+2. Dados enviados ao Backend via API REST
+   └─ Validação de integridade e geolocalização
+   
+         ↓
+         
+3. Armazenado no Supabase + análise de risco
+   └─ Correlação com dados históricos
+   
+         ↓
+         
+4. APIs climáticas (INMET, NOAA) correlacionam dados
+   └─ Análise de padrões meteorológicos
+   
+         ↓
+         
+5. Algoritmo gera alertas personalizados
+   └─ Nível de risco calculado por área
+   
+         ↓
+         
+6. Notificação push enviada para usuários em risco
+   └─ Diferentes níveis de severidade
+   
+         ↓
+         
+7. Dashboard da Defesa Civil atualizado em tempo real
+   └─ Suporte operacional para tomada de decisão
+#
+
 ## Objetivos de Desenvolvimento Sustentável
 
 A proposta da Conf-IA está alinhada aos Objetivos de Desenvolvimento Sustentável da Organização das Nações Unidas, especialmente:
