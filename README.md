@@ -68,13 +68,32 @@ A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modern
 ## Estrutura da Plataforma
 
 ```text
-Aplicação Mobile
-        │
-        ▼
-Backend / APIs REST
-        │
-        ▼
-Banco de Dados + APIs Climáticas
+┌─────────────────────────────────────────┐
+│      APLICAÇÃO MOBILE (React Native)    │
+│  • Alertas em Tempo Real                │
+│  • Mapas de Risco Interativos          │
+│  • Reporte Colaborativo                 │
+│  • Push Notifications                   │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│    BACKEND / APIs REST (Node.js)        │
+│  • Processamento de Dados               │
+│  • Autenticação & Autorização           │
+│  • Orquestração de APIs Externas        │
+│  • Websockets (atualizações em tempo real)
+└────────────────┬────────────────────────┘
+                 │
+        ┌────────┴────────┐
+        ▼                 ▼
+┌──────────────────┐  ┌────────────────────────────┐
+│  Supabase DB     │  │  APIs Climáticas Externas  │
+│  • Usuários      │  │  • OpenWeatherMap          │
+│  • Ocorrências   │  │  • NOAA                    │
+│  • Histórico     │  │  • INMET                   │
+│  • Configurações │  │  • Satélites/Radar         │
+└──────────────────┘  └────────────────────────────┘
 ```
 #
 
