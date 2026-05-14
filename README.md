@@ -111,51 +111,6 @@ Atualmente, o projeto encontra-se na fase de desenvolvimento da arquitetura back
 
 #
 
-## Fluxo de Dados em Tempo Real
-
-A plataforma opera através de um fluxo contínuo de coleta, processamento e disseminação de informações:
-
-```text
-┌──────────────────────────────────────────────┐
-│ 1. Usuário relata ocorrência no aplicativo  │
-│    • Foto                                  │
-│    • Localização                           │
-│    • Descrição                             │
-│    • Tipo de evento                        │
-└──────────────────────────────────────────────┘
-                    ↓
-┌──────────────────────────────────────────────┐
-│ 2. Dados enviados ao Backend via API REST   │
-│    • Validação de integridade               │
-│    • Verificação de geolocalização          │
-└──────────────────────────────────────────────┘
-                    ↓
-┌──────────────────────────────────────────────┐
-│ 3. APIs climáticas processam os dados       │
-│    • INMET                                 │
-│    • NOAA                                  │
-│    • Padrões meteorológicos                │
-└──────────────────────────────────────────────┘
-                    ↓
-┌──────────────────────────────────────────────┐
-│ 4. Algoritmo gera alertas personalizados    │
-│    • Será mostrado aos outro usuarios o risco│
-└──────────────────────────────────────────────┘
-                    ↓
-┌──────────────────────────────────────────────┐
-│ 5. Notificações push enviadas aos usuários  │
-│    • Alertas em tempo real                  │
-│    • Diferentes níveis de severidade        │
-└──────────────────────────────────────────────┘
-                    ↓
-┌──────────────────────────────────────────────┐
-│ 6. Dashboard atualizado                     │
-│    • Monitoramento em tempo real            │
-│    • Apoio à tomada de decisão              │
-└──────────────────────────────────────────────┘
-
-```
-#
 
 ## Objetivos de Desenvolvimento Sustentável
 
