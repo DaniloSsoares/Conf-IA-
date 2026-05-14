@@ -82,7 +82,6 @@ A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modern
 │  • Processamento de Dados               │
 │  • Autenticação & Autorização           │
 │  • Orquestração de APIs Externas        │
-│  • Websockets (atualizações em tempo real)
 └────────────────┬────────────────────────┘
                  │
         ┌────────┴────────┐
