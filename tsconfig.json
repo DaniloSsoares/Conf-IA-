@@ -12,6 +12,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "app/features/Toast/toastConfig.jsx"  ]
+    "expo-env.d.ts",
+    "src/app/features/Toast/toastConfig.jsx"
+  ]
 }
