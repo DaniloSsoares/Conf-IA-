@@ -13,3 +13,10 @@ export const registerSchema = yup.object({
     .oneOf([yup.ref('password')], 'As senhas não coincidem') // Valida se é igual ao password
     .required("Confirme sua senha"),
 });
+
+export const profileSchema = yup.object({
+  name: yup.string().required("Informe seu nome"),
+  cellphone: yup.string().required("Informe seu telefone"),
+  city: yup.string().required("Informe sua cidade"),
+  state: yup.string().required("Informe seu estado"),
+});

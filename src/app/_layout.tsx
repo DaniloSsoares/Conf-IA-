@@ -7,6 +7,7 @@ export default function RootLayout() {
     <>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="features/SplashScreen/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/Intro/index" options={{ headerShown: false }} />
@@ -16,6 +17,7 @@ export default function RootLayout() {
         <Stack.Screen name="features/Alerts/index" options={{ headerShown: false }} />
         <Stack.Screen name="features/Profile/index" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
       </Stack>
       <Toast config={toastConfig} />
     </>

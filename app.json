@@ -38,6 +38,12 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O aplicativo precisa de acesso à galeria para alterar a foto do seu perfil."
+        }
       ]
     ],
     "experiments": {

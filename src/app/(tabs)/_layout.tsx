@@ -1,48 +1,46 @@
 import { Tabs } from "expo-router";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { View, Platform, useColorScheme } from "react-native";
-import { colors, darkTheme, lightTheme } from "../../constants/theme";
+import { Ionicons } from "@expo/vector-icons";
+import { Platform, View } from "react-native";
+import { useAppTheme } from "../../constants/theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
-  const deviceTheme = useColorScheme();
-  const currentTheme = deviceTheme === "dark" ? darkTheme : lightTheme;
+  const { theme } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.azulClaro,
-        tabBarInactiveTintColor: colors.azulClaro,
-
+        tabBarActiveTintColor: '#FFFFFF',
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.5)',
+        tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: deviceTheme === "dark" ? "#0F172A" : "#FFFFFF",
-          height: 70,
-          marginVertical: '5%',
-          paddingBottom: Platform.OS === "ios" ? 20 : 10,
+          backgroundColor: 'rgba(30, 41, 59, 0.95)', // Slightly lighter to contrast with background
           position: "absolute",
-          borderTopWidth: 0,
-          elevation: 5,
+          bottom: Math.max(insets.bottom + 16, 16), // Accounts for system navigation bar
+          left: 20,
+          right: 20,
+          height: 70, // Increased height to fit icon + label properly
+          borderRadius: 35,
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.15)',
+          paddingBottom: 8,
+          paddingTop: 8,
+          elevation: 10,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 15,
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.3,
+          shadowRadius: 20,
         },
-
         tabBarItemStyle: {
-          marginHorizontal: 15,
-          marginVertical: 10,
-          borderRadius: 25,
-          marginTop: 15,
-          overflow: "hidden",
+          borderRadius: 20,
+          padding: 0,
         },
-
-        tabBarActiveBackgroundColor: "#EFF6FF",
-
         tabBarLabelStyle: {
-          fontSize: 10,
-          fontWeight: "700",
-          marginBottom: 10,
-          textTransform: "uppercase",
+          fontSize: 11,
+          fontWeight: "600",
+          marginTop: -4,
         },
       }}
     >
@@ -50,8 +48,15 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Início',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size || 24} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={{
+              backgroundColor: focused ? 'rgba(255,255,255,0.1)' : 'transparent',
+              padding: 6,
+              borderRadius: 20,
+              marginBottom: 4
+            }}>
+              <Ionicons name={focused ? "home" : "home-outline"} size={22} color={color} />
+            </View>
           ),
         }}
       />
@@ -60,19 +65,34 @@ export default function TabLayout() {
         name="Alerts/index"
         options={{
           title: 'Alertas',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="bell" size={size || 24} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={{
+              backgroundColor: focused ? 'rgba(255,255,255,0.1)' : 'transparent',
+              padding: 6,
+              borderRadius: 20,
+              marginBottom: 4
+            }}>
+              <Ionicons name={focused ? "notifications" : "notifications-outline"} size={22} color={color} />
+            </View>
           ),
         }}
       />
       <Tabs.Screen
-      name="Profile/index"
-      options={{
-        title: 'Perfil',
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name="profile" size={size || 24} color={color} />
-        ),
-      }}/>
+        name="Profile/index"
+        options={{
+          title: 'Perfil',
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={{
+              backgroundColor: focused ? 'rgba(255,255,255,0.1)' : 'transparent',
+              padding: 6,
+              borderRadius: 20,
+              marginBottom: 4
+            }}>
+              <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
+            </View>
+          ),
+        }}
+      />
     </Tabs>
   );
 }

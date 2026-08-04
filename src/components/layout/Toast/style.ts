@@ -1,12 +1,12 @@
 import { StyleSheet, Platform } from 'react-native';
 import { colors } from '@/src/constants/theme';
 
-export default StyleSheet.create({
+export const getStyles = (theme: any) => StyleSheet.create({
   sucessheaderContainerToast: {
     flexDirection: 'row',
-    backgroundColor: colors.background,
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: colors.neonVerde,
+    borderColor: theme.neonVerde,
     paddingVertical: 16,
     paddingHorizontal: 20,
     width: '90%',
@@ -21,7 +21,7 @@ export default StyleSheet.create({
   },
   sucessheaderIndicatorToast: {
     width: 6,
-    backgroundColor: colors.neonVerde,
+    backgroundColor: theme.neonVerde,
     marginRight: 16,
     borderRadius: 3,
   },
@@ -37,18 +37,18 @@ export default StyleSheet.create({
   sucessheaderTitleToast: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.neonVerde,
+    color: theme.neonVerde,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   sucessheaderSubtitleToast: {
     fontSize: 14,
-    color: colors.white || '#666',
+    color: theme.white || colors.white || '#666',
   },
 
   headerContainerToast: {
     flexDirection: 'row',
-    backgroundColor: colors.background,
+    backgroundColor: theme.background,
     borderWidth: 1,
     borderColor: '#ef4444', // Vermelho para erro
     paddingVertical: 16,
@@ -87,7 +87,7 @@ export default StyleSheet.create({
   },
   headerSubtitleToast: {
     fontSize: 14,
-    color: colors.white || '#666',
+    color: colors.text,
   },
 
   toastContainer: {
@@ -99,9 +99,9 @@ export default StyleSheet.create({
 
   edicaoToast: {
     flexDirection: 'row',
-    backgroundColor: colors.background,
+    backgroundColor: theme.background,
     borderWidth: 1,
-    borderColor: colors.neon,
+    borderColor: theme.neon,
     paddingVertical: 16,
     paddingHorizontal: 20,
     width: '90%',
@@ -116,7 +116,7 @@ export default StyleSheet.create({
   },
   edicaoIndicatorToast: {
     width: 6,
-    backgroundColor: colors.neon,
+    backgroundColor: theme.neon,
     marginRight: 16,
     borderRadius: 3,
   },
@@ -132,17 +132,17 @@ export default StyleSheet.create({
   edicaoTitleToast: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.neon,
+    color: theme.neon,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   edicaoSubtitleToast: {
     fontSize: 14,
-    color: colors.text || '#666',
+    color: theme.text || '#666',
   },
 
   errorToastLogin: {
-    backgroundColor: colors.background,
+    backgroundColor: theme.background,
     borderRadius: 12,
     width: '90%',
     paddingVertical: 16,
@@ -155,7 +155,7 @@ export default StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1.5,
-    borderColor: '#fca5a5',
+    borderColor:  '#fca5a5',
   },
   errorTextLogin: {
     fontSize: 18,
@@ -172,7 +172,7 @@ export default StyleSheet.create({
   },
 
   EnvioToastSenha: {
-    backgroundColor: colors.background,
+    backgroundColor: theme.background,
     borderRadius: 12,
     width: '90%',
     paddingVertical: 16,
@@ -185,24 +185,24 @@ export default StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1.5,
-    borderColor: colors.neonVerde,
+    borderColor: theme.neonVerde,
   },
   EnvioTextSenha: {
     fontSize: 18,
-    color: colors.neonVerde,
+    color: theme.neonVerde,
     fontWeight: 'bold',
     marginLeft: 12,
   },
   EnvioSubTextSenha: {
     fontSize: 14,
-    color: colors.text || '#333',
+    color: theme.text || '#333',
     marginLeft: 12,
     marginTop: 2,
     flexShrink: 1,
   },
 
   DocToast: {
-    backgroundColor: colors.background,
+    backgroundColor: theme.background,
     borderRadius: 12,
     width: '90%',
     paddingVertical: 16,
@@ -215,17 +215,17 @@ export default StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
     borderWidth: 1.5,
-    borderColor: colors.primary,
+    borderColor: theme.primary,
   },
   DocText: {
     fontSize: 18,
-    color: colors.primary,
+    color: theme.primary,
     fontWeight: 'bold',
     marginLeft: 12,
   },
   DocSubText: {
     fontSize: 14,
-    color: colors.primary,
+    color: theme.primary,
     marginLeft: 12,
     marginTop: 2,
     flexShrink: 1,
