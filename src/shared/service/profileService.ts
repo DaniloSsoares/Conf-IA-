@@ -32,9 +32,11 @@ export async function updateProfile(
             | "perfil_avatar_url"
             | "perfil_raio_notificacao_km"
             | "perfil_preferencias_alertas"
+            | "perfil_latitude"
+            | "perfil_longitude"
         >
     >
-){
+) {
     const {data, error} = await supabaseConfig
     .from("perfil")
     .upsert({ id: userId, ...updates })

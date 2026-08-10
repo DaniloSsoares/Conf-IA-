@@ -89,4 +89,20 @@ export const getStyles = (theme: any) =>
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
+  locationButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 8,
+  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  borderRadius: 12,
+  paddingVertical: 14,
+  marginTop: 8,
+  marginBottom: 16,
+},
+locationButtonText: {
+  color: '#FFFFFF',
+  fontSize: 14,
+  fontWeight: '600',
+},
 });

@@ -19,6 +19,7 @@ import Toast from 'react-native-toast-message';
 import { supabaseConfig } from '@/src/config/supabase';
 import { getProfile } from '@/src/shared/service/profileService';
 import { Profile } from '@/src/shared/types/profile';
+import {formatDate} from '@/src/shared/utils/dateMember'
 
 export default function ProfileScreen() {
   const { theme } = useAppTheme();
@@ -73,22 +74,24 @@ export default function ProfileScreen() {
     }, [loadProfile])
   );
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const month = months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-  };
+ 
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const { error } = await supabaseConfig.auth.signOut();
+    if(error){
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Erro ao sair',
+      });
+      return;
+    }
     Toast.show({
       type: 'success',
       text1: 'Logout',
-      text2: 'Você saiu da aplicação'
+      text2: 'Você saiu da aplicação',
     });
+    router.replace('/Login');
   };
 
   const handleDeleteAccount = () => {
@@ -235,15 +238,6 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuLabel}>
-              <View style={styles.iconBg}><Ionicons name="shield-checkmark" size={18} color="#FFFFFF" /></View>
-              <Text style={styles.menuTitle}>Privacidade</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="rgba(255, 255, 255, 0.6)" />
-          </TouchableOpacity>
-          <View style={styles.divider} />
-
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuLabel}>
               <View style={styles.iconBg}><Ionicons name="document-text" size={18} color="#FFFFFF" /></View>
               <Text style={styles.menuTitle}>Termos de Serviço</Text>
             </View>
@@ -251,7 +245,6 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Ações Perigosas */}
         <View style={styles.dangerSection}>
           <TouchableOpacity style={styles.dangerButton} onPress={handleLogout}>
             <Ionicons name="log-out" size={22} color="#FF6B6B" />
@@ -263,7 +256,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.versionText}>Conf-IA v1.0.0</Text>
+        
       </ScrollView>
     </LinearGradient>
   );

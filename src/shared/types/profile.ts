@@ -18,8 +18,10 @@ export type Profile = {
     perfil_telefone: string | null;
     perfil_cidade: string | null;
     perfil_estado: string | null;
-    perfil_raio_notificacao_km:number;
+    perfil_raio_notificacao:number;
     perfil_preferencias_alertas:AlertPreferences;
+    perfil_latitude: number | null;
+    perfil_longitude: number | null;
     created_at:string;
     updated_at:string;
 }

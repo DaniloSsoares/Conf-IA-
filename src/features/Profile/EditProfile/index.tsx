@@ -24,6 +24,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { supabaseConfig } from '@/src/config/supabase';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
+import * as Location from 'expo-location';
 import { updateProfile, getProfile, uploadAvatar } from '@/src/shared/service/profileService';
 
 
@@ -38,6 +39,8 @@ export default function EditProfileScreen() {
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
+  const [gettingLocation, setGettingLocation] = useState(false);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -60,6 +63,12 @@ export default function EditProfileScreen() {
             state: profileData.perfil_estado || '',
           });
           setAvatarUrl(profileData.perfil_avatar_url || null);
+          if(profileData.perfil_latitude && profileData.perfil_longitude) {
+           setLocation({
+              latitude: profileData.perfil_latitude,
+              longitude: profileData.perfil_longitude,
+            });
+          }
         } else {
           reset({
             name: '',
@@ -80,6 +89,61 @@ export default function EditProfileScreen() {
     loadProfileData();
   }, [reset]);
 
+  const handleGetLocation = async () => {
+  
+  try{
+    const {status}= await Location.requestForegroundPermissionsAsync();
+    if(status !=='granted'){
+      Toast.show({
+        type: 'error',
+        text1: 'Erro',
+        text2: 'Permissão de localização negada',
+      });
+      return;
+    }
+   setGettingLocation(true);
+      const position = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = position.coords;
+   const {data:{user}} = await supabaseConfig.auth.getUser();
+  if (!user) {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro',
+          text2: 'Usuário não autenticado',
+        });
+        return;
+      }
+
+      const { error } = await updateProfile(user.id, {
+        perfil_latitude: latitude,
+        perfil_longitude: longitude,
+      });
+
+      if (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro ao salvar localização',
+          text2: error.message,
+        });
+        return;
+      }
+
+      setLocation({ latitude, longitude });
+      Toast.show({
+        type: 'success',
+        text1: 'Localização atualizada!',
+      });
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Erro ao obter localização',
+        text2: error.message,
+      });
+    } finally {
+      setGettingLocation(false);
+    }
+  }
+  
   const handleSelectAndUploadAvatar = async () => {
     try {
       const { data: { user } } = await supabaseConfig.auth.getUser();
@@ -153,6 +217,8 @@ export default function EditProfileScreen() {
       perfil_telefone: data.cellphone,
       perfil_cidade: data.city,
       perfil_estado: data.state,
+      perfil_latitude: location?.latitude,
+      perfil_longitude: location?.longitude,
     });
     if (error) {
       Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
@@ -267,6 +333,30 @@ export default function EditProfileScreen() {
                 />
               )}
             />
+
+                <TouchableOpacity
+              style={styles.locationButton}
+              onPress={handleGetLocation}
+              disabled={gettingLocation}
+              activeOpacity={0.8}
+            >
+              {gettingLocation ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Ionicons
+                  name={location ? 'checkmark-circle' : 'locate'}
+                  size={18}
+                  color="#FFFFFF"
+                />
+              )}
+              <Text style={styles.locationButtonText}>
+                {gettingLocation
+                  ? 'Obtendo localização...'
+                  : location
+                  ? 'Localização capturada'
+                  : 'Usar minha localização atual'}
+              </Text>
+            </TouchableOpacity>
 
             <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(handleSave)}>
               <Text style={styles.saveButtonText}>Salvar Alterações</Text>
