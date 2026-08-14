@@ -20,6 +20,7 @@ import Toast from 'react-native-toast-message';
 import styles from './style';
 import { supabaseConfig } from "@/src/config/supabase";
 import { registerSchema } from '@/src/shared/yup';
+import { Load } from '@/src/components/ui/Load';
 
 export default function RegisterScreen() {
   type FormData = yup.InferType<typeof registerSchema>;
@@ -78,6 +79,7 @@ export default function RegisterScreen() {
       style={styles.container}
     >
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Load visible={loading} message="Criando sua conta..." subMessage="Por favor, aguarde" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}

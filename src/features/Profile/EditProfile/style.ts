@@ -105,4 +105,22 @@ locationButtonText: {
   fontSize: 14,
   fontWeight: '600',
 },
+sliderContainer: {
+  marginTop: 8,
+  marginBottom: 16,
+},
+sliderLabel: {
+  color: '#FFFFFF',
+  fontSize: 14,
+  fontWeight: '600',
+  marginBottom: 4,
+},
+sliderRange: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+},
+sliderRangeText: {
+  color: 'rgba(255, 255, 255, 0.6)',
+  fontSize: 12,
+},
 });

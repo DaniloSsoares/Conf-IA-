@@ -53,7 +53,6 @@ export async function uploadAvatar(
   try {
     const fileName = `${userId}/avatar-${Date.now()}.${fileExt}`;
     
-    // Upload do arquivo decodificado do base64
     const { data: storageData, error: storageError } = await supabaseConfig.storage
       .from("avatars")
       .upload(fileName, decode(base64), {
@@ -66,14 +65,12 @@ export async function uploadAvatar(
       return null;
     }
 
-    // Busca a URL pública do avatar
     const { data: urlData } = supabaseConfig.storage
       .from('avatars')
       .getPublicUrl(fileName);
 
     const publicUrl = urlData.publicUrl;
 
-    // Salva o link no perfil (usando a função updateProfile que já faz o upsert)
     const { error: dbError } = await updateProfile(userId, { perfil_avatar_url: publicUrl });
     if (dbError) throw dbError;
 

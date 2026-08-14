@@ -1,13 +1,10 @@
 export type AlertPreferences = {
     alagamento: boolean;
     deslizamento: boolean;
+    bloqueio_via: boolean;
     fogo_em_mata: boolean;
-    chuva: boolean;
     queda_de_galho: boolean;
     falta_de_luz: boolean;
-    falta_de_agua: boolean;
-    acidente: boolean;
-    vandalismo: boolean;
     outro: boolean;
 }
 
@@ -18,7 +15,7 @@ export type Profile = {
     perfil_telefone: string | null;
     perfil_cidade: string | null;
     perfil_estado: string | null;
-    perfil_raio_notificacao:number;
+    perfil_raio_notificacao_km:number;
     perfil_preferencias_alertas:AlertPreferences;
     perfil_latitude: number | null;
     perfil_longitude: number | null;

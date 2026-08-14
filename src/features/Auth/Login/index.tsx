@@ -20,6 +20,7 @@ import Toast from 'react-native-toast-message';
 import styles from './style';
 import { supabaseConfig } from "@/src/config/supabase";
 import { loginSchema } from '@/src/shared/yup';
+import { Load } from '@/src/components/ui/Load';
 
 export default function LoginScreen() {
   type FormData = yup.InferType<typeof loginSchema>;
@@ -75,6 +76,7 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Load visible={loading} message="Autenticando..." subMessage="Conectando à sua conta" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}

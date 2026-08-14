@@ -15,6 +15,7 @@ const toastConfig = {
   success: ({ text1, text2 }: ToastConfigProps) => {
     const { theme } = useAppTheme();
     const styles = getStyles(theme);
+    const isDark = theme.background === '#020617' || theme.text === '#FFFFFF';
     return (
       <View style={styles.sucessheaderContainerToast}>
         <View style={styles.sucessheaderIndicatorToast} />
@@ -27,7 +28,7 @@ const toastConfig = {
           )}
         </View>
         <TouchableOpacity onPress={() => Toast.hide()}>
-          <MaterialCommunityIcons name="close-circle" size={24} color={colors.neonVerde} />
+          <MaterialCommunityIcons name="close-circle" size={24} color={isDark ? (theme.neonVerde || '#00FF88') : '#10B981'} />
         </TouchableOpacity>
       </View>
     );
@@ -57,6 +58,7 @@ const toastConfig = {
   edicaoToast: ({ text1, text2 }: ToastConfigProps) => {
     const { theme } = useAppTheme();
     const styles = getStyles(theme);
+    const isDark = theme.background === '#020617' || theme.text === '#FFFFFF';
     return (
       <View style={styles.edicaoToast}>
         <View style={styles.edicaoIndicatorToast} />
@@ -69,7 +71,7 @@ const toastConfig = {
           )}
         </View>
         <TouchableOpacity onPress={() => Toast.hide()}>
-          <MaterialCommunityIcons name="close-circle" size={24} color={colors.neon} />
+          <MaterialCommunityIcons name="close-circle" size={24} color={isDark ? (theme.neon || '#00D1FF') : '#0284C7'} />
         </TouchableOpacity>
       </View>
     );

@@ -3,7 +3,7 @@ import { useColorScheme } from 'react-native';
 const tintColorLight = "#0a7ea4";
 const tintColorDark = "#fff";
 
-// Maintain the generic colors object for backward compatibility if it's imported elsewhere
+
 export const colors = {
   background: "#fff",
   white: "#F8FAFC",

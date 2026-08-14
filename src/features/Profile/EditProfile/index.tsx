@@ -24,9 +24,10 @@ import { Controller, useForm } from 'react-hook-form';
 import { supabaseConfig } from '@/src/config/supabase';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
+import Slider from '@react-native-community/slider';
 import * as Location from 'expo-location';
 import { updateProfile, getProfile, uploadAvatar } from '@/src/shared/service/profileService';
-
+import { Load } from '@/src/components/ui/Load';
 
 export default function EditProfileScreen() {
   type FormData = yup.InferType<typeof profileSchema>;
@@ -39,8 +40,10 @@ export default function EditProfileScreen() {
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
+  const [raioNotificacao, setRaioNotificacao] = useState(5);
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -68,6 +71,9 @@ export default function EditProfileScreen() {
               latitude: profileData.perfil_latitude,
               longitude: profileData.perfil_longitude,
             });
+          }
+          if(profileData.perfil_raio_notificacao_km){
+            setRaioNotificacao(profileData.perfil_raio_notificacao_km);
           }
         } else {
           reset({
@@ -208,25 +214,34 @@ export default function EditProfileScreen() {
   };
 
   const handleSave = async (data: FormData) => {
-    const { data: { user } } = await supabaseConfig.auth.getUser();
-    if (!user) {
-      return;
-    }
-    const { error } = await updateProfile(user.id, {
-      perfil_nome_completo: data.name,
-      perfil_telefone: data.cellphone,
-      perfil_cidade: data.city,
-      perfil_estado: data.state,
-      perfil_latitude: location?.latitude,
-      perfil_longitude: location?.longitude,
-    });
-    if (error) {
-      Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
-      return;
-    }
+    try {
+      setSaving(true);
+      const { data: { user } } = await supabaseConfig.auth.getUser();
+      if (!user) {
+        setSaving(false);
+        return;
+      }
+      const { error } = await updateProfile(user.id, {
+        perfil_nome_completo: data.name,
+        perfil_telefone: data.cellphone,
+        perfil_cidade: data.city,
+        perfil_estado: data.state,
+        perfil_latitude: location?.latitude,
+        perfil_longitude: location?.longitude,
+        perfil_raio_notificacao_km: raioNotificacao,
+      });
+      setSaving(false);
+      if (error) {
+        Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
+        return;
+      }
 
-    Toast.show({ type: "success", text1: "Perfil atualizado!" });
-    router.back();
+      Toast.show({ type: "success", text1: "Perfil atualizado!" });
+      router.back();
+    } catch (error: any) {
+      setSaving(false);
+      Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
+    }
   };
 
   const handleBack = () => {
@@ -236,6 +251,11 @@ export default function EditProfileScreen() {
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <Load
+        visible={saving || uploading}
+        message={saving ? "Salvando perfil..." : "Enviando foto..."}
+        subMessage="Por favor, aguarde"
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -358,6 +378,26 @@ export default function EditProfileScreen() {
               </Text>
             </TouchableOpacity>
 
+<View style={styles.sliderContainer}>
+  <Text style={styles.sliderLabel}>
+    Raio de notificação: {raioNotificacao} km
+  </Text>
+  <Slider
+    style={{ width: '100%', height: 40 }}
+    minimumValue={1}
+    maximumValue={50}
+    step={1}
+    value={raioNotificacao}
+    onValueChange={setRaioNotificacao}
+    minimumTrackTintColor="#3069E8"
+    maximumTrackTintColor="rgba(255, 255, 255, 0.2)"
+    thumbTintColor="#FFFFFF"
+  />
+  <View style={styles.sliderRange}>
+    <Text style={styles.sliderRangeText}>1 km</Text>
+    <Text style={styles.sliderRangeText}>50 km</Text>
+  </View>
+</View>
             <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(handleSave)}>
               <Text style={styles.saveButtonText}>Salvar Alterações</Text>
             </TouchableOpacity>
