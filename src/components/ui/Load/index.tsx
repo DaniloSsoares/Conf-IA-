@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useAppTheme } from "@/src/constants/theme";
+import { useAppTheme } from "@/src/shared/constants/theme";
 import styles from "./style";
 
 export interface LoadProps {

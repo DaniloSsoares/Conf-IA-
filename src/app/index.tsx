@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, StatusBar } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAppTheme } from '@/src/constants/theme';
+import { useAppTheme } from '@/src/shared/constants/theme';
 
 export default function Index() {
   const router = useRouter();

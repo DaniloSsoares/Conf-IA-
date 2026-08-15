@@ -4,7 +4,7 @@ import { Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '@/src/constants/theme';
+import { useAppTheme } from '@/src/shared/constants/theme';
 
 export default function NotFoundScreen() {
   const router = useRouter();

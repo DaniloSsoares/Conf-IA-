@@ -10,15 +10,16 @@ export type AlertPreferences = {
 
 export type Profile = {
     id: string;
-    perfil_nome_completo:string
+    perfil_nome_completo: string
     perfil_avatar_url: string | null;
     perfil_telefone: string | null;
     perfil_cidade: string | null;
     perfil_estado: string | null;
-    perfil_raio_notificacao_km:number;
-    perfil_preferencias_alertas:AlertPreferences;
+    perfil_raio_notificacao_km: number;
+    perfil_preferencias_alertas: AlertPreferences;
     perfil_latitude: number | null;
+    perfil_trust_score: number;
     perfil_longitude: number | null;
-    created_at:string;
-    updated_at:string;
+    created_at: string;
+    updated_at: string;
 }

@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import {getStyles} from './style';
+import { getStyles } from './style';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { colors, useAppTheme } from '@/src/constants/theme';
+import { colors, useAppTheme } from '@/src/shared/constants/theme';
 import Toast from 'react-native-toast-message';
 
 interface ToastConfigProps {

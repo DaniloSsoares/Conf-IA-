@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAppTheme } from '@/src/constants/theme';
+import { useAppTheme } from '@/src/shared/constants/theme';
 import styles from './style';
 
 const slides = [

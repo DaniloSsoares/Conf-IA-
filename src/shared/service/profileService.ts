@@ -4,55 +4,56 @@ import { decode } from "base64-arraybuffer";
 
 
 export async function getProfile(userId: string): Promise<Profile | null> {
-    try {
-        const { data, error } = await supabaseConfig
-            .from("perfil")
-            .select("*")
-            .eq("id", userId)
-            .maybeSingle();
+  try {
+    const { data, error } = await supabaseConfig
+      .from("perfil")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
 
-        if (error) throw error;
+    if (error) throw error;
 
-        return data as Profile;
-    } catch (error) {
-        console.error("Erro ao buscar perfil:", error);
-        return null;
-    }
+    return data as Profile;
+  } catch (error) {
+    console.error("Erro ao buscar perfil:", error);
+    return null;
+  }
 }
 
 export async function updateProfile(
-    userId: string,
-    updates: Partial<
-        Pick<
-            Profile,
-            | "perfil_nome_completo"
-            | "perfil_cidade"
-            | "perfil_estado"
-            | "perfil_telefone"
-            | "perfil_avatar_url"
-            | "perfil_raio_notificacao_km"
-            | "perfil_preferencias_alertas"
-            | "perfil_latitude"
-            | "perfil_longitude"
-        >
+  userId: string,
+  updates: Partial<
+    Pick<
+      Profile,
+      | "perfil_nome_completo"
+      | "perfil_cidade"
+      | "perfil_estado"
+      | "perfil_telefone"
+      | "perfil_avatar_url"
+      | "perfil_raio_notificacao_km"
+      | "perfil_preferencias_alertas"
+      | "perfil_latitude"
+      | "perfil_longitude"
+      | "perfil_trust_score"
     >
+  >
 ) {
-    const {data, error} = await supabaseConfig
+  const { data, error } = await supabaseConfig
     .from("perfil")
     .upsert({ id: userId, ...updates })
     .select()
     .single();
-    return { data: data as Profile | null, error};
+  return { data: data as Profile | null, error };
 }
 
 export async function uploadAvatar(
-    userId: string, 
-    base64: string, 
-    fileExt: string = 'png'
+  userId: string,
+  base64: string,
+  fileExt: string = 'png'
 ): Promise<string | null> {
   try {
     const fileName = `${userId}/avatar-${Date.now()}.${fileExt}`;
-    
+
     const { data: storageData, error: storageError } = await supabaseConfig.storage
       .from("avatars")
       .upload(fileName, decode(base64), {

@@ -13,7 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'base64-arraybuffer';
-import { useAppTheme } from '@/src/constants/theme';
+import { useAppTheme } from '@/src/shared/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import Input from '@/src/components/ui/Input';
 import { getStyles } from './style';
@@ -41,7 +41,7 @@ export default function EditProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [location, setLocation] = useState<{latitude: number; longitude: number} | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [raioNotificacao, setRaioNotificacao] = useState(5);
 
@@ -66,13 +66,13 @@ export default function EditProfileScreen() {
             state: profileData.perfil_estado || '',
           });
           setAvatarUrl(profileData.perfil_avatar_url || null);
-          if(profileData.perfil_latitude && profileData.perfil_longitude) {
-           setLocation({
+          if (profileData.perfil_latitude && profileData.perfil_longitude) {
+            setLocation({
               latitude: profileData.perfil_latitude,
               longitude: profileData.perfil_longitude,
             });
           }
-          if(profileData.perfil_raio_notificacao_km){
+          if (profileData.perfil_raio_notificacao_km) {
             setRaioNotificacao(profileData.perfil_raio_notificacao_km);
           }
         } else {
@@ -96,22 +96,22 @@ export default function EditProfileScreen() {
   }, [reset]);
 
   const handleGetLocation = async () => {
-  
-  try{
-    const {status}= await Location.requestForegroundPermissionsAsync();
-    if(status !=='granted'){
-      Toast.show({
-        type: 'error',
-        text1: 'Erro',
-        text2: 'Permissão de localização negada',
-      });
-      return;
-    }
-   setGettingLocation(true);
+
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Toast.show({
+          type: 'error',
+          text1: 'Erro',
+          text2: 'Permissão de localização negada',
+        });
+        return;
+      }
+      setGettingLocation(true);
       const position = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = position.coords;
-   const {data:{user}} = await supabaseConfig.auth.getUser();
-  if (!user) {
+      const { data: { user } } = await supabaseConfig.auth.getUser();
+      if (!user) {
         Toast.show({
           type: 'error',
           text1: 'Erro',
@@ -149,7 +149,7 @@ export default function EditProfileScreen() {
       setGettingLocation(false);
     }
   }
-  
+
   const handleSelectAndUploadAvatar = async () => {
     try {
       const { data: { user } } = await supabaseConfig.auth.getUser();
@@ -354,7 +354,7 @@ export default function EditProfileScreen() {
               )}
             />
 
-                <TouchableOpacity
+            <TouchableOpacity
               style={styles.locationButton}
               onPress={handleGetLocation}
               disabled={gettingLocation}
@@ -373,31 +373,31 @@ export default function EditProfileScreen() {
                 {gettingLocation
                   ? 'Obtendo localização...'
                   : location
-                  ? 'Localização capturada'
-                  : 'Usar minha localização atual'}
+                    ? 'Localização capturada'
+                    : 'Usar minha localização atual'}
               </Text>
             </TouchableOpacity>
 
-<View style={styles.sliderContainer}>
-  <Text style={styles.sliderLabel}>
-    Raio de notificação: {raioNotificacao} km
-  </Text>
-  <Slider
-    style={{ width: '100%', height: 40 }}
-    minimumValue={1}
-    maximumValue={50}
-    step={1}
-    value={raioNotificacao}
-    onValueChange={setRaioNotificacao}
-    minimumTrackTintColor="#3069E8"
-    maximumTrackTintColor="rgba(255, 255, 255, 0.2)"
-    thumbTintColor="#FFFFFF"
-  />
-  <View style={styles.sliderRange}>
-    <Text style={styles.sliderRangeText}>1 km</Text>
-    <Text style={styles.sliderRangeText}>50 km</Text>
-  </View>
-</View>
+            <View style={styles.sliderContainer}>
+              <Text style={styles.sliderLabel}>
+                Raio de notificação: {raioNotificacao} km
+              </Text>
+              <Slider
+                style={{ width: '100%', height: 40 }}
+                minimumValue={1}
+                maximumValue={50}
+                step={1}
+                value={raioNotificacao}
+                onValueChange={setRaioNotificacao}
+                minimumTrackTintColor="#3069E8"
+                maximumTrackTintColor="rgba(255, 255, 255, 0.2)"
+                thumbTintColor="#FFFFFF"
+              />
+              <View style={styles.sliderRange}>
+                <Text style={styles.sliderRangeText}>1 km</Text>
+                <Text style={styles.sliderRangeText}>50 km</Text>
+              </View>
+            </View>
             <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(handleSave)}>
               <Text style={styles.saveButtonText}>Salvar Alterações</Text>
             </TouchableOpacity>

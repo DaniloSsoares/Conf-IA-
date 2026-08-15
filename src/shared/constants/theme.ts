@@ -7,7 +7,7 @@ const tintColorDark = "#fff";
 export const colors = {
   background: "#fff",
   white: "#F8FAFC",
-  text: "#FFFFFF",  
+  text: "#FFFFFF",
   primary: "#0047FF",
   second: "#00F0FF",
   ternary: "#8B5CF6",
@@ -21,8 +21,8 @@ export const colors = {
   azulClaro: "#3B82F6",
   azulEscuro: "#1D3FAD",
   azulCrepusculo: "#031c6e",
-  neonVerde: "#00FF88", 
-  neonVerdeTransparente: "rgba(0, 255, 136, 0.15)", 
+  neonVerde: "#00FF88",
+  neonVerdeTransparente: "rgba(0, 255, 136, 0.15)",
   primaryGradient: ['#246DF8', '#1495F7', '#01C6F5'],
 };
 
@@ -43,13 +43,13 @@ export const lightTheme = {
   azulClaro: "#3B82F6",
   azulEscuro: "#1D3FAD",
   azulCrepusculo: "#031c6e",
-  neonVerde: "#00FF88", 
-  neonVerdeTransparente: "rgba(0, 255, 136, 0.15)", 
-  primaryGradient: ['#246DF8', '#1495F7', '#01C6F5'] as const, 
+  neonVerde: "#00FF88",
+  neonVerdeTransparente: "rgba(0, 255, 136, 0.15)",
+  primaryGradient: ['#246DF8', '#1495F7', '#01C6F5'] as const,
 };
 
 export const darkTheme = {
-  background: "#020617", 
+  background: "#020617",
   text: "#FFFFFF",
   white: "#FFFFFF",
   primary: "#3B82F6",
@@ -66,16 +66,16 @@ export const darkTheme = {
   azulEscuro: "#1E3A8A",
   azulCrepusculo: "#031c6e",
   neonVerde: "#00FF88",
-  neonVerdeTransparente: "rgba(0, 255, 136, 0.15)", 
-  primaryGradient: ['#0A1931', '#112240', '#050D1A'] as const, 
+  neonVerdeTransparente: "rgba(0, 255, 136, 0.15)",
+  primaryGradient: ['#0A1931', '#112240', '#050D1A'] as const,
 };
 
 export const useAppTheme = () => {
   const colorScheme = useColorScheme();
-  
+
   const isDarkMode = colorScheme === 'dark';
   const theme = isDarkMode ? darkTheme : lightTheme;
-  
+
   return {
     isDarkMode,
     theme,

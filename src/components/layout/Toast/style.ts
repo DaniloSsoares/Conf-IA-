@@ -1,5 +1,5 @@
 import { StyleSheet, Platform } from 'react-native';
-import { colors } from '@/src/constants/theme';
+import { colors } from '@/src/shared/constants/theme';
 
 export const getStyles = (theme: any) => {
   const isDark = theme.background === '#020617' || theme.text === '#FFFFFF';

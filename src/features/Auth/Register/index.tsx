@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { Controller, useForm } from "react-hook-form";
 import * as yup from 'yup';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAppTheme } from '@/src/constants/theme';
+import { useAppTheme } from '@/src/shared/constants/theme';
 import Toast from 'react-native-toast-message';
 import styles from './style';
 import { supabaseConfig } from "@/src/config/supabase";

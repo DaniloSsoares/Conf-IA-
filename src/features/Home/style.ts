@@ -1,4 +1,4 @@
-import { colors } from '@/src/constants/theme';
+import { colors } from '@/src/shared/constants/theme';
 import { StyleSheet, Platform, Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
