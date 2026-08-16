@@ -23,7 +23,7 @@ export default function SplashScreen() {
         </View>
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>Conf</Text>
-          <Text style={styles.logoIa}>-IA</Text>
+          <Text style={styles.logoIa}>-U</Text>
         </View>
         <Text style={styles.subtitle}>Prevenção de Desastres Climáticos</Text>
       </View>

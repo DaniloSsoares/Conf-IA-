@@ -77,7 +77,7 @@ export default function IntroScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Ionicons name="shield-outline" size={28} color="#FFFFFF" />
-          <Text style={styles.headerText}>Conf-IA</Text>
+          <Text style={styles.headerText}>Conf-U</Text>
         </View>
 
         <View style={styles.content}>

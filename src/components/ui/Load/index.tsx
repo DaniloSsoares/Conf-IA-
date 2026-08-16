@@ -90,10 +90,10 @@ export function Load({
         <Ionicons name={iconName} size={40} color="#FFFFFF" />
       </View>
 
-      {/* Marca Conf-IA */}
+      {/* Marca Conf-U */}
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>Conf</Text>
-        <Text style={styles.logoIa}>-IA</Text>
+        <Text style={styles.logoIa}>-U</Text>
       </View>
 
       {/* Spinner de carregamento */}

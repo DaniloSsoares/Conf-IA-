@@ -88,7 +88,7 @@ export default function LoginScreen() {
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
-              <Text style={styles.logoIa}>-IA</Text>
+              <Text style={styles.logoIa}>-U</Text>
             </View>
             <Text style={styles.title}>Bem-vindo de volta!</Text>
             <Text style={styles.subtitle}>
