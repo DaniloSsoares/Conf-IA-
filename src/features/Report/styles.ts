@@ -1,0 +1,348 @@
+import { StyleSheet, Platform, StatusBar } from "react-native";
+
+export const getStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    safeArea: {
+      flex: 1,
+      paddingTop: Platform.OS === "android" ? StatusBar.currentHeight || 20 : 0,
+    },
+    scrollContent: {
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 100,
+    },
+    // Header
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 16,
+    },
+    iconButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#FFFFFF",
+      letterSpacing: 0.3,
+    },
+    // Modal Ajuda
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.75)",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: 24,
+    },
+    helpModalContent: {
+      width: "100%",
+      backgroundColor: "#0F172A",
+      borderRadius: 20,
+      padding: 24,
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.15)",
+    },
+    helpModalHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      marginBottom: 16,
+    },
+    helpModalTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#FFFFFF",
+    },
+    helpModalBody: {
+      fontSize: 14,
+      color: "rgba(255, 255, 255, 0.8)",
+      lineHeight: 22,
+      marginBottom: 20,
+    },
+    helpModalButton: {
+      backgroundColor: "#3069E8",
+      borderRadius: 12,
+      paddingVertical: 14,
+      alignItems: "center",
+    },
+    helpModalButtonText: {
+      color: "#FFFFFF",
+      fontSize: 15,
+      fontWeight: "700",
+    },
+    // Categorias
+    sectionCategory: {
+      marginBottom: 24,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: "rgba(255, 255, 255, 0.6)",
+      fontWeight: "500",
+      marginBottom: 4,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "800",
+      color: "#FFFFFF",
+      marginBottom: 16,
+      letterSpacing: 0.2,
+    },
+    categoryGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 12,
+    },
+    categoryCard: {
+      width: "48%",
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.12)",
+      borderRadius: 16,
+      paddingVertical: 20,
+      paddingHorizontal: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    categoryCardFullWidth: {
+      width: "100%",
+    },
+    categoryCardSelected: {
+      backgroundColor: "rgba(48, 105, 232, 0.15)",
+      borderColor: "#3069E8",
+      borderWidth: 2,
+    },
+    categoryIcon: {
+      marginBottom: 10,
+    },
+    categoryLabel: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: "#FFFFFF",
+      textAlign: "center",
+    },
+    categoryLabelSelected: {
+      color: "#3069E8",
+      fontWeight: "700",
+    },
+    // Localização
+    sectionContainer: {
+      marginBottom: 24,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 12,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#FFFFFF",
+    },
+    locationButton: {
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.12)",
+      borderRadius: 16,
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+      justifyContent: "center",
+    },
+    locationButtonCaptured: {
+      borderColor: "#10B981",
+      backgroundColor: "rgba(16, 185, 129, 0.1)",
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+    },
+    buttonText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: "#FFFFFF",
+      textAlign: "center",
+    },
+    capturedContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    capturedInfo: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      flex: 1,
+      marginRight: 8,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    capturedTitle: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: "#FFFFFF",
+    },
+    capturedSub: {
+      fontSize: 12,
+      color: "rgba(255, 255, 255, 0.7)",
+      marginTop: 2,
+    },
+    recaptureBadge: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: "rgba(255, 255, 255, 0.15)",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    // Detalhes adicionais
+    headerRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    counterText: {
+      fontSize: 12,
+      color: "rgba(255, 255, 255, 0.4)",
+    },
+    textArea: {
+      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.12)",
+      borderRadius: 16,
+      padding: 16,
+      color: "#FFFFFF",
+      fontSize: 15,
+      minHeight: 110,
+      lineHeight: 22,
+    },
+    // Adicionar foto
+    dashedCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      backgroundColor: "rgba(255, 255, 255, 0.03)",
+      borderWidth: 1.5,
+      borderColor: "rgba(255, 255, 255, 0.25)",
+      borderStyle: "dashed",
+      borderRadius: 16,
+      paddingVertical: 18,
+      paddingHorizontal: 16,
+    },
+    previewContainer: {
+      position: "relative",
+      borderRadius: 16,
+      overflow: "hidden",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.2)",
+    },
+    previewImage: {
+      width: "100%",
+      height: 180,
+      borderRadius: 16,
+    },
+    removePhotoButton: {
+      position: "absolute",
+      top: 10,
+      right: 10,
+      backgroundColor: "rgba(0, 0, 0, 0.75)",
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    photoModalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.65)",
+      justifyContent: "flex-end",
+    },
+    photoModalContent: {
+      backgroundColor: "#0F172A",
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      padding: 24,
+      borderTopWidth: 1,
+      borderLeftWidth: 1,
+      borderRightWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.15)",
+    },
+    photoModalTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: "#FFFFFF",
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    photoOptionButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      backgroundColor: "rgba(255, 255, 255, 0.06)",
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      borderRadius: 14,
+      marginBottom: 12,
+    },
+    photoOptionText: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: "#FFFFFF",
+    },
+    photoCancelButton: {
+      paddingVertical: 14,
+      alignItems: "center",
+      marginTop: 8,
+    },
+    photoCancelText: {
+      fontSize: 15,
+      color: "rgba(255, 255, 255, 0.6)",
+      fontWeight: "600",
+    },
+    // Botão Enviar
+    submitButton: {
+      backgroundColor: "#3069E8",
+      borderRadius: 16,
+      paddingVertical: 18,
+      paddingHorizontal: 24,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#3069E8",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 5,
+      marginBottom: 20,
+    },
+    submitButtonDisabled: {
+      backgroundColor: "rgba(48, 105, 232, 0.4)",
+      shadowOpacity: 0,
+      elevation: 0,
+    },
+    sendIcon: {
+      transform: [{ rotate: "-20deg" }],
+    },
+    submitButtonText: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: "#FFFFFF",
+      letterSpacing: 0.3,
+    },
+  });
+
+export default getStyles;

@@ -69,6 +69,37 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      
+      <Tabs.Screen
+        name="Report/index"
+        options={{
+          title: 'Reportar',
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={{
+              backgroundColor: focused ? 'rgba(255,255,255,0.1)' : 'transparent',
+              marginBottom: 4
+            }}>
+              <Ionicons name={focused ? "add-circle" : "add-circle-outline"} size={22} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="History/index"
+        options={{
+          title: 'Histórico',
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={{
+              backgroundColor: focused ? 'rgba(255,255,255,0.1)' : 'transparent',
+              marginBottom: 4
+            }}>
+              <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
+            </View>
+          ),
+        }}
+      />
+      
       <Tabs.Screen
         name="Profile/index"
         options={{
@@ -83,6 +114,8 @@ export default function TabLayout() {
           ),
         }}
       />
+
+      
     </Tabs>
   );
 }
