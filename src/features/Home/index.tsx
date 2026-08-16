@@ -1,164 +1,415 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   RefreshControl,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { supabaseConfig } from '@/src/config/supabase';
 import styles from './style';
 
-export default function DashboardScreen({ navigation }) {
+export default function DashboardScreen({ navigation }: any) {
   const [refreshing, setRefreshing] = useState(false);
-  const [riskLevel, setRiskLevel] = useState('baixo');
+  const [userName, setUserName] = useState('Usuário');
 
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
+  const riskLevel = 'baixo';
+
+  useEffect(() => {
+    loadUser();
   }, []);
 
-  const getRiskColor = (level) => {
-    switch (level) {
-      case 'crítico': return '#E11D48'; // Rose 600
-      case 'alto': return '#F97316'; // Orange 500
-      case 'médio': return '#F59E0B'; // Amber 500
-      case 'baixo':
-      default: return '#10B981'; // Emerald 500
+  const loadUser = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabaseConfig.auth.getUser();
+
+      if (!user) {
+        return;
+      }
+
+      const metadata = user.user_metadata || {};
+
+      const name =
+        metadata.nome ||
+        metadata.name ||
+        metadata.full_name ||
+        metadata.display_name ||
+        user.email?.split('@')[0] ||
+        'Usuário';
+
+      setUserName(name);
+    } catch (error) {
+      console.error('Erro ao carregar usuário:', error);
     }
   };
 
-  const getRiskBgColor = (level) => {
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+
+    loadUser().finally(() => {
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 800);
+    });
+  }, []);
+
+  const getRiskColor = (level: string) => {
     switch (level) {
-      case 'crítico': return '#FFE4E6';
-      case 'alto': return '#FFEDD5';
-      case 'médio': return '#FEF3C7';
+      case 'crítico':
+        return '#E11D48';
+
+      case 'alto':
+        return '#F97316';
+
+      case 'médio':
+        return '#F59E0B';
+
       case 'baixo':
-      default: return '#D1FAE5';
+      default:
+        return '#10B981';
     }
   };
 
-  const getRiskIcon = (level) => {
+  const getRiskBgColor = (level: string) => {
     switch (level) {
-      case 'crítico': return 'alert-circle';
-      case 'alto': return 'warning';
-      case 'médio': return 'alert';
+      case 'crítico':
+        return '#FFE4E6';
+
+      case 'alto':
+        return '#FFEDD5';
+
+      case 'médio':
+        return '#FEF3C7';
+
       case 'baixo':
-      default: return 'checkmark-circle';
+      default:
+        return '#D1FAE5';
     }
   };
+
+  const riskColor = getRiskColor(riskLevel);
+  const riskBackground = getRiskBgColor(riskLevel);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{ paddingBottom: 100 }} // Espaço para a Tab Bar
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4F46E5" />}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#4F8EF7"
+          />
+        }
       >
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerGreeting}>Olá, Danilo</Text>
-            <Text style={styles.headerSubtitle}>
-              <Ionicons name="location" size={14} color="#64748B" /> São Paulo, SP
+        {/* =========================
+            CLIMA
+        ========================= */}
+
+        <View style={styles.weatherHeader}>
+          <View style={styles.sunContainer}>
+            <View style={styles.sunGlow} />
+
+            <Ionicons
+              name="sunny"
+              size={92}
+              color="#FFD76A"
+            />
+          </View>
+
+          <View style={styles.weatherInfo}>
+            <Text style={styles.weatherDay}>
+              Hoje - Sábado
+            </Text>
+
+            <Text style={styles.weatherCondition}>
+              Ensolarado
+            </Text>
+
+            <Text style={styles.weatherTemperature}>
+              22° Graus
             </Text>
           </View>
-          <TouchableOpacity style={styles.profileBtn}>
-             <Ionicons name="person-circle" size={40} color="#4F46E5" />
-          </TouchableOpacity>
         </View>
 
-        {/* Card de Risco */}
-        <View style={[styles.riskCard, { backgroundColor: getRiskBgColor(riskLevel) }]}>
+        {/* =========================
+            SAUDAÇÃO
+        ========================= */}
+
+        <View style={styles.greetingContainer}>
+          <Text style={styles.greetingSmall}>
+            Olá, {userName}
+          </Text>
+
+          <Text style={styles.greeting}>
+            Como podemos ajudar
+            <Text style={styles.greetingHighlight}>
+              {' você '}
+            </Text>
+            hoje?
+          </Text>
+
+          <View style={styles.greetingLine} />
+        </View>
+
+        {/* =========================
+            RISCO
+        ========================= */}
+
+        <View
+          style={[
+            styles.riskCard,
+            {
+              backgroundColor: riskBackground,
+            },
+          ]}
+        >
           <View style={styles.riskHeader}>
             <View>
-              <Text style={[styles.riskLabel, { color: getRiskColor(riskLevel) }]}>Nível de Risco Atual</Text>
-              <Text style={[styles.riskLevel, { color: getRiskColor(riskLevel) }]}>
+              <Text
+                style={[
+                  styles.riskLabel,
+                  {
+                    color: riskColor,
+                  },
+                ]}
+              >
+                Nível de risco atual
+              </Text>
+
+              <Text
+                style={[
+                  styles.riskLevel,
+                  {
+                    color: riskColor,
+                  },
+                ]}
+              >
                 {riskLevel.toUpperCase()}
               </Text>
             </View>
-            <View style={[styles.iconBadge, { backgroundColor: getRiskColor(riskLevel) }]}>
-               <Ionicons name={getRiskIcon(riskLevel)} size={32} color="#FFFFFF" />
+
+            <View
+              style={[
+                styles.iconBadge,
+                {
+                  backgroundColor: riskColor,
+                },
+              ]}
+            >
+              <Ionicons
+                name="checkmark-circle"
+                size={25}
+                color="#FFFFFF"
+              />
             </View>
           </View>
-          <Text style={[styles.riskLocation, { color: getRiskColor(riskLevel) }]}>
-            Situação normal. Fique atento a novas atualizações.
+
+          <Text
+            style={[
+              styles.riskLocation,
+              {
+                color: riskColor,
+              },
+            ]}
+          >
+            Situação normal. Nenhum risco relevante
+            identificado no momento.
           </Text>
         </View>
 
-        {/* Informações Climáticas */}
+        {/* =========================
+            CONDIÇÕES CLIMÁTICAS
+        ========================= */}
+
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Condições Climáticas</Text>
-          <View style={styles.weatherGrid}>
-            <View style={styles.weatherCard}>
-              <View style={[styles.weatherIconBg, { backgroundColor: '#DBEAFE' }]}>
-                 <Ionicons name="water-outline" size={24} color="#3B82F6" />
+          <Text style={styles.sectionTitle}>
+            Condições Climáticas
+          </Text>
+
+          <View style={styles.weatherSummary}>
+            {/* UMIDADE */}
+            <View style={styles.weatherSummaryItem}>
+              <View
+                style={[
+                  styles.weatherMiniIcon,
+                  {
+                    backgroundColor: '#E7F0FF',
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="water-outline"
+                  size={19}
+                  color="#3F7FC4"
+                />
               </View>
-              <Text style={styles.weatherValue}>78%</Text>
-              <Text style={styles.weatherLabel}>Umidade</Text>
+
+              <View>
+                <Text style={styles.weatherSummaryValue}>
+                  78%
+                </Text>
+
+                <Text style={styles.weatherSummaryLabel}>
+                  Umidade
+                </Text>
+              </View>
             </View>
-            <View style={styles.weatherCard}>
-              <View style={[styles.weatherIconBg, { backgroundColor: '#FFEDD5' }]}>
-                 <Ionicons name="thermometer-outline" size={24} color="#F97316" />
+
+            <View style={styles.weatherDivider} />
+
+            {/* TEMPERATURA */}
+            <View style={styles.weatherSummaryItem}>
+              <View
+                style={[
+                  styles.weatherMiniIcon,
+                  {
+                    backgroundColor: '#FFF0E4',
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="thermometer-outline"
+                  size={19}
+                  color="#F47A3A"
+                />
               </View>
-              <Text style={styles.weatherValue}>28°C</Text>
-              <Text style={styles.weatherLabel}>Temperatura</Text>
+
+              <View>
+                <Text style={styles.weatherSummaryValue}>
+                  28°C
+                </Text>
+
+                <Text style={styles.weatherSummaryLabel}>
+                  Temperatura
+                </Text>
+              </View>
             </View>
-            <View style={styles.weatherCard}>
-              <View style={[styles.weatherIconBg, { backgroundColor: '#E0E7FF' }]}>
-                 <Ionicons name="cloud-outline" size={24} color="#6366F1" />
+
+            <View style={styles.weatherDivider} />
+
+            {/* CHUVA */}
+            <View style={styles.weatherSummaryItem}>
+              <View
+                style={[
+                  styles.weatherMiniIcon,
+                  {
+                    backgroundColor: '#EEEAFE',
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="rainy-outline"
+                  size={19}
+                  color="#625BFF"
+                />
               </View>
-              <Text style={styles.weatherValue}>12 mm</Text>
-              <Text style={styles.weatherLabel}>Precipitação</Text>
+
+              <View>
+                <Text style={styles.weatherSummaryValue}>
+                  12 mm
+                </Text>
+
+                <Text style={styles.weatherSummaryLabel}>
+                  Chuva
+                </Text>
+              </View>
             </View>
           </View>
         </View>
 
-        {/* Alertas Próximos */}
+        {/* =========================
+            ALERTAS ATIVOS
+        ========================= */}
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Alertas Ativos</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Alertas')}>
-              <Text style={styles.seeAll}>Ver Tudo</Text>
+            <Text style={styles.sectionTitle}>
+              Alertas Ativos
+            </Text>
+
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() =>
+                navigation.navigate('Alerts/index')
+              }
+            >
+              <Text style={styles.seeAll}>
+                Ver tudo
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.alertItem} onPress={() => navigation.navigate('Alertas')}>
-            <View style={[styles.alertIcon, { backgroundColor: '#FFEDD5' }]}>
-              <Ionicons name="alert" size={24} color="#F97316" />
+          <TouchableOpacity
+            style={styles.alertItem}
+            activeOpacity={0.8}
+            onPress={() =>
+              navigation.navigate('Alerts/index')
+            }
+          >
+            <View
+              style={[
+                styles.alertIcon,
+                {
+                  backgroundColor: '#FFF0E4',
+                },
+              ]}
+            >
+              <Ionicons
+                name="warning-outline"
+                size={23}
+                color="#F47A3A"
+              />
             </View>
-            <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>Chuva Moderada Prevista</Text>
-              <Text style={styles.alertTime}>Próximas 6 horas</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
-          </TouchableOpacity>
 
-          <TouchableOpacity style={styles.alertItem}>
-            <View style={[styles.alertIcon, { backgroundColor: '#DBEAFE' }]}>
-              <Ionicons name="water" size={24} color="#3B82F6" />
-            </View>
             <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>Alagamentos em Área Próxima</Text>
-              <Text style={styles.alertTime}>Há 2 horas</Text>
+              <Text style={styles.alertTitle}>
+                Chuva Moderada Prevista
+              </Text>
+
+              <Text style={styles.alertTime}>
+                Próximas 6 horas
+              </Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#CBD5E1" />
+
+            <Ionicons
+              name="chevron-forward"
+              size={19}
+              color="#8B93A1"
+            />
           </TouchableOpacity>
         </View>
 
-        {/* Call to Action */}
+        {/* =========================
+            BOTÃO REPORTAR
+        ========================= */}
+
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate('Report')}
-          activeOpacity={0.9}
+          activeOpacity={0.88}
+          onPress={() =>
+            navigation.navigate('Report/index')
+          }
         >
-          <Ionicons name="add-circle" size={24} color="#FFFFFF" />
-          <Text style={styles.actionButtonText}>Reportar Novo Evento</Text>
+          <Ionicons
+            name="add-circle-outline"
+            size={22}
+            color="#FFFFFF"
+          />
+
+          <Text style={styles.actionButtonText}>
+            Reportar Novo Evento
+          </Text>
         </TouchableOpacity>
+
+        <View style={styles.bottomSpace} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
