@@ -35,7 +35,7 @@ export default function EditProfileScreen() {
     resolver: yupResolver(profileSchema),
   });
 
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
 
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -44,6 +44,8 @@ export default function EditProfileScreen() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [raioNotificacao, setRaioNotificacao] = useState(5);
+
+  const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
 
   useEffect(() => {
     const loadProfileData = async () => {
@@ -250,7 +252,7 @@ export default function EditProfileScreen() {
 
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
       <Load
         visible={saving || uploading}
         message={saving ? "Salvando perfil..." : "Enviando foto..."}
@@ -262,7 +264,7 @@ export default function EditProfileScreen() {
       >
         <View style={styles.header}>
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color={iconColor} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Editar Informações</Text>
           <View style={{ width: 40 }} />
@@ -275,7 +277,7 @@ export default function EditProfileScreen() {
                 {avatarUrl ? (
                   <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%', borderRadius: 48 }} />
                 ) : (
-                  <Ionicons name="person" size={54} color="#FFFFFF" />
+                  <Ionicons name="person" size={54} color={iconColor} />
                 )}
                 {uploading && (
                   <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', borderRadius: 48 }}>
@@ -361,12 +363,12 @@ export default function EditProfileScreen() {
               activeOpacity={0.8}
             >
               {gettingLocation ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
+                <ActivityIndicator color={theme.primary || "#0047FF"} size="small" />
               ) : (
                 <Ionicons
                   name={location ? 'checkmark-circle' : 'locate'}
                   size={18}
-                  color="#FFFFFF"
+                  color={location ? '#10B981' : iconColor}
                 />
               )}
               <Text style={styles.locationButtonText}>
@@ -389,9 +391,9 @@ export default function EditProfileScreen() {
                 step={1}
                 value={raioNotificacao}
                 onValueChange={setRaioNotificacao}
-                minimumTrackTintColor="#3069E8"
-                maximumTrackTintColor="rgba(255, 255, 255, 0.2)"
-                thumbTintColor="#FFFFFF"
+                minimumTrackTintColor={theme.primary || "#0047FF"}
+                maximumTrackTintColor={isDarkMode ? "rgba(255, 255, 255, 0.2)" : "#E2E8F0"}
+                thumbTintColor={theme.primary || "#0047FF"}
               />
               <View style={styles.sliderRange}>
                 <Text style={styles.sliderRangeText}>1 km</Text>

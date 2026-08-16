@@ -33,7 +33,7 @@ export interface SelectedPhoto {
 }
 
 export default function ReportScreen() {
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
   const router = useRouter();
 
@@ -46,6 +46,8 @@ export default function ReportScreen() {
 
   const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
+  const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
+  const primaryColor = theme.primary || "#0047FF";
 
   // Capturar Localização
   const handleCaptureLocation = async () => {
@@ -263,17 +265,17 @@ export default function ReportScreen() {
 
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
 
         {/* Header Bar */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.iconButton} onPress={() => router.back()} activeOpacity={0.7}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color={primaryColor} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Reportar ocorrência</Text>
           <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
-            <Ionicons name="help-circle-outline" size={26} color="#FFFFFF" />
+            <Ionicons name="help-circle-outline" size={26} color={primaryColor} />
           </TouchableOpacity>
         </View>
 
@@ -301,7 +303,7 @@ export default function ReportScreen() {
                     <Ionicons
                       name={item.icon as any}
                       size={26}
-                      color={isSelected ? '#3069E8' : '#FFFFFF'}
+                      color={primaryColor}
                       style={styles.categoryIcon}
                     />
                     <Text style={[styles.categoryLabel, isSelected && styles.categoryLabelSelected]}>
@@ -316,7 +318,7 @@ export default function ReportScreen() {
           {/* Seção Localização */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="location" size={20} color="#FFFFFF" />
+              <Ionicons name="location" size={20} color={primaryColor} />
               <Text style={styles.sectionTitle}>Localização</Text>
             </View>
 
@@ -328,7 +330,7 @@ export default function ReportScreen() {
             >
               {loadingLocation ? (
                 <View style={styles.row}>
-                  <ActivityIndicator size="small" color="#3069E8" />
+                  <ActivityIndicator size="small" color={primaryColor} />
                   <Text style={styles.buttonText}>Obtendo localização atual...</Text>
                 </View>
               ) : location ? (
@@ -343,12 +345,12 @@ export default function ReportScreen() {
                     </View>
                   </View>
                   <View style={styles.recaptureBadge}>
-                    <Ionicons name="refresh-outline" size={16} color="#FFFFFF" />
+                    <Ionicons name="refresh-outline" size={16} color={primaryColor} />
                   </View>
                 </View>
               ) : (
                 <View style={styles.row}>
-                  <Ionicons name="scan-outline" size={22} color="#FFFFFF" />
+                  <Ionicons name="scan-outline" size={22} color={primaryColor} />
                   <Text style={styles.buttonText}>Toque para capturar localização atual</Text>
                 </View>
               )}
@@ -364,7 +366,7 @@ export default function ReportScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="Descreva a situação em poucas palavras..."
-              placeholderTextColor="rgba(255, 255, 255, 0.4)"
+              placeholderTextColor={isDarkMode ? "rgba(255, 255, 255, 0.4)" : "#858D99"}
               multiline
               numberOfLines={4}
               maxLength={500}
@@ -389,7 +391,7 @@ export default function ReportScreen() {
                 onPress={() => setPhotoModalVisible(true)}
                 activeOpacity={0.7}
               >
-                <Ionicons name="camera-outline" size={22} color="#FFFFFF" />
+                <Ionicons name="camera-outline" size={22} color={primaryColor} />
                 <Text style={styles.buttonText}>Adicionar foto (opcional)</Text>
               </TouchableOpacity>
             )}

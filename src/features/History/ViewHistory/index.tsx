@@ -10,20 +10,21 @@ import { getStyles } from './styles';
 type ParamType = 'alerta' | 'reporte';
 
 export default function ViewHistoryScreen() {
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
   const router = useRouter();
   const { type, data } = useLocalSearchParams<{ type: ParamType; data: string }>();
 
+  const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
   const parsed = data ? JSON.parse(data) : null;
 
   if (!parsed) {
     return (
       <LinearGradient colors={theme.primaryGradient} style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+        <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={24} color={iconColor} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Detalhes</Text>
           <View style={{ width: 40 }} />
@@ -38,11 +39,11 @@ export default function ViewHistoryScreen() {
 
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={22} color="#FFFFFF" />
+          <Ionicons name="arrow-back" size={22} color={iconColor} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{isAlerta ? 'Detalhes da notificação' : 'Detalhes do reporte'}</Text>
         <View style={{ width: 40 }} />
@@ -50,24 +51,25 @@ export default function ViewHistoryScreen() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {isAlerta ? (
-          <AlertaContent parsed={parsed} meta={meta} theme={theme} styles={styles} />
+          <AlertaContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} />
         ) : (
-          <ReporteContent parsed={parsed} meta={meta} theme={theme} styles={styles} />
+          <ReporteContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} />
         )}
       </ScrollView>
     </LinearGradient>
   );
 }
 
-function AlertaContent({ parsed, meta, theme, styles }: any) {
+function AlertaContent({ parsed, meta, theme, styles, isDarkMode }: any) {
   const risk = getRiskStyle(parsed.alerta_nivel_risco, theme);
+  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
 
   return (
     <>
       <View style={styles.heroCard}>
         <View style={styles.iconRow}>
           <View style={styles.iconBg}>
-            <Ionicons name={meta.icon as any} size={24} color="#FFFFFF" />
+            <Ionicons name={meta.icon as any} size={24} color={iconColor} />
           </View>
           <View style={[styles.badge, { backgroundColor: risk.bg }]}>
             <Text style={styles.badgeText}>{risk.label}</Text>
@@ -112,16 +114,17 @@ function AlertaContent({ parsed, meta, theme, styles }: any) {
   );
 }
 
-function ReporteContent({ parsed, meta, theme, styles }: any) {
+function ReporteContent({ parsed, meta, theme, styles, isDarkMode }: any) {
   const statusStyle = getStatusStyle(parsed.reporte_status, theme);
   const photoUrl = parsed.reporte_midias?.[0]?.midia_url;
+  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
 
   return (
     <>
       <View style={styles.heroCard}>
         <View style={styles.iconRow}>
           <View style={styles.iconBg}>
-            <Ionicons name={meta.icon as any} size={24} color="#FFFFFF" />
+            <Ionicons name={meta.icon as any} size={24} color={iconColor} />
           </View>
           <View style={[styles.badge, { backgroundColor: statusStyle.bg }]}>
             <Text style={[styles.badgeText, { color: statusStyle.text }]}>{statusStyle.label}</Text>

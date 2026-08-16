@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { useAppTheme } from "@/src/shared/constants/theme";
-import styles from "./style";
+import { getStyles } from "./style";
 
 export interface LoadProps {
   message?: string;
@@ -29,7 +29,8 @@ export function Load({
   iconName = "shield-checkmark",
   style,
 }: LoadProps) {
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
+  const styles = getStyles(theme);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0.6)).current;
@@ -87,17 +88,17 @@ export function Load({
 
       {/* Ícone do escudo/marca */}
       <View style={styles.iconWrapper}>
-        <Ionicons name={iconName} size={40} color="#FFFFFF" />
+        <Ionicons name={iconName} size={40} color={isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF")} />
       </View>
 
-      {/* Marca Conf-U */}
+      {/* Marca Conf-IA */}
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>Conf</Text>
         <Text style={styles.logoIa}>-U</Text>
       </View>
 
       {/* Spinner de carregamento */}
-      <ActivityIndicator size="large" color="#00D1FF" style={styles.spinner} />
+      <ActivityIndicator size="large" color={theme.primary || "#0047FF"} style={styles.spinner} />
 
       {/* Mensagem e subtítulo */}
       <Text style={styles.messageText}>{message}</Text>
@@ -117,10 +118,9 @@ export function Load({
       >
         <LinearGradient
           colors={
-            theme.primaryGradient || [
-              "rgba(10, 25, 49, 0.92)",
-              "rgba(2, 6, 23, 0.95)",
-            ]
+            isDarkMode
+              ? ["rgba(10, 25, 49, 0.92)", "rgba(2, 6, 23, 0.95)"]
+              : ["rgba(255, 255, 255, 0.92)", "rgba(248, 249, 250, 0.95)"]
           }
           style={styles.overlayContainer}
         >

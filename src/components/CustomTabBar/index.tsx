@@ -19,6 +19,7 @@ import {
 } from 'react-native-safe-area-context';
 
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useAppTheme } from '@/src/shared/constants/theme';
 
 import styles from './styles';
 
@@ -36,6 +37,7 @@ export default function CustomTabBar({
   navigation,
 }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const { theme, isDarkMode } = useAppTheme();
 
   const [barWidth, setBarWidth] = useState(0);
 
@@ -316,10 +318,11 @@ export default function CustomTabBar({
           >
             {state.index === 1 ? (
               <LinearGradient
-                colors={[
-                  '#3F7FC4',
-                  '#5D9F55',
-                ]}
+                colors={
+                  isDarkMode
+                    ? ['#3F7FC4', '#5D9F55']
+                    : ['#0047FF', '#3B82F6']
+                }
                 start={{
                   x: 0,
                   y: 0,
@@ -337,10 +340,9 @@ export default function CustomTabBar({
                 style={[
                   styles.indicatorFill,
                   {
-                    backgroundColor:
-                      state.index === 0
-                        ? '#58B99B'
-                        : '#4F8EF7',
+                    backgroundColor: isDarkMode
+                      ? '#4F8EF7'
+                      : (theme.primary || '#0047FF'),
                   },
                 ]}
               />
@@ -462,7 +464,7 @@ export default function CustomTabBar({
                         color={
                           focused
                             ? '#FFFFFF'
-                            : '#171717'
+                            : isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#2C2B30'
                         }
                       />
 
@@ -473,7 +475,7 @@ export default function CustomTabBar({
                             color:
                               focused
                                 ? '#FFFFFF'
-                                : '#171717',
+                                : isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#2C2B30',
                           },
                         ]}
                       >

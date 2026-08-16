@@ -13,15 +13,16 @@ import { getStyles } from './styles';
 import {getStatusStyle, getRiskStyle, getCategoryMeta, formatRelativeTime} from '@/src/shared/constants/historyStatus';
 
 type Tab = 'notificações' | 'reportes';
-
 export default function HistoryScreen() {
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
   const router = useRouter();
   const styles = getStyles(theme);
   const [tab, setTab] = useState<Tab>('notificações');
   const [notifications, setNotifications] = useState<AlertNotification[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const iconColor = isDarkMode ? "rgba(255,255,255,0.6)" : (theme.primary || "#0047FF");
 
   const loadData = useCallback(async () => {
     try {
@@ -66,14 +67,14 @@ export default function HistoryScreen() {
 
   const renderEmpty = (message: string) => (
     <View style={styles.emptyState}>
-      <Ionicons name="file-tray-outline" size={40} color="rgba(255,255,255,0.4)" />
+      <Ionicons name="file-tray-outline" size={40} color={iconColor} />
       <Text style={styles.emptyStateText}>{message}</Text>
     </View>
   );
 
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
 
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Histórico</Text>
@@ -95,7 +96,7 @@ export default function HistoryScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#FFFFFF" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color={theme.primary || "#3AA77A"} style={{ marginTop: 40 }} />
       ) : (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {tab === 'notificações' ? (
@@ -105,7 +106,7 @@ export default function HistoryScreen() {
               notifications.map((notification) => {
                 const meta = getCategoryMeta(notification.alertas?.alerta_tipo_ocorrencia);
                 const risk = getRiskStyle(notification.alertas?.alerta_nivel_risco, theme);
-                const borderColor = notification.notificacao_lida ? 'rgba(255,255,255,0.2)' : risk.border;
+                const borderColor = notification.notificacao_lida ? (isDarkMode ? 'rgba(255,255,255,0.2)' : '#E2E8F0') : risk.border;
 
                 return (
                   <TouchableOpacity
@@ -129,7 +130,7 @@ export default function HistoryScreen() {
 
                     {notification.alertas?.alerta_descricao ? (
                       <View style={styles.cardLocationRow}>
-                        <Ionicons name="information-circle-outline" size={14} color="rgba(255,255,255,0.6)" />
+                        <Ionicons name="information-circle-outline" size={14} color={iconColor} />
                         <Text style={styles.cardLocationText} numberOfLines={1}>
                           {notification.alertas.alerta_descricao}
                         </Text>
@@ -141,14 +142,14 @@ export default function HistoryScreen() {
                         <View
                           style={[
                             styles.statusDot,
-                            { backgroundColor: notification.notificacao_lida ? '#64748B' : theme.second || '#00F0FF' },
+                            { backgroundColor: notification.notificacao_lida ? '#64748B' : (theme.second || '#3B82F6') },
                           ]}
                         />
                         <Text style={styles.statusBadgeText}>
                           {notification.notificacao_lida ? 'Lida' : 'Nova notificação'}
                         </Text>
                       </View>
-                      <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.4)" />
+                      <Ionicons name="chevron-forward" size={18} color={iconColor} />
                     </View>
                   </TouchableOpacity>
                 );
@@ -172,8 +173,8 @@ export default function HistoryScreen() {
                     <Text style={styles.cardDateText}>
                       {formatRelativeTime(report.created_at)}
                     </Text>
-                    <View style={[styles.riskBadge, { backgroundColor: 'rgba(255,255,255,0.12)' }]}>
-                      <Text style={[styles.riskBadgeText, { color: 'rgba(255,255,255,0.9)' }]}>
+                    <View style={[styles.riskBadge, { backgroundColor: isDarkMode ? 'rgba(255,255,255,0.12)' : 'rgba(58,167,122,0.12)' }]}>
+                      <Text style={[styles.riskBadgeText, { color: isDarkMode ? 'rgba(255,255,255,0.9)' : (theme.primary || '#3AA77A') }]}>
                         {meta.label.toUpperCase()}
                       </Text>
                     </View>
@@ -185,7 +186,7 @@ export default function HistoryScreen() {
 
                   {report.reporte_endereco ? (
                     <View style={styles.cardLocationRow}>
-                      <Ionicons name="location-sharp" size={14} color="rgba(255,255,255,0.6)" />
+                      <Ionicons name="location-sharp" size={14} color={iconColor} />
                       <Text style={styles.cardLocationText} numberOfLines={1}>
                         {report.reporte_endereco}
                       </Text>
@@ -199,7 +200,7 @@ export default function HistoryScreen() {
                         {statusStyle.label}
                       </Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color="rgba(255,255,255,0.4)" />
+                    <Ionicons name="chevron-forward" size={18} color={iconColor} />
                   </View>
                 </TouchableOpacity>
               );

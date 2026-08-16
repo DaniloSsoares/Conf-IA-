@@ -1,7 +1,8 @@
 import { StyleSheet } from "react-native";
 
-export const getStyles = (theme: any) =>
-  StyleSheet.create({
+export const getStyles = (theme: any) => {
+  const isDark = theme?.isDark;
+  return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme?.background || 'transparent',
@@ -14,7 +15,7 @@ export const getStyles = (theme: any) =>
     headerTitle: {
       fontSize: 24,
       fontWeight: '800',
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
       letterSpacing: 0.3,
     },
     segmentedControl: {
@@ -22,7 +23,7 @@ export const getStyles = (theme: any) =>
       marginHorizontal: 20,
       marginBottom: 16,
       padding: 4,
-      backgroundColor: 'rgba(255, 255, 255, 0.12)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.12)' : '#F4F5F7',
       borderRadius: 12,
     },
     segmentButton: {
@@ -32,12 +33,12 @@ export const getStyles = (theme: any) =>
       alignItems: 'center',
     },
     segmentButtonActive: {
-      backgroundColor: theme?.primary || '#3069E8',
+      backgroundColor: theme?.primary || '#3AA77A',
     },
     segmentText: {
       fontSize: 14,
       fontWeight: '600',
-      color: 'rgba(255, 255, 255, 0.7)',
+      color: isDark ? 'rgba(255, 255, 255, 0.7)' : '#616A78',
     },
     segmentTextActive: {
       color: '#FFFFFF',
@@ -47,18 +48,17 @@ export const getStyles = (theme: any) =>
       paddingHorizontal: 20,
       paddingBottom: 40,
     },
- 
     card: {
-     backgroundColor: 'rgba(255,255,255,)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#FFFFFF',
       borderRadius: 16,
       padding: 16,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#E2E8F0',
       borderLeftWidth: 4,
-      shadowColor: '#000',
+      shadowColor: '#2C2B30',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
+      shadowOpacity: isDark ? 0.2 : 0.05,
       shadowRadius: 8,
       elevation: 2,
     },
@@ -71,7 +71,7 @@ export const getStyles = (theme: any) =>
     cardDateText: {
       fontSize: 12,
       fontWeight: '600',
-      color: 'rgba(255, 255, 255, 0.6)',
+      color: theme?.subtext || '#616A78',
     },
     riskBadge: {
       paddingHorizontal: 10,
@@ -87,12 +87,12 @@ export const getStyles = (theme: any) =>
     cardTitle: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
       marginBottom: 6,
       lineHeight: 22,
     },
     cardTitleUnread: {
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
       fontWeight: '800',
     },
     cardLocationRow: {
@@ -103,7 +103,7 @@ export const getStyles = (theme: any) =>
     },
     cardLocationText: {
       fontSize: 13,
-      color: 'rgba(255, 255, 255, 0.65)',
+      color: theme?.subtext || '#616A78',
       flex: 1,
     },
     cardFooter: {
@@ -117,7 +117,7 @@ export const getStyles = (theme: any) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: 6,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(44, 43, 48, 0.05)',
       paddingHorizontal: 12,
       paddingVertical: 6,
       borderRadius: 8,
@@ -130,7 +130,7 @@ export const getStyles = (theme: any) =>
     statusBadgeText: {
       fontSize: 12,
       fontWeight: '600',
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
     },
     emptyState: {
       alignItems: 'center',
@@ -140,10 +140,11 @@ export const getStyles = (theme: any) =>
     },
     emptyStateText: {
       fontSize: 14,
-      color: 'rgba(255, 255, 255, 0.5)',
+      color: theme?.subtext || '#858D99',
       textAlign: 'center',
     },
   });
+};
 
 export default getStyles;
 

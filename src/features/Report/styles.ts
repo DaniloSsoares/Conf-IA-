@@ -1,7 +1,8 @@
 import { StyleSheet, Platform, StatusBar } from "react-native";
 
-export const getStyles = (theme: any) =>
-  StyleSheet.create({
+export const getStyles = (theme: any) => {
+  const isDark = theme.isDark;
+  return StyleSheet.create({
     container: {
       flex: 1,
     },
@@ -27,14 +28,14 @@ export const getStyles = (theme: any) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "rgba(255, 255, 255, 0.08)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(44, 43, 48, 0.05)",
       justifyContent: "center",
       alignItems: "center",
     },
     headerTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
       letterSpacing: 0.3,
     },
     // Modal Ajuda
@@ -47,11 +48,11 @@ export const getStyles = (theme: any) =>
     },
     helpModalContent: {
       width: "100%",
-      backgroundColor: "#0F172A",
+      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
       borderRadius: 20,
       padding: 24,
       borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.15)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.15)" : "#E2E8F0",
     },
     helpModalHeader: {
       flexDirection: "row",
@@ -62,16 +63,16 @@ export const getStyles = (theme: any) =>
     helpModalTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
     },
     helpModalBody: {
       fontSize: 14,
-      color: "rgba(255, 255, 255, 0.8)",
+      color: theme.subtext || "#616A78",
       lineHeight: 22,
       marginBottom: 20,
     },
     helpModalButton: {
-      backgroundColor: "#3069E8",
+      backgroundColor: theme.primary || "#3AA77A",
       borderRadius: 12,
       paddingVertical: 14,
       alignItems: "center",
@@ -87,14 +88,14 @@ export const getStyles = (theme: any) =>
     },
     subtitle: {
       fontSize: 14,
-      color: "rgba(255, 255, 255, 0.6)",
+      color: theme.subtext || "#616A78",
       fontWeight: "500",
       marginBottom: 4,
     },
     title: {
       fontSize: 22,
       fontWeight: "800",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
       marginBottom: 16,
       letterSpacing: 0.2,
     },
@@ -105,21 +106,26 @@ export const getStyles = (theme: any) =>
     },
     categoryCard: {
       width: "48%",
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.12)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#E2E8F0",
       borderRadius: 16,
       paddingVertical: 20,
       paddingHorizontal: 12,
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: "#2C2B30",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDark ? 0 : 0.04,
+      shadowRadius: 6,
+      elevation: isDark ? 0 : 1,
     },
     categoryCardFullWidth: {
       width: "100%",
     },
     categoryCardSelected: {
-      backgroundColor: "rgba(48, 105, 232, 0.15)",
-      borderColor: "#3069E8",
+      backgroundColor: isDark ? "rgba(58, 167, 122, 0.15)" : "#E6F7F0",
+      borderColor: theme.primary || "#3AA77A",
       borderWidth: 2,
     },
     categoryIcon: {
@@ -128,11 +134,11 @@ export const getStyles = (theme: any) =>
     categoryLabel: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
       textAlign: "center",
     },
     categoryLabelSelected: {
-      color: "#3069E8",
+      color: theme.primary || "#3AA77A",
       fontWeight: "700",
     },
     // Localização
@@ -148,12 +154,12 @@ export const getStyles = (theme: any) =>
     sectionTitle: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
     },
     locationButton: {
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.12)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#E2E8F0",
       borderRadius: 16,
       paddingVertical: 18,
       paddingHorizontal: 16,
@@ -172,7 +178,7 @@ export const getStyles = (theme: any) =>
     buttonText: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
       textAlign: "center",
     },
     capturedContainer: {
@@ -193,18 +199,18 @@ export const getStyles = (theme: any) =>
     capturedTitle: {
       fontSize: 14,
       fontWeight: "700",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
     },
     capturedSub: {
       fontSize: 12,
-      color: "rgba(255, 255, 255, 0.7)",
+      color: theme.subtext || "#616A78",
       marginTop: 2,
     },
     recaptureBadge: {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: "rgba(255, 255, 255, 0.15)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(58, 167, 122, 0.12)",
       justifyContent: "center",
       alignItems: "center",
     },
@@ -217,15 +223,15 @@ export const getStyles = (theme: any) =>
     },
     counterText: {
       fontSize: 12,
-      color: "rgba(255, 255, 255, 0.4)",
+      color: theme.subtext || "#858D99",
     },
     textArea: {
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#F4F5F7",
       borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.12)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#E2E8F0",
       borderRadius: 16,
       padding: 16,
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
       fontSize: 15,
       minHeight: 110,
       lineHeight: 22,
@@ -236,9 +242,9 @@ export const getStyles = (theme: any) =>
       alignItems: "center",
       justifyContent: "center",
       gap: 10,
-      backgroundColor: "rgba(255, 255, 255, 0.03)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "#F8FAFC",
       borderWidth: 1.5,
-      borderColor: "rgba(255, 255, 255, 0.25)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.25)" : "#CBD5E1",
       borderStyle: "dashed",
       borderRadius: 16,
       paddingVertical: 18,
@@ -249,7 +255,7 @@ export const getStyles = (theme: any) =>
       borderRadius: 16,
       overflow: "hidden",
       borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.2)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.2)" : "#E2E8F0",
     },
     previewImage: {
       width: "100%",
@@ -273,19 +279,19 @@ export const getStyles = (theme: any) =>
       justifyContent: "flex-end",
     },
     photoModalContent: {
-      backgroundColor: "#0F172A",
+      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       padding: 24,
       borderTopWidth: 1,
       borderLeftWidth: 1,
       borderRightWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.15)",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.15)" : "#E2E8F0",
     },
     photoModalTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
       marginBottom: 20,
       textAlign: "center",
     },
@@ -293,7 +299,7 @@ export const getStyles = (theme: any) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-      backgroundColor: "rgba(255, 255, 255, 0.06)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#F4F5F7",
       paddingVertical: 16,
       paddingHorizontal: 20,
       borderRadius: 14,
@@ -302,7 +308,7 @@ export const getStyles = (theme: any) =>
     photoOptionText: {
       fontSize: 16,
       fontWeight: "600",
-      color: "#FFFFFF",
+      color: theme.text || "#2C2B30",
     },
     photoCancelButton: {
       paddingVertical: 14,
@@ -311,18 +317,18 @@ export const getStyles = (theme: any) =>
     },
     photoCancelText: {
       fontSize: 15,
-      color: "rgba(255, 255, 255, 0.6)",
+      color: theme.subtext || "#858D99",
       fontWeight: "600",
     },
     // Botão Enviar
     submitButton: {
-      backgroundColor: "#3069E8",
+      backgroundColor: theme.ternary || "#D74247",
       borderRadius: 16,
       paddingVertical: 18,
       paddingHorizontal: 24,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#3069E8",
+      shadowColor: theme.ternary || "#D74247",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.35,
       shadowRadius: 10,
@@ -330,7 +336,7 @@ export const getStyles = (theme: any) =>
       marginBottom: 20,
     },
     submitButtonDisabled: {
-      backgroundColor: "rgba(48, 105, 232, 0.4)",
+      backgroundColor: "rgba(215, 66, 71, 0.4)",
       shadowOpacity: 0,
       elevation: 0,
     },
@@ -344,5 +350,6 @@ export const getStyles = (theme: any) =>
       letterSpacing: 0.3,
     },
   });
+};
 
 export default getStyles;

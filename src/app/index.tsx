@@ -7,7 +7,7 @@ import { useAppTheme } from '@/src/shared/constants/theme';
 
 export default function Index() {
   const router = useRouter();
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -17,27 +17,31 @@ export default function Index() {
     return () => clearTimeout(timer);
   }, [router]);
 
+  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
+  const textColor = isDarkMode ? "#FFFFFF" : (theme.text || "#2C2B30");
+  const iaColor = isDarkMode ? "rgba(255, 255, 255, 0.8)" : (theme.primary || "#3AA77A");
+
   return (
     <LinearGradient
       colors={theme.primaryGradient}
       style={styles.container}
     >
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
 
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="shield-checkmark" size={64} color="#FFFFFF" />
+        <View style={[styles.iconContainer, { backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(58, 167, 122, 0.12)' }]}>
+          <Ionicons name="shield-checkmark" size={64} color={iconColor} />
         </View>
 
         <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>Conf</Text>
-          <Text style={styles.logoIa}>-IA</Text>
+          <Text style={[styles.logoText, { color: textColor }]}>Conf</Text>
+          <Text style={[styles.logoIa, { color: iaColor }]}>-IA</Text>
         </View>
 
-        <Text style={styles.subtitle}>Prevenção de Desastres Climáticos</Text>
+        <Text style={[styles.subtitle, { color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#616A78' }]}>Prevenção de Desastres Climáticos</Text>
       </View>
 
-      <ActivityIndicator size="large" color="#FFFFFF" style={styles.loader} />
+      <ActivityIndicator size="large" color={theme.primary || "#3AA77A"} style={styles.loader} />
     </LinearGradient>
   );
 }

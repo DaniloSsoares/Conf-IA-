@@ -17,7 +17,7 @@ import * as yup from 'yup';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import Toast from 'react-native-toast-message';
-import styles from './style';
+import getStyles from './style';
 import { supabaseConfig } from "@/src/config/supabase";
 import { registerSchema } from '@/src/shared/yup';
 import { Load } from '@/src/components/ui/Load';
@@ -26,9 +26,13 @@ export default function RegisterScreen() {
   type FormData = yup.InferType<typeof registerSchema>;
 
   const router = useRouter();
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
+  const styles = getStyles(theme);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
+  const placeholderColor = isDarkMode ? "rgba(255, 255, 255, 0.6)" : "#858D99";
 
   const {
     control,
@@ -78,7 +82,7 @@ export default function RegisterScreen() {
       colors={theme.primaryGradient}
       style={styles.container}
     >
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
       <Load visible={loading} message="Criando sua conta..." subMessage="Por favor, aguarde" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -90,11 +94,11 @@ export default function RegisterScreen() {
               style={styles.backButton}
               onPress={() => router.back()}
             >
-              <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+              <Ionicons name="arrow-back" size={24} color={iconColor} />
             </TouchableOpacity>
 
             <View style={styles.iconWrapper}>
-              <Ionicons name="person-add-outline" size={38} color="#FFFFFF" />
+              <Ionicons name="person-add-outline" size={38} color={iconColor} />
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
@@ -113,14 +117,14 @@ export default function RegisterScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.email && { borderColor: "#FF6B6B" },
+                      errors.email && { borderColor: "#D74247" },
                     ]}
                   >
-                    <Ionicons name="mail-outline" size={20} color="#FFFFFF" />
+                    <Ionicons name="mail-outline" size={20} color={iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="seu.email@exemplo.com"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                      placeholderTextColor={placeholderColor}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -144,14 +148,14 @@ export default function RegisterScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.password && { borderColor: "#FF6B6B" },
+                      errors.password && { borderColor: "#D74247" },
                     ]}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color="#FFFFFF" />
+                    <Ionicons name="lock-closed-outline" size={20} color={iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="Sua senha"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                      placeholderTextColor={placeholderColor}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -164,7 +168,7 @@ export default function RegisterScreen() {
                       <Ionicons
                         name={showPassword ? 'eye' : 'eye-off'}
                         size={20}
-                        color="#FFFFFF"
+                        color={iconColor}
                       />
                     </TouchableOpacity>
                   </View>
@@ -184,14 +188,14 @@ export default function RegisterScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.confirmPassword && { borderColor: "#FF6B6B" },
+                      errors.confirmPassword && { borderColor: "#D74247" },
                     ]}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color="#FFFFFF" />
+                    <Ionicons name="lock-closed-outline" size={20} color={iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="Confirme sua senha"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                      placeholderTextColor={placeholderColor}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -204,7 +208,7 @@ export default function RegisterScreen() {
                       <Ionicons
                         name={showPassword ? 'eye' : 'eye-off'}
                         size={20}
-                        color="#FFFFFF"
+                        color={iconColor}
                       />
                     </TouchableOpacity>
                   </View>

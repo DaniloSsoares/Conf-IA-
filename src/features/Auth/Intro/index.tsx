@@ -10,7 +10,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/src/shared/constants/theme';
-import styles from './style';
+import getStyles from './style';
 
 const slides = [
   {
@@ -49,8 +49,11 @@ const slides = [
 
 export default function IntroScreen() {
   const router = useRouter();
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
+  const styles = getStyles(theme);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
@@ -71,12 +74,12 @@ export default function IntroScreen() {
       colors={theme.primaryGradient}
       style={styles.container}
     >
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
       <SafeAreaView style={styles.safeArea}>
 
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="shield-outline" size={28} color="#FFFFFF" />
+          <Ionicons name="shield-outline" size={28} color={iconColor} />
           <Text style={styles.headerText}>Conf-U</Text>
         </View>
 
@@ -84,9 +87,9 @@ export default function IntroScreen() {
           {/* Icon Circle */}
           <View style={styles.iconCircle}>
             {slide.iconFamily === 'MaterialCommunityIcons' ? (
-              <MaterialCommunityIcons name={slide.iconName as any} size={70} color="#FFFFFF" />
+              <MaterialCommunityIcons name={slide.iconName as any} size={70} color={iconColor} />
             ) : (
-              <Ionicons name={slide.iconName as any} size={70} color="#FFFFFF" />
+              <Ionicons name={slide.iconName as any} size={70} color={iconColor} />
             )}
           </View>
 

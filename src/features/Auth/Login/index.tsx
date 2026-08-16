@@ -17,7 +17,7 @@ import * as yup from 'yup';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import Toast from 'react-native-toast-message';
-import styles from './style';
+import getStyles from './style';
 import { supabaseConfig } from "@/src/config/supabase";
 import { loginSchema } from '@/src/shared/yup';
 import { Load } from '@/src/components/ui/Load';
@@ -26,9 +26,13 @@ export default function LoginScreen() {
   type FormData = yup.InferType<typeof loginSchema>;
 
   const router = useRouter();
-  const { theme } = useAppTheme();
+  const { theme, isDarkMode } = useAppTheme();
+  const styles = getStyles(theme);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
+  const placeholderColor = isDarkMode ? "rgba(255, 255, 255, 0.6)" : "#858D99";
 
   const {
     control,
@@ -75,7 +79,7 @@ export default function LoginScreen() {
       colors={theme.primaryGradient}
       style={styles.container}
     >
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
       <Load visible={loading} message="Autenticando..." subMessage="Conectando à sua conta" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -84,11 +88,11 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.iconWrapper}>
-              <Ionicons name="shield-checkmark" size={40} color="#FFFFFF" />
+              <Ionicons name="shield-checkmark" size={40} color={iconColor} />
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
-              <Text style={styles.logoIa}>-U</Text>
+              <Text style={styles.logoIa}>-IA</Text>
             </View>
             <Text style={styles.title}>Bem-vindo de volta!</Text>
             <Text style={styles.subtitle}>
@@ -106,14 +110,14 @@ export default function LoginScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.email && { borderColor: "#FF6B6B" },
+                      errors.email && { borderColor: "#D74247" },
                     ]}
                   >
-                    <Ionicons name="mail-outline" size={20} color="#FFFFFF" />
+                    <Ionicons name="mail-outline" size={20} color={iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="seu.email@exemplo.com"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                      placeholderTextColor={placeholderColor}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -137,14 +141,14 @@ export default function LoginScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.password && { borderColor: "#FF6B6B" },
+                      errors.password && { borderColor: "#D74247" },
                     ]}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color="#FFFFFF" />
+                    <Ionicons name="lock-closed-outline" size={20} color={iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="Sua senha"
-                      placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                      placeholderTextColor={placeholderColor}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -157,7 +161,7 @@ export default function LoginScreen() {
                       <Ionicons
                         name={showPassword ? 'eye' : 'eye-off'}
                         size={20}
-                        color="#FFFFFF"
+                        color={iconColor}
                       />
                     </TouchableOpacity>
                   </View>

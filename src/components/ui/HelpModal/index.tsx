@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { styles } from './style';
+import { useAppTheme } from '@/src/shared/constants/theme';
+import { getStyles } from './style';
 
 export interface HelpModalProps {
   visible: boolean;
@@ -18,6 +19,9 @@ export default function HelpModal({
   description = `1. Selecione a categoria da ocorrência.\n2. Capture sua localização precisa via GPS.\n3. Se desejar, adicione uma descrição e foto.\n4. Envie para que outros usuários fiquem alertas em tempo real.`,
   buttonText = 'Entendi',
 }: HelpModalProps) {
+  const { theme, isDarkMode } = useAppTheme();
+  const styles = getStyles(theme);
+
   return (
     <Modal
       visible={visible}
@@ -36,7 +40,7 @@ export default function HelpModal({
           onPress={(e) => e.stopPropagation()}
         >
           <View style={styles.modalHeader}>
-            <Ionicons name="information-circle" size={32} color="#3069E8" />
+            <Ionicons name="information-circle" size={32} color={theme.primary || "#0047FF"} />
             <Text style={styles.modalTitle}>{title}</Text>
           </View>
 

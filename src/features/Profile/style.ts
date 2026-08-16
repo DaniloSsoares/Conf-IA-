@@ -1,7 +1,8 @@
 import { StyleSheet, Platform, StatusBar } from "react-native";
 
-export const getStyles = (theme: any) =>
-  StyleSheet.create({
+export const getStyles = (theme: any) => {
+  const isDark = theme.isDark;
+  return StyleSheet.create({
     container: {
       flex: 1,
     },
@@ -13,10 +14,7 @@ export const getStyles = (theme: any) =>
     profileHeader: {
       alignItems: 'center',
       paddingVertical: 32,
-
-
       marginBottom: 20,
-
     },
     avatarContainer: {
       position: 'relative',
@@ -26,7 +24,7 @@ export const getStyles = (theme: any) =>
       width: 90,
       height: 90,
       borderRadius: 45,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(58, 167, 122, 0.12)',
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -34,7 +32,7 @@ export const getStyles = (theme: any) =>
       position: 'absolute',
       bottom: 0,
       right: 0,
-      backgroundColor: '#3069E8',
+      backgroundColor: theme.primary || '#3AA77A',
       width: 32,
       height: 32,
       borderRadius: 16,
@@ -46,27 +44,32 @@ export const getStyles = (theme: any) =>
     userName: {
       fontSize: 22,
       fontWeight: '800',
-      color: '#FFFFFF',
+      color: theme.text || '#2C2B30',
       marginBottom: 4,
       letterSpacing: 0.5,
     },
     userEmail: {
       fontSize: 15,
-      color: 'rgba(255, 255, 255, 0.8)',
+      color: theme.subtext || '#616A78',
       fontWeight: '500',
     },
     section: {
       marginBottom: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#FFFFFF',
       borderRadius: 24,
       padding: 24,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#E6F7F0',
+      shadowColor: '#2C2B30',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: isDark ? 0 : 0.04,
+      shadowRadius: 8,
+      elevation: isDark ? 0 : 1,
     },
     sectionTitle: {
       fontSize: 16,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: theme.subtext || '#616A78',
       marginBottom: 20,
       letterSpacing: 0.3,
     },
@@ -84,7 +87,7 @@ export const getStyles = (theme: any) =>
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 71, 255, 0.12)',
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: 12,
@@ -92,29 +95,29 @@ export const getStyles = (theme: any) =>
     infoTitle: {
       fontSize: 14,
       fontWeight: '600',
-      color: 'rgba(255, 255, 255, 0.8)',
+      color: theme.text || '#2C2B30',
     },
     infoValue: {
       fontSize: 14,
-      color: '#FFFFFF',
+      color: theme.text || '#2C2B30',
       fontWeight: '700',
     },
     divider: {
       height: 1,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#ECEEF2',
       marginVertical: 14,
     },
     editButton: {
       marginTop: 16,
       paddingTop: 16,
       borderTopWidth: 1,
-      borderTopColor: 'rgba(255, 255, 255, 0.2)',
+      borderTopColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#ECEEF2',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
     },
     editButtonText: {
-      color: '#FFFFFF',
+      color: theme.primary || '#3AA77A',
       fontSize: 15,
       fontWeight: '700',
       marginLeft: 8,
@@ -132,7 +135,7 @@ export const getStyles = (theme: any) =>
     },
     notificationTitle: {
       fontSize: 15,
-      color: '#FFFFFF',
+      color: theme.text || '#2C2B30',
       fontWeight: '600',
     },
     menuItem: {
@@ -148,7 +151,7 @@ export const getStyles = (theme: any) =>
     },
     menuTitle: {
       fontSize: 15,
-      color: '#FFFFFF',
+      color: theme.text || '#2C2B30',
       fontWeight: '600',
     },
     dangerSection: {
@@ -161,16 +164,16 @@ export const getStyles = (theme: any) =>
       alignItems: 'center',
       justifyContent: 'center',
       paddingVertical: 16,
-      backgroundColor: 'rgba(225, 29, 72, 0.1)',
+      backgroundColor: isDark ? 'rgba(225, 29, 72, 0.1)' : '#FFF5F5',
       borderRadius: 20,
       borderWidth: 1,
-      borderColor: 'rgba(225, 29, 72, 0.4)',
+      borderColor: isDark ? 'rgba(225, 29, 72, 0.4)' : '#FEE2E2',
     },
     dangerButtonText: {
       fontSize: 16,
       fontWeight: '700',
       marginLeft: 10,
-      color: '#FF6B6B',
+      color: theme.ternary || '#D74247',
     },
     deleteButton: {
       paddingVertical: 16,
@@ -178,14 +181,15 @@ export const getStyles = (theme: any) =>
     },
     deleteButtonText: {
       fontSize: 14,
-      color: 'rgba(255, 255, 255, 0.6)',
+      color: theme.subtext || '#858D99',
       fontWeight: '600',
     },
     versionText: {
       textAlign: 'center',
-      color: 'rgba(255, 255, 255, 0.4)',
+      color: theme.subtext || '#858D99',
       fontSize: 13,
       fontWeight: '600',
       marginBottom: 20,
     },
   });
+};

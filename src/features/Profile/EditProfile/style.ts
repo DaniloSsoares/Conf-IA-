@@ -1,9 +1,11 @@
 import { StyleSheet, Platform } from 'react-native';
 
-export const getStyles = (theme: any) =>
-  StyleSheet.create({
+export const getStyles = (theme: any) => {
+  const isDark = theme?.isDark;
+  return StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: theme?.background || 'transparent',
     },
     header: {
       flexDirection: 'row',
@@ -17,16 +19,16 @@ export const getStyles = (theme: any) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#F4F5F7',
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#E2E8F0',
     },
     headerTitle: {
       fontSize: 18,
       fontWeight: '700',
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
       letterSpacing: 0.5,
     },
     scrollContent: {
@@ -44,17 +46,17 @@ export const getStyles = (theme: any) =>
       width: 100,
       height: 100,
       borderRadius: 50,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#F4F5F7',
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 2,
-      borderColor: 'rgba(255, 255, 255, 0.5)',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.5)' : '#E2E8F0',
     },
     editAvatarButton: {
       position: 'absolute',
       bottom: 0,
       right: 0,
-      backgroundColor: '#3069E8',
+      backgroundColor: theme?.primary || '#0047FF',
       width: 36,
       height: 36,
       borderRadius: 18,
@@ -64,22 +66,27 @@ export const getStyles = (theme: any) =>
       borderColor: '#FFFFFF',
     },
     formContainer: {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
       borderRadius: 24,
       padding: 24,
       borderWidth: 1,
-      borderColor: 'rgba(255, 255, 255, 0.1)',
+      borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#E2E8F0',
+      shadowColor: '#2C2B30',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: isDark ? 0 : 0.05,
+      shadowRadius: 8,
+      elevation: isDark ? 0 : 2,
     },
     saveButton: {
-      backgroundColor: '#3069E8',
+      backgroundColor: theme?.primary || '#0047FF',
       borderRadius: 16,
       height: 56,
       justifyContent: 'center',
       alignItems: 'center',
       marginTop: 20,
-      shadowColor: '#000',
+      shadowColor: '#2C2B30',
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
+      shadowOpacity: 0.15,
       shadowRadius: 5,
       elevation: 5,
     },
@@ -94,14 +101,16 @@ export const getStyles = (theme: any) =>
       alignItems: 'center',
       justifyContent: 'center',
       gap: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#F4F5F7',
+      borderWidth: isDark ? 0 : 1,
+      borderColor: isDark ? 'transparent' : '#E2E8F0',
       borderRadius: 12,
       paddingVertical: 14,
       marginTop: 8,
       marginBottom: 16,
     },
     locationButtonText: {
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
       fontSize: 14,
       fontWeight: '600',
     },
@@ -110,7 +119,7 @@ export const getStyles = (theme: any) =>
       marginBottom: 16,
     },
     sliderLabel: {
-      color: '#FFFFFF',
+      color: theme?.text || '#2C2B30',
       fontSize: 14,
       fontWeight: '600',
       marginBottom: 4,
@@ -120,7 +129,8 @@ export const getStyles = (theme: any) =>
       justifyContent: 'space-between',
     },
     sliderRangeText: {
-      color: 'rgba(255, 255, 255, 0.6)',
+      color: theme?.subtext || '#616A78',
       fontSize: 12,
     },
   });
+};
