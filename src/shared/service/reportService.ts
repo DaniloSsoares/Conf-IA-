@@ -82,7 +82,7 @@ export async function getUserReports(userId: string): Promise<Report[]> {
   try {
      const { data, error } = await supabaseConfig
       .from("reportes")
-      .select("*")
+      .select("*, reporte_midias(*)")
       .eq("perfil_id", userId)
       .order("created_at", { ascending: false });
     if (error) throw error;

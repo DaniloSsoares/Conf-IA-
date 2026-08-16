@@ -16,6 +16,14 @@ export interface ReportLocation {
   endereco?: string | null;
 }
 
+export interface ReportMedia {
+  id: string;
+  reporte_id: string;
+  midia_url: string;
+  midia_tipo: string;
+  created_at: string;
+}
+
 export interface Report {
   id: string;
   perfil_id: string;
@@ -28,6 +36,7 @@ export interface Report {
   reporte_score_confianca: number;
   created_at: string;
   updated_at: string;
+  reporte_midias?: ReportMedia[];
 }
 
 export interface CreateReportInput {

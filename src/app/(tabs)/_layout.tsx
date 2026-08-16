@@ -94,7 +94,7 @@ export default function TabLayout() {
               backgroundColor: focused ? 'rgba(255,255,255,0.1)' : 'transparent',
               marginBottom: 4
             }}>
-              <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
+              <Ionicons name={focused ? "list" : "list-outline"} size={22} color={color} />
             </View>
           ),
         }}
