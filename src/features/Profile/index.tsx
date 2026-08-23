@@ -22,6 +22,9 @@ import { Profile } from '@/src/shared/types/profile';
 import { formatDate } from '@/src/shared/utils/dateMember'
 import { ALERT_CATEGORIES, DEFAULT_ALERT_PREFERENCES } from '@/src/shared/constants/alertCategories';
 import { AlertPreferences } from '@/src/shared/types/profile';
+import { ChangePassModel } from '@/src/components/ui/ChangePassModel';
+import { TermsModal } from '@/src/components/ui/TermsModal';
+import { getTerms } from '@/src/shared/service/termsService';
 
 
 export default function ProfileScreen() {
@@ -33,6 +36,10 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+
 
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
 
@@ -56,7 +63,7 @@ export default function ProfileScreen() {
           text1: 'Perfil Incompleto',
           text2: 'Por favor, preencha seus dados de perfil.',
         });
-        router.push('/EditProfile');
+        router.push('/(screens)/EditProfile');
         return;
       }
       setProfile(profileData);
@@ -64,6 +71,12 @@ export default function ProfileScreen() {
         ...DEFAULT_ALERT_PREFERENCES,
         ...(profileData.perfil_preferencias_alertas || {}),
       });
+
+      const accepted = await getTerms(user.id);
+      setHasAcceptedTerms(accepted);
+      if (!accepted) {
+        setIsTermsModalVisible(true);
+      }
 
     } catch (error: any) {
       Toast.show({
@@ -100,6 +113,21 @@ export default function ProfileScreen() {
       text2: 'Você saiu da aplicação',
     });
     router.replace('/Login');
+  };
+
+  const handleAcceptTerms = async () => {
+    const { data: { user } } = await supabaseConfig.auth.getUser();
+    if (!user) return;
+    const hasAccepted = await getTerms(user.id);
+    if (hasAccepted) {
+      Toast.show({
+        type: 'info',
+        text1: 'Termos de Serviço',
+        text2: 'Você já aceitou os Termos de Serviço.',
+      });
+    } else {
+      setIsTermsModalVisible(true);
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -236,7 +264,7 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Segurança e Termos</Text>
 
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => setIsModalVisible(true)}>
             <View style={styles.menuLabel}>
               <View style={styles.iconBg}><Ionicons name="lock-closed" size={18} color={iconColor} /></View>
               <Text style={styles.menuTitle}>Trocar Senha</Text>
@@ -245,13 +273,20 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           <View style={styles.divider} />
 
-          <TouchableOpacity style={styles.menuItem}>
-            <View style={styles.menuLabel}>
-              <View style={styles.iconBg}><Ionicons name="document-text" size={18} color={iconColor} /></View>
-              <Text style={styles.menuTitle}>Termos de Serviço</Text>
+          {hasAcceptedTerms ? (
+            <View style={styles.acceptedContainer}>
+              <Ionicons name="checkmark-circle" size={20} color="#4BB543" />
+              <Text style={styles.acceptedText}>Você já aceitou estes termos.</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={isDarkMode ? "rgba(255, 255, 255, 0.6)" : (theme.primary || "#0047FF")} />
-          </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.menuItem} onPress={handleAcceptTerms}>
+              <View style={styles.menuLabel}>
+                <View style={styles.iconBg}><Ionicons name="document-text" size={18} color={iconColor} /></View>
+                <Text style={styles.menuTitle}>Termos de Serviço</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color={isDarkMode ? "rgba(255, 255, 255, 0.6)" : (theme.primary || "#0047FF")} />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.dangerSection}>
@@ -264,9 +299,29 @@ export default function ProfileScreen() {
             <Text style={styles.deleteButtonText}>Excluir Minha Conta</Text>
           </TouchableOpacity>
         </View>
-
-
       </ScrollView>
+
+      <ChangePassModel
+        visible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      />
+
+      <TermsModal
+        visible={isTermsModalVisible}
+        onClose={() => setIsTermsModalVisible(false)}
+        onAccept={() => {
+          setIsTermsModalVisible(false);
+          setHasAcceptedTerms(true);
+          Toast.show({
+            type: 'success',
+            text1: 'Sucesso',
+            text2: 'Termos de serviço aceitos com sucesso!',
+          });
+        }}
+      />
+
     </LinearGradient>
+
+
   );
 }

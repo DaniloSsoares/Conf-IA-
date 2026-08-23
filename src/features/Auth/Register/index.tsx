@@ -21,6 +21,8 @@ import getStyles from './style';
 import { supabaseConfig } from "@/src/config/supabase";
 import { registerSchema } from '@/src/shared/yup';
 import { Load } from '@/src/components/ui/Load';
+import { TermsModal } from '@/src/components/ui/TermsModal';
+import { createTerms } from '@/src/shared/service/termsService';
 
 export default function RegisterScreen() {
   type FormData = yup.InferType<typeof registerSchema>;
@@ -30,6 +32,9 @@ export default function RegisterScreen() {
   const styles = getStyles(theme);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
 
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
   const placeholderColor = isDarkMode ? "rgba(255, 255, 255, 0.6)" : "#858D99";
@@ -42,16 +47,16 @@ export default function RegisterScreen() {
     resolver: yupResolver(registerSchema),
   });
 
-  const handleCadastro = async (data: FormData) => {
+  const executeCadastro = async (data: FormData) => {
     try {
       setLoading(true);
       const { error } = await supabaseConfig.auth.signUp({
         email: data.email,
         password: data.password,
       });
-      setLoading(false);
 
       if (error) {
+        setLoading(false);
         Toast.show({
           type: "error",
           text1: "Erro no cadastro",
@@ -61,6 +66,10 @@ export default function RegisterScreen() {
         return;
       }
 
+      
+      await createTerms();
+
+      setLoading(false);
       Toast.show({
         type: "success",
         text1: "Conta criada com sucesso!",
@@ -74,6 +83,30 @@ export default function RegisterScreen() {
         text1: "Erro inesperado",
         text2: "Tente novamente mais tarde.",
       });
+    }
+  };
+
+  const handleCadastro = async (data: FormData) => {
+    if (!hasAcceptedTerms) {
+      setPendingFormData(data);
+      setIsTermsModalVisible(true);
+      Toast.show({
+        type: "info",
+        text1: "Termos de Serviço",
+        text2: "Por favor, leia e aceite os termos para concluir seu cadastro.",
+      });
+      return;
+    }
+
+    await executeCadastro(data);
+  };
+
+  const handleAcceptTerms = () => {
+    setHasAcceptedTerms(true);
+    setIsTermsModalVisible(false);
+    if (pendingFormData) {
+      executeCadastro(pendingFormData);
+      setPendingFormData(null);
     }
   };
 
@@ -219,6 +252,18 @@ export default function RegisterScreen() {
               )}
             </View>
 
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                Ao continuar, você concorda com nossos{' '}
+                <Text
+                  style={styles.footerLink}
+                  onPress={() => setIsTermsModalVisible(true)}
+                >
+                  Termos
+                </Text>
+              </Text>
+            </View>
+
             <TouchableOpacity
               style={styles.loginButton}
               onPress={handleSubmit(handleCadastro)}
@@ -232,6 +277,12 @@ export default function RegisterScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <TermsModal
+        visible={isTermsModalVisible}
+        onClose={() => setIsTermsModalVisible(false)}
+        onAccept={handleAcceptTerms}
+      />
     </LinearGradient>
   );
 }

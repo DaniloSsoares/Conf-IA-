@@ -191,5 +191,21 @@ export const getStyles = (theme: any) => {
       fontWeight: '600',
       marginBottom: 20,
     },
+    acceptedContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 16,
+      backgroundColor: isDark ? 'rgba(75, 181, 67, 0.1)' : 'rgba(75, 181, 67, 0.12)',
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(75, 181, 67, 0.4)' : 'rgba(75, 181, 67, 0.2)',
+      gap: 8,
+    },
+    acceptedText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.primary || '#3AA77A',
+    },
   });
 };

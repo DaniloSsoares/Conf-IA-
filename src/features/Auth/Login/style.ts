@@ -148,20 +148,7 @@ export const getStyles = (theme: any) => {
       fontSize: 16,
       fontWeight: '700',
     },
-    footer: {
-      marginTop: 40,
-    },
-    footerText: {
-      fontSize: 13,
-      color: theme.subtext || '#616A78',
-      textAlign: 'center',
-      lineHeight: 20,
-    },
-    footerLink: {
-      color: theme.primary || '#3AA77A',
-      fontWeight: '700',
-      textDecorationLine: 'underline',
-    },
+   
     labelError: {
       color: '#D74247',
       fontSize: 12,

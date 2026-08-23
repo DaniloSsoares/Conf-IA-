@@ -104,18 +104,20 @@ export const getStyles = (theme: any) => {
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 20,
-      marginTop: 10,
+      marginTop: 30,
       shadowColor: theme.primary || '#3AA77A',
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
       elevation: 5,
+
     },
     loginButtonText: {
       color: '#FFFFFF',
       fontSize: 16,
       fontWeight: 'bold',
       letterSpacing: 0.5,
+    
     },
     labelError: {
       color: '#D74247',
@@ -123,6 +125,21 @@ export const getStyles = (theme: any) => {
       marginBottom: 10,
       marginLeft: 5,
       marginTop: 4,
+    },
+     footer: {
+     
+      alignItems: 'center',
+    },
+    footerText: {
+      fontSize: 13,
+      color: theme.subtext || '#616A78',
+      textAlign: 'center',
+      lineHeight: 20,
+    },
+    footerLink: {
+      color: theme.primary || '#3AA77A',
+      fontWeight: '700',
+      textDecorationLine: 'underline',
     },
   });
 };

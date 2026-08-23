@@ -21,6 +21,7 @@ import getStyles from './style';
 import { supabaseConfig } from "@/src/config/supabase";
 import { loginSchema } from '@/src/shared/yup';
 import { Load } from '@/src/components/ui/Load';
+import { getTerms } from "@/src/shared/service/termsService";
 
 export default function LoginScreen() {
   type FormData = yup.InferType<typeof loginSchema>;
@@ -30,7 +31,7 @@ export default function LoginScreen() {
   const styles = getStyles(theme);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
+  const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
   const placeholderColor = isDarkMode ? "rgba(255, 255, 255, 0.6)" : "#858D99";
 
@@ -45,12 +46,13 @@ export default function LoginScreen() {
   const handleLogin = async (data: FormData) => {
     try {
       setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 8000));
+      //await new Promise((resolve) => setTimeout(resolve, 8000));
+      
       const { error } = await supabaseConfig.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
-      
+
       setLoading(false);
 
       if (error) {
@@ -75,6 +77,8 @@ export default function LoginScreen() {
       });
     }
   }
+
+ 
 
   return (
     <LinearGradient
@@ -199,14 +203,8 @@ export default function LoginScreen() {
             }}>
               <Text style={styles.signupButtonText}>Criar nova conta</Text>
             </TouchableOpacity>
-          </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Ao continuar, você concorda com nossos{' '}
-              <Text style={styles.footerLink}>Termos</Text> e{' '}
-              <Text style={styles.footerLink}>Privacidade</Text>
-            </Text>
+           
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
