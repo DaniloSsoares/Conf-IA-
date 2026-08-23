@@ -44,7 +44,8 @@
         {
           "photosPermission": "O aplicativo precisa de acesso à galeria para alterar a foto do seu perfil."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

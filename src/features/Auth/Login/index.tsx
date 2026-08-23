@@ -45,10 +45,12 @@ export default function LoginScreen() {
   const handleLogin = async (data: FormData) => {
     try {
       setLoading(true);
+      await new Promise((resolve) => setTimeout(resolve, 8000));
       const { error } = await supabaseConfig.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
+      
       setLoading(false);
 
       if (error) {
@@ -92,7 +94,7 @@ export default function LoginScreen() {
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
-              <Text style={styles.logoIa}>-IA</Text>
+              <Text style={styles.logoIa}>-U</Text>
             </View>
             <Text style={styles.title}>Bem-vindo de volta!</Text>
             <Text style={styles.subtitle}>

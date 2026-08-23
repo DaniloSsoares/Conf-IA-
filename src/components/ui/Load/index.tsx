@@ -76,6 +76,7 @@ export function Load({
   const cardContent = (
     <View style={[styles.cardContainer, style]}>
       {/* Brilho pulsante atrás do ícone */}
+      <View style={{ marginBottom: 20, marginTop: 30, justifyContent: 'center', alignItems: 'center' }}>
       <Animated.View
         style={[
           styles.glowRing,
@@ -90,8 +91,9 @@ export function Load({
       <View style={styles.iconWrapper}>
         <Ionicons name={iconName} size={40} color={isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF")} />
       </View>
+      </View>
 
-      {/* Marca Conf-IA */}
+      {/* Marca Conf-U */}
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>Conf</Text>
         <Text style={styles.logoIa}>-U</Text>

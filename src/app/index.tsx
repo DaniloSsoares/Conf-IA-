@@ -35,7 +35,7 @@ export default function Index() {
 
         <View style={styles.logoContainer}>
           <Text style={[styles.logoText, { color: textColor }]}>Conf</Text>
-          <Text style={[styles.logoIa, { color: iaColor }]}>-IA</Text>
+          <Text style={[styles.logoIa, { color: iaColor }]}>-U</Text>
         </View>
 
         <Text style={[styles.subtitle, { color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#616A78' }]}>Prevenção de Desastres Climáticos</Text>

@@ -17,20 +17,12 @@ export const getStyles = (theme: any) => {
       alignItems: 'center',
     },
     cardContainer: {
-      width: Math.min(width * 0.82, 320),
-      paddingVertical: 32,
-      paddingHorizontal: 24,
+      width: '100%',
+      height: '100%',
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : '#FFFFFF',
-      borderRadius: 24,
-      borderWidth: 1,
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#E2E8F0',
-      shadowColor: '#2C2B30',
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: isDark ? 0.35 : 0.1,
-      shadowRadius: 20,
-      elevation: 10,
+
     },
     glowRing: {
       position: 'absolute',
@@ -50,6 +42,7 @@ export const getStyles = (theme: any) => {
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 16,
+      marginTop:30
     },
     logoContainer: {
       flexDirection: 'row',
