@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import {View, Text, ScrollView,TouchableOpacity, StatusBar, ActivityIndicator} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -10,7 +10,9 @@ import { getUserNotifications, markNotificationAsRead } from '@/src/shared/servi
 import { Report } from '@/src/shared/types/report';
 import { AlertNotification } from '@/src/shared/types/notification';
 import { getStyles } from './styles';
-import {getStatusStyle, getRiskStyle, getCategoryMeta, formatRelativeTime} from '@/src/shared/constants/historyStatus';
+import { getStatusStyle, getRiskStyle, getCategoryMeta, formatRelativeTime } from '@/src/shared/constants/historyStatus';
+import ButtonBack from '@/src/components/ui/ButtonBack';
+import { HelpModal } from '@/src/components/ui';
 
 type Tab = 'notificações' | 'reportes';
 export default function HistoryScreen() {
@@ -21,6 +23,8 @@ export default function HistoryScreen() {
   const [notifications, setNotifications] = useState<AlertNotification[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const primaryColor = theme.primary || "#0047FF";
 
   const iconColor = isDarkMode ? "rgba(255,255,255,0.6)" : (theme.primary || "#0047FF");
 
@@ -75,10 +79,13 @@ export default function HistoryScreen() {
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
-
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Histórico</Text>
-      </View>
+ <View style={styles.header}>
+         <ButtonBack/>
+          <Text style={styles.headerTitle}>Histórico</Text>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
+            <Ionicons name="help-circle-outline" size={26} color={primaryColor} />
+          </TouchableOpacity>
+        </View>
 
       <View style={styles.segmentedControl}>
         <TouchableOpacity
@@ -94,6 +101,14 @@ export default function HistoryScreen() {
           <Text style={[styles.segmentText, tab === 'reportes' && styles.segmentTextActive]}>Meus reportes</Text>
         </TouchableOpacity>
       </View>
+
+      <HelpModal
+        visible={helpModalVisible}
+        onClose={() => setHelpModalVisible(false)}
+        title='Histórico de alertas'
+        description='Aqui você pode acompanhar todos os alertas que foram enviados e receber notificações de novos alertas na sua região.'
+        buttonText='Entendi'
+      />
 
       {loading ? (
         <ActivityIndicator size="large" color={theme.primary || "#3AA77A"} style={{ marginTop: 40 }} />

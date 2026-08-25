@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { getStatusStyle, getRiskStyle, getCategoryMeta } from '@/src/shared/constants/historyStatus';
 import { getStyles } from './styles';
@@ -17,6 +17,8 @@ export default function ViewHistoryScreen() {
 
   const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
   const parsed = data ? JSON.parse(data) : null;
+
+
 
   if (!parsed) {
     return (
@@ -118,7 +120,12 @@ function ReporteContent({ parsed, meta, theme, styles, isDarkMode }: any) {
   const statusStyle = getStatusStyle(parsed.reporte_status, theme);
   const photoUrl = parsed.reporte_midias?.[0]?.midia_url;
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
-
+   const handleEdit = () => {
+    router.push({
+      pathname: '/(screens)/EditReport' as any, 
+      params: { id: parsed?.id, data: JSON.stringify(parsed) }
+    });
+  };
   return (
     <>
       <View style={styles.heroCard}>
@@ -164,6 +171,11 @@ function ReporteContent({ parsed, meta, theme, styles, isDarkMode }: any) {
           styles={styles}
         />
       </View>
+
+       <TouchableOpacity style={styles.editButton} onPress={() => {handleEdit()}}>
+          <Ionicons name="create-outline" size={20} color={theme.primary || '#3AA77A'} />
+          <Text style={styles.editButtonText}>Editar Reporte</Text>
+        </TouchableOpacity>
     </>
   );
 }

@@ -15,9 +15,9 @@ export interface HelpModalProps {
 export default function HelpModal({
   visible,
   onClose,
-  title = 'Como funciona o reporte?',
-  description = `1. Selecione a categoria da ocorrência.\n2. Capture sua localização precisa via GPS.\n3. Se desejar, adicione uma descrição e foto.\n4. Envie para que outros usuários fiquem alertas em tempo real.`,
-  buttonText = 'Entendi',
+  title,
+  description,
+  buttonText,
 }: HelpModalProps) {
   const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);

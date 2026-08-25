@@ -25,6 +25,7 @@ import { createReport } from '@/src/shared/service/reportService';
 import { HelpModal } from '@/src/components/ui';
 import { getStyles } from './styles';
 import { supabaseConfig } from '@/src/config/supabase';
+import ButtonBack from '@/src/components/ui/ButtonBack';
 
 export interface SelectedPhoto {
   uri: string;
@@ -270,9 +271,7 @@ export default function ReportScreen() {
 
         {/* Header Bar */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => router.back()} activeOpacity={0.7}>
-            <Ionicons name="arrow-back" size={24} color={primaryColor} />
-          </TouchableOpacity>
+         <ButtonBack/>
           <Text style={styles.headerTitle}>Reportar ocorrência</Text>
           <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
             <Ionicons name="help-circle-outline" size={26} color={primaryColor} />
@@ -424,6 +423,9 @@ export default function ReportScreen() {
       <HelpModal
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
+        title='Como funciona o reporte?'
+        description={`1. Selecione a categoria da ocorrência.\n2. Capture sua localização precisa via GPS.\n3. Se desejar, adicione uma descrição e foto.\n4. Envie para que outros usuários fiquem alertas em tempo real.`}
+        buttonText='Entendi'
       />
 
       {/* Modal de Foto (Câmera / Galeria) */}

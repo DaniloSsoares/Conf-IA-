@@ -126,6 +126,21 @@ export const getStyles = (theme: any) => {
       marginBottom: 12,
       letterSpacing: 0.3,
     },
+    editButton: {
+      backgroundColor: theme?.primary || '#3AA77A',
+      padding: 12,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginTop: 24,
+      marginHorizontal: 20,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    editButtonText: {
+      color: '#FFFFFF',
+      fontWeight: '600',
+    },
   });
 };
 

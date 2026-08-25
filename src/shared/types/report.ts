@@ -49,6 +49,17 @@ export interface CreateReportInput {
   fotoExt?: string;
 }
 
+export interface UpdateReportInput {
+  reporte_tipo_ocorrencia?: ReportCategory;
+  reporte_descricao?: string | null;
+  reporte_latitude?: number;
+  reporte_longitude?: number;
+  reporte_endereco?: string | null;
+  fotoBase64?: string | null;
+  fotoExt?: string;
+  removeFoto?: boolean;
+}
+
 export interface ReportCategoryItem {
   id: ReportCategory;
   label: string;

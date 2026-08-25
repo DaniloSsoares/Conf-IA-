@@ -8,15 +8,26 @@ export const getStyles = (theme: any) => {
       backgroundColor: theme?.background || 'transparent',
     },
     header: {
-      paddingHorizontal: 20,
-      paddingTop: 50,
-      paddingBottom: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      paddingTop: 60,
+      paddingBottom: 16,
     },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: '800',
-      color: theme?.text || '#2C2B30',
+      headerTitle: {
+      fontSize: 18,
+      fontWeight: "700",
+      color: theme.text || "#2C2B30",
       letterSpacing: 0.3,
+    },
+    iconButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(44, 43, 48, 0.05)",
+      justifyContent: "center",
+      alignItems: "center",
     },
     segmentedControl: {
       flexDirection: 'row',
