@@ -24,7 +24,9 @@ import { ALERT_CATEGORIES, DEFAULT_ALERT_PREFERENCES } from '@/src/shared/consta
 import { AlertPreferences } from '@/src/shared/types/profile';
 import { ChangePassModel } from '@/src/components/ui/ChangePassModel';
 import { TermsModal } from '@/src/components/ui/TermsModal';
+import { AnonymizationModal } from '@/src/components/ui/AnonymizationModal';
 import { getTerms } from '@/src/shared/service/termsService';
+
 
 
 export default function ProfileScreen() {
@@ -38,7 +40,9 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+  const [isAnonModalVisible, setIsAnonModalVisible] = useState(false);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
+
 
   const loadProfile = useCallback(async () => {
     try {
@@ -270,6 +274,15 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           <View style={styles.divider} />
 
+          <TouchableOpacity style={styles.menuItem} onPress={() => setIsAnonModalVisible(true)}>
+            <View style={styles.menuLabel}>
+              <View style={styles.iconBg}><Ionicons name="shield-checkmark" size={18} color={theme.iconPrimary} /></View>
+              <Text style={styles.menuTitle}>Dados Anonimizados (LGPD)</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
+          </TouchableOpacity>
+          <View style={styles.divider} />
+
           {hasAcceptedTerms ? (
             <View style={styles.acceptedContainer}>
               <Ionicons name="checkmark-circle" size={20} color="#4BB543" />
@@ -317,6 +330,13 @@ export default function ProfileScreen() {
           });
         }}
       />
+
+      <AnonymizationModal
+        visible={isAnonModalVisible}
+        onClose={() => setIsAnonModalVisible(false)}
+        profile={profile}
+      />
+
 
     </LinearGradient>
 
