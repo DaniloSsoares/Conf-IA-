@@ -1,10 +1,11 @@
 import { StyleSheet, Platform, StatusBar } from "react-native";
+import { AppTheme } from "@/src/shared/constants/theme";
 
-export const getStyles = (theme: any) => {
-  const isDark = theme.isDark;
+export const getStyles = (theme: AppTheme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
+      backgroundColor: theme.background,
     },
     safeArea: {
       flex: 1,
@@ -28,31 +29,31 @@ export const getStyles = (theme: any) => {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(44, 43, 48, 0.05)",
+      backgroundColor: theme.badgeBg,
       justifyContent: "center",
       alignItems: "center",
     },
     headerTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
       letterSpacing: 0.3,
     },
     // Modal Ajuda
     modalOverlay: {
       flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.75)",
+      backgroundColor: theme.transparency,
       justifyContent: "center",
       alignItems: "center",
       padding: 24,
     },
     helpModalContent: {
       width: "100%",
-      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+      backgroundColor: theme.cardBg,
       borderRadius: 20,
       padding: 24,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.15)" : "#E2E8F0",
+      borderColor: theme.cardBorder,
     },
     helpModalHeader: {
       flexDirection: "row",
@@ -63,22 +64,22 @@ export const getStyles = (theme: any) => {
     helpModalTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
     },
     helpModalBody: {
       fontSize: 14,
-      color: theme.subtext || "#616A78",
+      color: theme.subtext,
       lineHeight: 22,
       marginBottom: 20,
     },
     helpModalButton: {
-      backgroundColor: theme.primary || "#3AA77A",
+      backgroundColor: theme.buttonPrimary,
       borderRadius: 12,
       paddingVertical: 14,
       alignItems: "center",
     },
     helpModalButtonText: {
-      color: "#FFFFFF",
+      color: theme.buttonText,
       fontSize: 15,
       fontWeight: "700",
     },
@@ -88,14 +89,14 @@ export const getStyles = (theme: any) => {
     },
     subtitle: {
       fontSize: 14,
-      color: theme.subtext || "#616A78",
+      color: theme.subtext,
       fontWeight: "500",
       marginBottom: 4,
     },
     title: {
       fontSize: 22,
       fontWeight: "800",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
       marginBottom: 16,
       letterSpacing: 0.2,
     },
@@ -106,26 +107,26 @@ export const getStyles = (theme: any) => {
     },
     categoryCard: {
       width: "48%",
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#FFFFFF",
+      backgroundColor: theme.cardBg,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#E2E8F0",
+      borderColor: theme.cardBorder,
       borderRadius: 16,
       paddingVertical: 20,
       paddingHorizontal: 12,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#2C2B30",
+      shadowColor: theme.black,
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0 : 0.04,
+      shadowOpacity: 0.04,
       shadowRadius: 6,
-      elevation: isDark ? 0 : 1,
+      elevation: 1,
     },
     categoryCardFullWidth: {
       width: "100%",
     },
     categoryCardSelected: {
-      backgroundColor: isDark ? "rgba(58, 167, 122, 0.15)" : "#E6F7F0",
-      borderColor: theme.primary || "#3AA77A",
+      backgroundColor: theme.avatarBg,
+      borderColor: theme.primary,
       borderWidth: 2,
     },
     categoryIcon: {
@@ -134,11 +135,11 @@ export const getStyles = (theme: any) => {
     categoryLabel: {
       fontSize: 14,
       fontWeight: "600",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
       textAlign: "center",
     },
     categoryLabelSelected: {
-      color: theme.primary || "#3AA77A",
+      color: theme.primary,
       fontWeight: "700",
     },
     // Localização
@@ -154,20 +155,20 @@ export const getStyles = (theme: any) => {
     sectionTitle: {
       fontSize: 16,
       fontWeight: "700",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
     },
     locationButton: {
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#FFFFFF",
+      backgroundColor: theme.cardBg,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#E2E8F0",
+      borderColor: theme.cardBorder,
       borderRadius: 16,
       paddingVertical: 18,
       paddingHorizontal: 16,
       justifyContent: "center",
     },
     locationButtonCaptured: {
-      borderColor: "#10B981",
-      backgroundColor: "rgba(16, 185, 129, 0.1)",
+      borderColor: theme.successBorder,
+      backgroundColor: theme.successBg,
     },
     row: {
       flexDirection: "row",
@@ -178,7 +179,7 @@ export const getStyles = (theme: any) => {
     buttonText: {
       fontSize: 14,
       fontWeight: "600",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
       textAlign: "center",
     },
     capturedContainer: {
@@ -199,18 +200,18 @@ export const getStyles = (theme: any) => {
     capturedTitle: {
       fontSize: 14,
       fontWeight: "700",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
     },
     capturedSub: {
       fontSize: 12,
-      color: theme.subtext || "#616A78",
+      color: theme.subtext,
       marginTop: 2,
     },
     recaptureBadge: {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.15)" : "rgba(58, 167, 122, 0.12)",
+      backgroundColor: theme.badgeBg,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -223,15 +224,15 @@ export const getStyles = (theme: any) => {
     },
     counterText: {
       fontSize: 12,
-      color: theme.subtext || "#858D99",
+      color: theme.placeholderText,
     },
     textArea: {
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#F4F5F7",
+      backgroundColor: theme.inputBg,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.12)" : "#E2E8F0",
+      borderColor: theme.inputBorder,
       borderRadius: 16,
       padding: 16,
-      color: theme.text || "#2C2B30",
+      color: theme.text,
       fontSize: 15,
       minHeight: 110,
       lineHeight: 22,
@@ -242,9 +243,9 @@ export const getStyles = (theme: any) => {
       alignItems: "center",
       justifyContent: "center",
       gap: 10,
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "#F8FAFC",
+      backgroundColor: theme.inputBg,
       borderWidth: 1.5,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.25)" : "#CBD5E1",
+      borderColor: theme.inputBorder,
       borderStyle: "dashed",
       borderRadius: 16,
       paddingVertical: 18,
@@ -255,7 +256,7 @@ export const getStyles = (theme: any) => {
       borderRadius: 16,
       overflow: "hidden",
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.2)" : "#E2E8F0",
+      borderColor: theme.cardBorder,
     },
     previewImage: {
       width: "100%",
@@ -266,7 +267,7 @@ export const getStyles = (theme: any) => {
       position: "absolute",
       top: 10,
       right: 10,
-      backgroundColor: "rgba(0, 0, 0, 0.75)",
+      backgroundColor: theme.transparency,
       width: 32,
       height: 32,
       borderRadius: 16,
@@ -275,23 +276,23 @@ export const getStyles = (theme: any) => {
     },
     photoModalOverlay: {
       flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.65)",
+      backgroundColor: theme.transparency,
       justifyContent: "flex-end",
     },
     photoModalContent: {
-      backgroundColor: isDark ? "#0F172A" : "#FFFFFF",
+      backgroundColor: theme.cardBg,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       padding: 24,
       borderTopWidth: 1,
       borderLeftWidth: 1,
       borderRightWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.15)" : "#E2E8F0",
+      borderColor: theme.cardBorder,
     },
     photoModalTitle: {
       fontSize: 18,
       fontWeight: "700",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
       marginBottom: 20,
       textAlign: "center",
     },
@@ -299,7 +300,7 @@ export const getStyles = (theme: any) => {
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#F4F5F7",
+      backgroundColor: theme.inputBg,
       paddingVertical: 16,
       paddingHorizontal: 20,
       borderRadius: 14,
@@ -308,7 +309,7 @@ export const getStyles = (theme: any) => {
     photoOptionText: {
       fontSize: 16,
       fontWeight: "600",
-      color: theme.text || "#2C2B30",
+      color: theme.text,
     },
     photoCancelButton: {
       paddingVertical: 14,
@@ -317,18 +318,18 @@ export const getStyles = (theme: any) => {
     },
     photoCancelText: {
       fontSize: 15,
-      color: theme.subtext || "#858D99",
+      color: theme.subtext,
       fontWeight: "600",
     },
     // Botão Enviar
     submitButton: {
-      backgroundColor: theme.ternary || "#D74247",
+      backgroundColor: theme.ternary,
       borderRadius: 16,
       paddingVertical: 18,
       paddingHorizontal: 24,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: theme.ternary || "#D74247",
+      shadowColor: theme.ternary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.35,
       shadowRadius: 10,
@@ -336,7 +337,7 @@ export const getStyles = (theme: any) => {
       marginBottom: 20,
     },
     submitButtonDisabled: {
-      backgroundColor: "rgba(215, 66, 71, 0.4)",
+      backgroundColor: theme.inputTransparency,
       shadowOpacity: 0,
       elevation: 0,
     },
@@ -346,10 +347,11 @@ export const getStyles = (theme: any) => {
     submitButtonText: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#FFFFFF",
+      color: theme.buttonText,
       letterSpacing: 0.3,
     },
   });
 };
 
 export default getStyles;
+

@@ -40,9 +40,6 @@ export default function ProfileScreen() {
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
 
-
-  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
-
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -173,11 +170,11 @@ export default function ProfileScreen() {
               {profile?.perfil_avatar_url ? (
                 <Image source={{ uri: profile.perfil_avatar_url }} style={{ width: '100%', height: '100%', borderRadius: 48 }} />
               ) : (
-                <Ionicons name="person" size={54} color={iconColor} />
+                <Ionicons name="person" size={54} color={theme.iconPrimary} />
               )}
             </View>
             <TouchableOpacity style={styles.editAvatarButton} onPress={() => router.push('/EditProfile')}>
-              <Ionicons name="camera" size={16} color="#FFFFFF" />
+              <Ionicons name="camera" size={16} color={theme.white} />
             </TouchableOpacity>
           </View>
           <Text style={styles.userName}>{profile?.perfil_nome_completo || 'Sem Nome'}</Text>
@@ -190,7 +187,7 @@ export default function ProfileScreen() {
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="call" size={18} color={iconColor} /></View>
+              <View style={styles.iconBg}><Ionicons name="call" size={18} color={theme.iconPrimary} /></View>
               <Text style={styles.infoTitle}>Telefone</Text>
             </View>
             <Text style={styles.infoValue}>{profile?.perfil_telefone || 'Não informado'}</Text>
@@ -200,7 +197,7 @@ export default function ProfileScreen() {
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="location" size={18} color={iconColor} /></View>
+              <View style={styles.iconBg}><Ionicons name="location" size={18} color={theme.iconPrimary} /></View>
               <Text style={styles.infoTitle}>Localização</Text>
             </View>
             <Text style={styles.infoValue}>
@@ -213,7 +210,7 @@ export default function ProfileScreen() {
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="calendar" size={18} color={iconColor} /></View>
+              <View style={styles.iconBg}><Ionicons name="calendar" size={18} color={theme.iconPrimary} /></View>
               <Text style={styles.infoTitle}>Membro desde</Text>
             </View>
             <Text style={styles.infoValue}>{profile?.created_at ? formatDate(profile.created_at) : 'Não disponível'}</Text>
@@ -222,7 +219,7 @@ export default function ProfileScreen() {
           <View style={styles.divider} />
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="shield-checkmark" size={18} color={iconColor} /></View>
+              <View style={styles.iconBg}><Ionicons name="shield-checkmark" size={18} color={theme.iconPrimary} /></View>
               <Text style={styles.infoTitle}>Reputação</Text>
             </View>
             <Text style={styles.infoValue}>{profile?.perfil_trust_score ?? 0} pontos</Text>
@@ -230,7 +227,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.editButton}
             onPress={() => router.push('/EditProfile')}>
-            <Ionicons name="pencil" size={16} color={iconColor} />
+            <Ionicons name="pencil" size={16} color={theme.linkText} />
             <Text style={styles.editButtonText}>Editar Informações</Text>
           </TouchableOpacity>
         </View>
@@ -245,15 +242,15 @@ export default function ProfileScreen() {
               <View style={styles.notificationItem}>
                 <View style={styles.notificationLabel}>
                   <View style={styles.iconBg}>
-                    <Ionicons name={category.icon} size={18} color={iconColor} />
+                    <Ionicons name={category.icon} size={18} color={theme.iconPrimary} />
                   </View>
                   <Text style={styles.notificationTitle}>{category.label}</Text>
                 </View>
                 <Switch
                   value={preferences[category.key]}
                   onValueChange={() => handleTogglePreference(category.key)}
-                  trackColor={{ false: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : '#E2E8F0', true: theme.primary || '#0047FF' }}
-                  thumbColor={'#FFFFFF'}
+                  trackColor={{ false: theme.inputBorder, true: theme.primary }}
+                  thumbColor={theme.white}
                 />
               </View>
             </React.Fragment>
@@ -266,10 +263,10 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.menuItem} onPress={() => setIsModalVisible(true)}>
             <View style={styles.menuLabel}>
-              <View style={styles.iconBg}><Ionicons name="lock-closed" size={18} color={iconColor} /></View>
+              <View style={styles.iconBg}><Ionicons name="lock-closed" size={18} color={theme.iconPrimary} /></View>
               <Text style={styles.menuTitle}>Trocar Senha</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={isDarkMode ? "rgba(255, 255, 255, 0.6)" : (theme.primary || "#0047FF")} />
+            <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
           </TouchableOpacity>
           <View style={styles.divider} />
 
@@ -281,13 +278,14 @@ export default function ProfileScreen() {
           ) : (
             <TouchableOpacity style={styles.menuItem} onPress={handleAcceptTerms}>
               <View style={styles.menuLabel}>
-                <View style={styles.iconBg}><Ionicons name="document-text" size={18} color={iconColor} /></View>
+                <View style={styles.iconBg}><Ionicons name="document-text" size={18} color={theme.iconPrimary} /></View>
                 <Text style={styles.menuTitle}>Termos de Serviço</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={isDarkMode ? "rgba(255, 255, 255, 0.6)" : (theme.primary || "#0047FF")} />
+              <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
             </TouchableOpacity>
           )}
         </View>
+
 
         <View style={styles.dangerSection}>
           <TouchableOpacity style={styles.dangerButton} onPress={handleLogout}>

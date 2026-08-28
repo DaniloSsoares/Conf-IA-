@@ -7,7 +7,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StatusBar
+  StatusBar,
+  Image
 } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -32,8 +33,6 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
-  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
-  const placeholderColor = isDarkMode ? "rgba(255, 255, 255, 0.6)" : "#858D99";
 
   const {
     control,
@@ -94,7 +93,7 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.iconWrapper}>
-              <Ionicons name="shield-checkmark" size={40} color={iconColor} />
+              <Image source={require('@/src/shared/img/logoSemNome.png')} style={styles.logo} />
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
@@ -116,14 +115,14 @@ export default function LoginScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.email && { borderColor: "#D74247" },
+                      errors.email && { borderColor: theme.alertRed },
                     ]}
                   >
-                    <Ionicons name="mail-outline" size={20} color={iconColor} />
+                    <Ionicons name="mail-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="seu.email@exemplo.com"
-                      placeholderTextColor={placeholderColor}
+                      placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -147,14 +146,14 @@ export default function LoginScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.password && { borderColor: "#D74247" },
+                      errors.password && { borderColor: theme.alertRed },
                     ]}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color={iconColor} />
+                    <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="Sua senha"
-                      placeholderTextColor={placeholderColor}
+                      placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -167,7 +166,7 @@ export default function LoginScreen() {
                       <Ionicons
                         name={showPassword ? 'eye' : 'eye-off'}
                         size={20}
-                        color={iconColor}
+                        color={theme.iconColor}
                       />
                     </TouchableOpacity>
                   </View>
@@ -177,6 +176,7 @@ export default function LoginScreen() {
                 <Text style={styles.labelError}>{errors.password.message}</Text>
               )}
             </View>
+
 
             <TouchableOpacity style={styles.forgotPassword}>
               <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>

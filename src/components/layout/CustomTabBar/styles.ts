@@ -1,8 +1,7 @@
 import { StyleSheet } from 'react-native';
+import { AppTheme } from '@/src/shared/constants/theme';
 
-export const getStyles = (theme: any) => {
-  const isDark = theme?.isDark;
-
+export const getStyles = (theme: AppTheme) => {
   return StyleSheet.create({
     /* ==============================
        CONTAINER DA BARRA
@@ -19,19 +18,19 @@ export const getStyles = (theme: any) => {
     tabBar: {
       height: 66,
       width: '100%',
-      backgroundColor: theme?.tabBarBg || (isDark ? '#0F172A' : '#FFFFFF'),
+      backgroundColor: theme.tabBarBg,
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: 4,
       borderRadius: 40,
-      borderWidth: isDark ? 1 : 0,
-      borderColor: theme?.cardBorder || (isDark ? 'rgba(255, 255, 255, 0.15)' : 'transparent'),
-      shadowColor: '#000',
+      borderWidth: 1,
+      borderColor: theme.cardBorder,
+      shadowColor: theme.black,
       shadowOffset: {
         width: 0,
         height: 5,
       },
-      shadowOpacity: isDark ? 0.35 : 0.10,
+      shadowOpacity: 0.15,
       shadowRadius: 14,
       elevation: 9,
       overflow: 'visible',
@@ -52,7 +51,7 @@ export const getStyles = (theme: any) => {
     indicatorFill: {
       ...StyleSheet.absoluteFillObject,
       borderRadius: 22,
-      backgroundColor: theme?.primary || (isDark ? '#3B82F6' : '#0047FF'),
+      backgroundColor: theme.primary,
     },
 
     gradientFill: {
@@ -101,12 +100,12 @@ export const getStyles = (theme: any) => {
       width: 50,
       height: 50,
       borderRadius: 25,
-      backgroundColor: theme?.alertRed || '#E64550',
+      backgroundColor: theme.alertRed,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 3,
-      borderColor: theme?.tabBarBg || (isDark ? '#0F172A' : '#FFFFFF'),
-      shadowColor: theme?.alertRed || '#E64550',
+      borderColor: theme.tabBarBg,
+      shadowColor: theme.alertRed,
       shadowOffset: {
         width: 0,
         height: 5,
@@ -124,7 +123,7 @@ export const getStyles = (theme: any) => {
       width: 50,
       height: 50,
       borderRadius: 25,
-      backgroundColor: theme?.alertRed || '#E64550',
+      backgroundColor: theme.alertRed,
     },
   });
 };

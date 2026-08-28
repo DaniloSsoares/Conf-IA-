@@ -114,7 +114,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     }
   };
 
-  const inactiveColor = theme?.subtext || (isDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#616A78');
+  const inactiveColor = theme.subtext;
 
   return (
     <View style={[styles.wrapper, { bottom: Math.max(insets.bottom + 6, 8) }]}>
@@ -140,7 +140,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           >
             {state.index === 1 ? (
               <LinearGradient
-                colors={isDarkMode ? ['#3F7FC4', '#5D9F55'] : ['#0047FF', '#3B82F6']}
+                colors={[theme.primary, theme.second]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.gradientFill}
@@ -173,7 +173,7 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                       ]}
                     />
                     <View style={styles.alertButton}>
-                      <Ionicons name={focused ? info.activeIcon : info.icon} size={24} color="#FFFFFF" />
+                      <Ionicons name={focused ? info.activeIcon : info.icon} size={24} color={theme.buttonText} />
                     </View>
                   </Animated.View>
                 ) : (
@@ -181,9 +181,9 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                     <Ionicons
                       name={focused ? info.activeIcon : info.icon}
                       size={18}
-                      color={focused ? '#FFFFFF' : inactiveColor}
+                      color={focused ? theme.buttonText : inactiveColor}
                     />
-                    <Text style={[styles.label, { color: focused ? '#FFFFFF' : inactiveColor }]}>
+                    <Text style={[styles.label, { color: focused ? theme.buttonText : inactiveColor }]}>
                       {info.label}
                     </Text>
                   </>
@@ -195,4 +195,5 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
       </View>
     </View>
   );
+
 }

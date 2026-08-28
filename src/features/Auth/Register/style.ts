@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
+import { AppTheme } from '@/src/shared/constants/theme';
 
-export const getStyles = (theme: any) => {
-  const isDark = theme.isDark;
+export const getStyles = (theme: AppTheme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -28,7 +28,7 @@ export const getStyles = (theme: any) => {
       width: 80,
       height: 80,
       borderRadius: 40,
-      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(58, 167, 122, 0.12)',
+      backgroundColor: theme.iconCircleBg,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 16,
@@ -41,25 +41,25 @@ export const getStyles = (theme: any) => {
     logoText: {
       fontSize: 32,
       fontWeight: '800',
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       letterSpacing: 0.5,
     },
     logoIa: {
       fontSize: 32,
       fontWeight: '800',
-      color: theme.primary || '#3AA77A',
+      color: theme.primary,
       marginLeft: 2,
       letterSpacing: 0.5,
     },
     title: {
       fontSize: 24,
       fontWeight: '700',
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       marginBottom: 8,
     },
     subtitle: {
       fontSize: 15,
-      color: theme.subtext || '#616A78',
+      color: theme.subtext,
       textAlign: 'center',
       lineHeight: 22,
       paddingHorizontal: 20,
@@ -73,16 +73,16 @@ export const getStyles = (theme: any) => {
     label: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       marginBottom: 8,
       marginLeft: 4,
     },
     inputWrapper: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : '#F4F5F7',
+      backgroundColor: theme.inputBg,
       borderWidth: 1,
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.3)' : '#E2E8F0',
+      borderColor: theme.inputBorder,
       borderRadius: 16,
       paddingHorizontal: 16,
       height: 56,
@@ -91,53 +91,50 @@ export const getStyles = (theme: any) => {
       flex: 1,
       paddingHorizontal: 12,
       fontSize: 15,
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       height: '100%',
     },
     eyeIcon: {
       padding: 10,
     },
     loginButton: {
-      backgroundColor: theme.primary || '#3AA77A',
+      backgroundColor: theme.buttonPrimary,
       borderRadius: 16,
       height: 56,
       justifyContent: 'center',
       alignItems: 'center',
       marginBottom: 20,
       marginTop: 30,
-      shadowColor: theme.primary || '#3AA77A',
+      shadowColor: theme.buttonPrimary,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
       elevation: 5,
-
     },
     loginButtonText: {
-      color: '#FFFFFF',
+      color: theme.buttonText,
       fontSize: 16,
       fontWeight: 'bold',
       letterSpacing: 0.5,
-    
     },
     labelError: {
-      color: '#D74247',
+      color: theme.alertRed,
       fontSize: 12,
       marginBottom: 10,
       marginLeft: 5,
       marginTop: 4,
     },
-     footer: {
-     
+    footer: {
       alignItems: 'center',
     },
     footerText: {
       fontSize: 13,
-      color: theme.subtext || '#616A78',
+      color: theme.subtext,
       textAlign: 'center',
       lineHeight: 20,
     },
     footerLink: {
-      color: theme.primary || '#3AA77A',
+      color: theme.linkText,
       fontWeight: '700',
       textDecorationLine: 'underline',
     },
@@ -145,3 +142,4 @@ export const getStyles = (theme: any) => {
 };
 
 export default getStyles;
+

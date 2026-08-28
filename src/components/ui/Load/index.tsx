@@ -89,7 +89,7 @@ export function Load({
 
       {/* Ícone do escudo/marca */}
       <View style={styles.iconWrapper}>
-        <Ionicons name={iconName} size={40} color={isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF")} />
+        <Ionicons name={iconName} size={40} color={theme.iconPrimary} />
       </View>
       </View>
 
@@ -100,7 +100,7 @@ export function Load({
       </View>
 
       {/* Spinner de carregamento */}
-      <ActivityIndicator size="large" color={theme.primary || "#0047FF"} style={styles.spinner} />
+      <ActivityIndicator size="large" color={theme.primary} style={styles.spinner} />
 
       {/* Mensagem e subtítulo */}
       <Text style={styles.messageText}>{message}</Text>
@@ -119,11 +119,7 @@ export function Load({
         statusBarTranslucent
       >
         <LinearGradient
-          colors={
-            isDarkMode
-              ? ["rgba(10, 25, 49, 0.92)", "rgba(2, 6, 23, 0.95)"]
-              : ["rgba(255, 255, 255, 0.92)", "rgba(248, 249, 250, 0.95)"]
-          }
+          colors={theme.primaryGradient}
           style={styles.overlayContainer}
         >
           {cardContent}
@@ -131,6 +127,7 @@ export function Load({
       </Modal>
     );
   }
+
 
   return <View style={styles.inlineContainer}>{cardContent}</View>;
 }

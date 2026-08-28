@@ -36,9 +36,6 @@ export default function RegisterScreen() {
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
 
-  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
-  const placeholderColor = isDarkMode ? "rgba(255, 255, 255, 0.6)" : "#858D99";
-
   const {
     control,
     handleSubmit,
@@ -127,11 +124,11 @@ export default function RegisterScreen() {
               style={styles.backButton}
               onPress={() => router.back()}
             >
-              <Ionicons name="arrow-back" size={24} color={iconColor} />
+              <Ionicons name="arrow-back" size={24} color={theme.iconColor} />
             </TouchableOpacity>
 
             <View style={styles.iconWrapper}>
-              <Ionicons name="person-add-outline" size={38} color={iconColor} />
+              <Ionicons name="person-add-outline" size={38} color={theme.iconPrimary} />
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
@@ -150,14 +147,14 @@ export default function RegisterScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.email && { borderColor: "#D74247" },
+                      errors.email && { borderColor: theme.alertRed },
                     ]}
                   >
-                    <Ionicons name="mail-outline" size={20} color={iconColor} />
+                    <Ionicons name="mail-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="seu.email@exemplo.com"
-                      placeholderTextColor={placeholderColor}
+                      placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -181,14 +178,14 @@ export default function RegisterScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.password && { borderColor: "#D74247" },
+                      errors.password && { borderColor: theme.alertRed },
                     ]}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color={iconColor} />
+                    <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="Sua senha"
-                      placeholderTextColor={placeholderColor}
+                      placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -201,7 +198,7 @@ export default function RegisterScreen() {
                       <Ionicons
                         name={showPassword ? 'eye' : 'eye-off'}
                         size={20}
-                        color={iconColor}
+                        color={theme.iconColor}
                       />
                     </TouchableOpacity>
                   </View>
@@ -221,14 +218,14 @@ export default function RegisterScreen() {
                   <View
                     style={[
                       styles.inputWrapper,
-                      errors.confirmPassword && { borderColor: "#D74247" },
+                      errors.confirmPassword && { borderColor: theme.alertRed },
                     ]}
                   >
-                    <Ionicons name="lock-closed-outline" size={20} color={iconColor} />
+                    <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
                       placeholder="Confirme sua senha"
-                      placeholderTextColor={placeholderColor}
+                      placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
@@ -241,7 +238,7 @@ export default function RegisterScreen() {
                       <Ionicons
                         name={showPassword ? 'eye' : 'eye-off'}
                         size={20}
-                        color={iconColor}
+                        color={theme.iconColor}
                       />
                     </TouchableOpacity>
                   </View>
@@ -251,6 +248,7 @@ export default function RegisterScreen() {
                 <Text style={styles.labelError}>{errors.confirmPassword.message}</Text>
               )}
             </View>
+
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>

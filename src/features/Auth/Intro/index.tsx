@@ -4,6 +4,7 @@ import {
   Text,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -53,8 +54,6 @@ export default function IntroScreen() {
   const styles = getStyles(theme);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");
-
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
@@ -79,17 +78,17 @@ export default function IntroScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <Ionicons name="shield-outline" size={28} color={iconColor} />
-          <Text style={styles.headerText}>Conf-U</Text>
+          
+          <Image source={require('@/src/shared/img/logo.png')} style={styles.logo} />
         </View>
 
         <View style={styles.content}>
           {/* Icon Circle */}
           <View style={styles.iconCircle}>
             {slide.iconFamily === 'MaterialCommunityIcons' ? (
-              <MaterialCommunityIcons name={slide.iconName as any} size={70} color={iconColor} />
+              <MaterialCommunityIcons name={slide.iconName as any} size={70} color={theme.iconPrimary} />
             ) : (
-              <Ionicons name={slide.iconName as any} size={70} color={iconColor} />
+              <Ionicons name={slide.iconName as any} size={70} color={theme.iconPrimary} />
             )}
           </View>
 
@@ -121,7 +120,7 @@ export default function IntroScreen() {
             <Text style={styles.nextButtonText}>
               {currentSlide === slides.length - 1 ? 'Começar Agora' : 'Próximo'}
             </Text>
-            <Ionicons name="arrow-forward" size={22} color="#FFFFFF" />
+            <Ionicons name="arrow-forward" size={22} color={theme.buttonText} />
           </TouchableOpacity>
 
           <View style={styles.loginContainer}>
@@ -136,3 +135,4 @@ export default function IntroScreen() {
     </LinearGradient>
   );
 }
+

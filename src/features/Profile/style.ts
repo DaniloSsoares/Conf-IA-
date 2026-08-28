@@ -1,7 +1,7 @@
 import { StyleSheet, Platform, StatusBar } from "react-native";
+import { AppTheme } from "@/src/shared/constants/theme";
 
-export const getStyles = (theme: any) => {
-  const isDark = theme.isDark;
+export const getStyles = (theme: AppTheme) => {
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -24,7 +24,7 @@ export const getStyles = (theme: any) => {
       width: 90,
       height: 90,
       borderRadius: 45,
-      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(58, 167, 122, 0.12)',
+      backgroundColor: theme.avatarBg,
       justifyContent: 'center',
       alignItems: 'center',
     },
@@ -32,44 +32,44 @@ export const getStyles = (theme: any) => {
       position: 'absolute',
       bottom: 0,
       right: 0,
-      backgroundColor: theme.primary || '#3AA77A',
+      backgroundColor: theme.buttonPrimary,
       width: 32,
       height: 32,
       borderRadius: 16,
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 2,
-      borderColor: '#FFFFFF',
+      borderColor: theme.white,
     },
     userName: {
       fontSize: 22,
       fontWeight: '800',
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       marginBottom: 4,
       letterSpacing: 0.5,
     },
     userEmail: {
       fontSize: 15,
-      color: theme.subtext || '#616A78',
+      color: theme.subtext,
       fontWeight: '500',
     },
     section: {
       marginBottom: 20,
-      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : '#FFFFFF',
+      backgroundColor: theme.cardBg,
       borderRadius: 24,
       padding: 24,
       borderWidth: 1,
-      borderColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#E6F7F0',
-      shadowColor: '#2C2B30',
+      borderColor: theme.cardBorder,
+      shadowColor: theme.black,
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0 : 0.04,
+      shadowOpacity: 0.04,
       shadowRadius: 8,
-      elevation: isDark ? 0 : 1,
+      elevation: 1,
     },
     sectionTitle: {
       fontSize: 16,
       fontWeight: '700',
-      color: theme.subtext || '#616A78',
+      color: theme.subtext,
       marginBottom: 20,
       letterSpacing: 0.3,
     },
@@ -87,7 +87,7 @@ export const getStyles = (theme: any) => {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 71, 255, 0.12)',
+      backgroundColor: theme.badgeBg,
       justifyContent: 'center',
       alignItems: 'center',
       marginRight: 12,
@@ -95,29 +95,29 @@ export const getStyles = (theme: any) => {
     infoTitle: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.text || '#2C2B30',
+      color: theme.text,
     },
     infoValue: {
       fontSize: 14,
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       fontWeight: '700',
     },
     divider: {
       height: 1,
-      backgroundColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#ECEEF2',
+      backgroundColor: theme.divider,
       marginVertical: 14,
     },
     editButton: {
       marginTop: 16,
       paddingTop: 16,
       borderTopWidth: 1,
-      borderTopColor: isDark ? 'rgba(255, 255, 255, 0.2)' : '#ECEEF2',
+      borderTopColor: theme.divider,
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
     },
     editButtonText: {
-      color: theme.primary || '#3AA77A',
+      color: theme.linkText,
       fontSize: 15,
       fontWeight: '700',
       marginLeft: 8,
@@ -135,7 +135,7 @@ export const getStyles = (theme: any) => {
     },
     notificationTitle: {
       fontSize: 15,
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       fontWeight: '600',
     },
     menuItem: {
@@ -151,7 +151,7 @@ export const getStyles = (theme: any) => {
     },
     menuTitle: {
       fontSize: 15,
-      color: theme.text || '#2C2B30',
+      color: theme.text,
       fontWeight: '600',
     },
     dangerSection: {
@@ -164,16 +164,16 @@ export const getStyles = (theme: any) => {
       alignItems: 'center',
       justifyContent: 'center',
       paddingVertical: 16,
-      backgroundColor: isDark ? 'rgba(225, 29, 72, 0.1)' : '#FFF5F5',
+      backgroundColor: theme.dangerBg,
       borderRadius: 20,
       borderWidth: 1,
-      borderColor: isDark ? 'rgba(225, 29, 72, 0.4)' : '#FEE2E2',
+      borderColor: theme.dangerBorder,
     },
     dangerButtonText: {
       fontSize: 16,
       fontWeight: '700',
       marginLeft: 10,
-      color: theme.ternary || '#D74247',
+      color: theme.ternary,
     },
     deleteButton: {
       paddingVertical: 16,
@@ -181,12 +181,12 @@ export const getStyles = (theme: any) => {
     },
     deleteButtonText: {
       fontSize: 14,
-      color: theme.subtext || '#858D99',
+      color: theme.placeholderText,
       fontWeight: '600',
     },
     versionText: {
       textAlign: 'center',
-      color: theme.subtext || '#858D99',
+      color: theme.placeholderText,
       fontSize: 13,
       fontWeight: '600',
       marginBottom: 20,
@@ -196,16 +196,18 @@ export const getStyles = (theme: any) => {
       alignItems: 'center',
       justifyContent: 'center',
       paddingVertical: 16,
-      backgroundColor: isDark ? 'rgba(75, 181, 67, 0.1)' : 'rgba(75, 181, 67, 0.12)',
+      backgroundColor: theme.successBg,
       borderRadius: 20,
       borderWidth: 1,
-      borderColor: isDark ? 'rgba(75, 181, 67, 0.4)' : 'rgba(75, 181, 67, 0.2)',
+      borderColor: theme.successBorder,
       gap: 8,
     },
     acceptedText: {
       fontSize: 14,
       fontWeight: '600',
-      color: theme.primary || '#3AA77A',
+      color: theme.primary,
     },
   });
 };
+
+export default getStyles;

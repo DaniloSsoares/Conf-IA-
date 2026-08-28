@@ -47,8 +47,6 @@ export default function ReportScreen() {
 
   const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
-  const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
-  const primaryColor = theme.primary || "#0047FF";
 
   // Capturar Localização
   const handleCaptureLocation = async () => {
@@ -274,7 +272,7 @@ export default function ReportScreen() {
          <ButtonBack/>
           <Text style={styles.headerTitle}>Reportar ocorrência</Text>
           <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
-            <Ionicons name="help-circle-outline" size={26} color={primaryColor} />
+            <Ionicons name="help-circle-outline" size={26} color={theme.primary} />
           </TouchableOpacity>
         </View>
 
@@ -302,7 +300,7 @@ export default function ReportScreen() {
                     <Ionicons
                       name={item.icon as any}
                       size={26}
-                      color={primaryColor}
+                      color={theme.primary}
                       style={styles.categoryIcon}
                     />
                     <Text style={[styles.categoryLabel, isSelected && styles.categoryLabelSelected]}>
@@ -317,7 +315,7 @@ export default function ReportScreen() {
           {/* Seção Localização */}
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
-              <Ionicons name="location" size={20} color={primaryColor} />
+              <Ionicons name="location" size={20} color={theme.primary} />
               <Text style={styles.sectionTitle}>Localização</Text>
             </View>
 
@@ -329,7 +327,7 @@ export default function ReportScreen() {
             >
               {loadingLocation ? (
                 <View style={styles.row}>
-                  <ActivityIndicator size="small" color={primaryColor} />
+                  <ActivityIndicator size="small" color={theme.primary} />
                   <Text style={styles.buttonText}>Obtendo localização atual...</Text>
                 </View>
               ) : location ? (
@@ -344,12 +342,12 @@ export default function ReportScreen() {
                     </View>
                   </View>
                   <View style={styles.recaptureBadge}>
-                    <Ionicons name="refresh-outline" size={16} color={primaryColor} />
+                    <Ionicons name="refresh-outline" size={16} color={theme.primary} />
                   </View>
                 </View>
               ) : (
                 <View style={styles.row}>
-                  <Ionicons name="scan-outline" size={22} color={primaryColor} />
+                  <Ionicons name="scan-outline" size={22} color={theme.primary} />
                   <Text style={styles.buttonText}>Toque para capturar localização atual</Text>
                 </View>
               )}
@@ -365,7 +363,7 @@ export default function ReportScreen() {
             <TextInput
               style={styles.textArea}
               placeholder="Descreva a situação em poucas palavras..."
-              placeholderTextColor={isDarkMode ? "rgba(255, 255, 255, 0.4)" : "#858D99"}
+              placeholderTextColor={theme.placeholderText}
               multiline
               numberOfLines={4}
               maxLength={500}
@@ -381,7 +379,7 @@ export default function ReportScreen() {
               <View style={styles.previewContainer}>
                 <Image source={{ uri: photo.uri }} style={styles.previewImage} />
                 <TouchableOpacity style={styles.removePhotoButton} onPress={() => setPhoto(null)} activeOpacity={0.8}>
-                  <Ionicons name="close" size={18} color="#FFFFFF" />
+                  <Ionicons name="close" size={18} color={theme.buttonText} />
                 </TouchableOpacity>
               </View>
             ) : (
@@ -390,7 +388,7 @@ export default function ReportScreen() {
                 onPress={() => setPhotoModalVisible(true)}
                 activeOpacity={0.7}
               >
-                <Ionicons name="camera-outline" size={22} color={primaryColor} />
+                <Ionicons name="camera-outline" size={22} color={theme.primary} />
                 <Text style={styles.buttonText}>Adicionar foto (opcional)</Text>
               </TouchableOpacity>
             )}
@@ -405,12 +403,12 @@ export default function ReportScreen() {
           >
             {submitting ? (
               <View style={styles.row}>
-                <ActivityIndicator size="small" color="#FFFFFF" />
+                <ActivityIndicator size="small" color={theme.buttonText} />
                 <Text style={styles.submitButtonText}>Enviando...</Text>
               </View>
             ) : (
               <View style={styles.row}>
-                <Ionicons name="send-outline" size={20} color="#FFFFFF" style={styles.sendIcon} />
+                <Ionicons name="send-outline" size={20} color={theme.buttonText} style={styles.sendIcon} />
                 <Text style={styles.submitButtonText}>Enviar reporte</Text>
               </View>
             )}
@@ -434,11 +432,11 @@ export default function ReportScreen() {
           <View style={styles.photoModalContent}>
             <Text style={styles.photoModalTitle}>Adicionar foto</Text>
             <TouchableOpacity style={styles.photoOptionButton} onPress={handleTakePhoto}>
-              <Ionicons name="camera" size={22} color="#3069E8" />
+              <Ionicons name="camera" size={22} color={theme.primary} />
               <Text style={styles.photoOptionText}>Tirar Foto</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.photoOptionButton} onPress={handlePickFromGallery}>
-              <Ionicons name="images" size={22} color="#3069E8" />
+              <Ionicons name="images" size={22} color={theme.primary} />
               <Text style={styles.photoOptionText}>Escolher da Galeria</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.photoCancelButton} onPress={() => setPhotoModalVisible(false)}>

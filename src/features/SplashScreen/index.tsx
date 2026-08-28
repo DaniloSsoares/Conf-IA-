@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, ActivityIndicator, Animated, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import styles from './style';
 
@@ -19,7 +18,7 @@ export default function SplashScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.iconContainer}>
-          <Ionicons name="shield-checkmark" size={64} color="#FFFFFF" />
+          <Image source={require('@/src/shared/img/logo.png')} style={styles.logo} />
         </View>
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>Conf</Text>

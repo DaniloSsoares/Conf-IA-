@@ -16,6 +16,10 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  logo:{  
+    width: 100,
+    height: 100,
+  },
   iconContainer: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     padding: 24,

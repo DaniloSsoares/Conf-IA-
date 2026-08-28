@@ -29,7 +29,6 @@ export default function MapScreen() {
     const [filterType, setFilterType] = useState<FilterType>('todos');
 
     const { theme, isDarkMode } = useAppTheme();
-    const primaryColor = theme.primary || "#0047FF";
     const styles = getStyles(theme);
 
     const handleOpenAlerta = (alerta: any) => {
@@ -173,7 +172,7 @@ export default function MapScreen() {
         return (
             <View style={styles.loadingContainer}>
                 <View style={styles.loadingCard}>
-                    <Ionicons name="location-outline" size={40} color={primaryColor} />
+                    <Ionicons name="location-outline" size={40} color={theme.primary} />
                     <Text style={styles.loadingText}>
                         {permissionDenied
                             ? 'Permissão de localização negada. Habilite-a nas configurações para visualizar o mapa.'
@@ -220,7 +219,7 @@ export default function MapScreen() {
                             <Ionicons
                                 name="alert-circle"
                                 size={14}
-                                color={filterType === 'alertas' ? '#FFFFFF' : '#EF4444'}
+                                color={filterType === 'alertas' ? theme.buttonText : theme.alertRed}
                             />
                             <Text style={[styles.filterChipText, filterType === 'alertas' && styles.filterChipTextActive]}>
                                 Alertas ({alerts.length})
@@ -235,7 +234,7 @@ export default function MapScreen() {
                             <Ionicons
                                 name="megaphone"
                                 size={14}
-                                color={filterType === 'reportes' ? '#FFFFFF' : primaryColor}
+                                color={filterType === 'reportes' ? theme.buttonText : theme.primary}
                             />
                             <Text style={[styles.filterChipText, filterType === 'reportes' && styles.filterChipTextActive]}>
                                 Ocorrências ({reports.length})
@@ -252,7 +251,7 @@ export default function MapScreen() {
                     onPress={handleRecenterMap}
                     activeOpacity={0.8}
                 >
-                    <Ionicons name="navigate-outline" size={22} color={primaryColor} />
+                    <Ionicons name="navigate-outline" size={22} color={theme.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -294,10 +293,10 @@ export default function MapScreen() {
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={styles.markerBadgeOfficial}>
-                                    <Ionicons name="shield-checkmark" size={10} color="#FFFFFF" />
+                                    <Ionicons name="shield-checkmark" size={10} color={theme.white} />
                                 </View>
                                 <View style={getIconStyle(alerta.alerta_nivel_risco)}>
-                                    <Ionicons name={iconName as any} size={22} color="#FFFFFF" />
+                                    <Ionicons name={iconName as any} size={22} color={theme.white} />
                                 </View>
                             </View>
 
@@ -335,7 +334,7 @@ export default function MapScreen() {
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={getIconStyle(report.reporte_nivel_risco)}>
-                                    <Ionicons name={iconName as any} size={22} color="#FFFFFF" />
+                                    <Ionicons name={iconName as any} size={22} color={theme.white} />
                                 </View>
                             </View>
 
@@ -366,11 +365,12 @@ export default function MapScreen() {
                         longitude: location.longitude,
                     }}
                     radius={raioMetros}
-                    fillColor={isDarkMode ? "rgba(59, 130, 246, 0.12)" : "rgba(0, 71, 255, 0.08)"}
-                    strokeColor={isDarkMode ? "rgba(59, 130, 246, 0.45)" : "rgba(0, 71, 255, 0.35)"}
+                    fillColor={theme.badgeBg}
+                    strokeColor={theme.cardBorder}
                     strokeWidth={2}
                 />
             </MapView>
+
             
 
         </View>
