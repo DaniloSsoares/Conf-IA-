@@ -17,7 +17,7 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="Alerts/index"
+        name="Maps/index"
         options={{
           title: 'Mapa',
         }}

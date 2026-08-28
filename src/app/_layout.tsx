@@ -14,7 +14,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)/Login/index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/Register/index" options={{ headerShown: false }} />
         <Stack.Screen name="features/Home/index" options={{ headerShown: false }} />
-        <Stack.Screen name="features/Alerts/index" options={{ headerShown: false }} />
+        <Stack.Screen name="features/Maps/index" options={{ headerShown: false }} />
         <Stack.Screen name="features/Profile/index" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ headerShown: false }} />
         <Stack.Screen name="(screens)" options={{ headerShown: false }} />

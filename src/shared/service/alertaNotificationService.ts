@@ -53,4 +53,6 @@ export async function markNotificationAsRead(notificationId: string): Promise<vo
     }
   } catch (error) {
   }
+
+ 
 }
