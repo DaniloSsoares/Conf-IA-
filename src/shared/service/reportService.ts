@@ -197,3 +197,18 @@ export async function getUserReports(userId: string): Promise<Report[]> {
     return [];
   }
 }
+
+export async function getActiveReports(): Promise<Report[]> {
+  try {
+    const { data, error } = await supabaseConfig
+      .from("reportes")
+      .select("*")
+      .neq("reporte_status", "rejeitado");
+    if (error) throw error;
+    return (data as Report[]) || [];
+  } catch (error) {
+    console.error("Erro ao buscar reportes ativos:", error);
+    return [];
+  }
+}
+

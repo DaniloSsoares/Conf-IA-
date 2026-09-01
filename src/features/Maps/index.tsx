@@ -1,17 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { supabaseConfig } from '@/src/config/supabase';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { Load } from '@/src/components/ui';
 import { Report } from '@/src/shared/types/report';
 import { REPORT_CATEGORIES } from '@/src/shared/constants/reportCategories';
 import getStyles, { darkMapStyle } from './styles';
+import { useMapData } from './useMapData';
 
 type FilterType = 'todos' | 'alertas' | 'reportes';
 
@@ -19,17 +18,20 @@ export default function MapScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const mapRef = useRef<MapView>(null);
-
-    const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-    const [alerts, setAlerts] = useState<any[]>([]);
-    const [reports, setReports] = useState<Report[]>([]);
-    const [profile, setProfile] = useState<any>(null);
-    const [loadingLocation, setLoadingLocation] = useState(true);
-    const [permissionDenied, setPermissionDenied] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<any>(null);
     const [filterType, setFilterType] = useState<FilterType>('todos');
 
     const { theme, isDarkMode } = useAppTheme();
     const styles = getStyles(theme);
+
+    const {
+        location,
+        alerts,
+        reports,
+        profile,
+        loadingLocation,
+        permissionDenied,
+    } = useMapData();
 
     const handleOpenAlerta = (alerta: any) => {
         router.push({
@@ -61,74 +63,6 @@ export default function MapScreen() {
             }, 1000);
         }
     };
-
-    useEffect(() => {
-        const getLocation = async () => {
-            try {
-                let { status } = await Location.requestForegroundPermissionsAsync();
-                if (status !== 'granted') {
-                    console.log('Permissão para acessar localização foi negada');
-                    setPermissionDenied(true);
-                    return;
-                }
-                let currentPosition = await Location.getCurrentPositionAsync({});
-                setLocation({
-                    latitude: currentPosition.coords.latitude,
-                    longitude: currentPosition.coords.longitude,
-                });
-            } catch (error) {
-                console.error('Erro ao obter localização:', error);
-            } finally {
-                setLoadingLocation(false);
-            }
-        };
-        getLocation();
-    }, []);
-
-    useEffect(() => {
-        const fetchAlertas = async () => {
-            const { data, error } = await supabaseConfig
-                .from('alertas')
-                .select('*')
-                .eq('alerta_status', 'ativo');
-            if (!error && data) {
-                setAlerts(data);
-            }
-        };
-        fetchAlertas();
-    }, []);
-
-    useEffect(() => {
-        const fetchReports = async () => {
-            const { data, error } = await supabaseConfig
-                .from('reportes')
-                .select('*')
-                .neq('reporte_status', 'rejeitado');
-                console.log("Dados dos reportes:", data);
-            if (!error && data) {
-                setReports(data);
-            }
-        };
-        fetchReports();
-    }, []);
-
-    useEffect(() => {
-        const fetchProfile = async () => {
-            const { data, error } = await supabaseConfig.auth.getUser();
-            if (error || !data.user) return;
-
-            const { data: perfilData, error: perfilError } = await supabaseConfig
-                .from('perfil')
-                .select('*')
-                .select('*, perfil(perfil_nome_completo)')
-                .eq('id', data.user.id)
-                .single();
-            if (!perfilError && perfilData) {
-                setProfile(perfilData);
-            }
-        };
-        fetchProfile();
-    }, []);
 
     const getIconStyle = (nivelRisco: string) => {
         switch (nivelRisco?.toLowerCase()) {
@@ -266,7 +200,7 @@ export default function MapScreen() {
                     longitudeDelta: 0.05,
                 }}
             >
-                {/* MARCADOR DO USUÁRIO */}
+               
                 <Marker
                     coordinate={{ latitude: location.latitude, longitude: location.longitude }}
                     title="Você está aqui"
@@ -290,6 +224,8 @@ export default function MapScreen() {
                         <Marker
                             key={`alerta-${alerta.id}`}
                             coordinate={{ latitude: lat, longitude: lng }}
+                            onPress={() => setSelectedItem({...alerta, type :'alerta' })}
+                                
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={styles.markerBadgeOfficial}>
@@ -331,6 +267,7 @@ export default function MapScreen() {
                         <Marker
                             key={`report-${report.id}`}
                             coordinate={{ latitude: lat, longitude: lng }}
+                            onPress={() => setSelectedItem({...report, type : 'reporte' })} 
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={getIconStyle(report.reporte_nivel_risco)}>
@@ -371,8 +308,52 @@ export default function MapScreen() {
                 />
             </MapView>
 
-            
+            {selectedItem &&(
+                 <View style={[styles.previewCard, { bottom: insets.bottom + 80 }]}>
+        <View style={styles.previewHeader}>
+            <View style={styles.previewTypeTag}>
+                <Ionicons 
+                    name={selectedItem.type === 'alerta' ? "shield-checkmark" : "megaphone"} 
+                    size={16} 
+                    color={theme.primary} 
+                />
+                <Text style={styles.previewTypeText}>
+                    {selectedItem.type === 'alerta' ? "Alerta Oficial" : "Ocorrência Comunitária"}
+                </Text>
+            </View>
+            <TouchableOpacity onPress={() => setSelectedItem(null)}>
+                <Ionicons name="close-circle" size={24} color="#999" />
+            </TouchableOpacity>
+        </View>
 
+        <Text style={styles.previewTitle}>
+            {selectedItem.alerta_titulo || REPORT_CATEGORIES.find(c => c.id === selectedItem.reporte_tipo_ocorrencia)?.label || "Detalhes"}
+        </Text>
+
+        <Text style={styles.previewDescription} numberOfLines={2}>
+            {selectedItem.alerta_descricao || selectedItem.reporte_descricao || "Sem descrição disponível."}
+        </Text>
+
+        <View style={styles.previewFooter}>
+            <View style={getRiskBadgeStyle(selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco)}>
+                <Text style={styles.riskBadgeText}>
+                    Risco {selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco}
+                </Text>
+            </View>
+
+            <TouchableOpacity 
+                style={styles.detailsButton} 
+                onPress={() => {
+                    if (selectedItem.type === 'alerta') handleOpenAlerta(selectedItem);
+                    else handleOpenReport(selectedItem);
+                }}
+            >
+                <Text style={styles.detailsButtonText}>Ver detalhes</Text>
+                <Ionicons name="arrow-forward" size={16} color="#FFF" />
+            </TouchableOpacity>
+        </View>
+    </View>
+)}
         </View>
     );
 }
