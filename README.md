@@ -1,8 +1,8 @@
-# Conf-IA — Plataforma de Prevenção e Resposta a Desastres Climáticos
+# Conf-U — Plataforma de Prevenção e Resposta a Desastres Climáticos
 
-Bem-vindo ao projeto **Conf-IA**.
+Bem-vindo ao projeto **Conf-U**.
 
-A **Conf-IA** é uma plataforma digital de monitoramento, prevenção e resposta a desastres climáticos, desenvolvida com o objetivo de integrar informações meteorológicas, dados geográficos e participação colaborativa da população em um ambiente tecnológico acessível e orientado à redução de riscos socioambientais.
+A **Conf-U** é uma plataforma digital de monitoramento, prevenção e resposta a desastres climáticos, desenvolvida com o objetivo de integrar informações meteorológicas, dados geográficos e participação colaborativa da população em um ambiente tecnológico acessível e orientado à redução de riscos socioambientais.
 
 A plataforma foi concebida como uma solução complementar aos mecanismos tradicionais de monitoramento climático e defesa civil existentes no Brasil, buscando ampliar a capacidade de comunicação de risco com a população, especialmente em regiões urbanas vulneráveis a enchentes, alagamentos e deslizamentos.
 
@@ -98,7 +98,7 @@ A aplicação mobile da plataforma é desenvolvida utilizando tecnologias modern
 
 ## 📂 Projeto
 
-O desenvolvimento da Conf-IA encontra-se organizado em etapas progressivas que abrangem:
+O desenvolvimento da Conf-U encontra-se organizado em etapas progressivas que abrangem:
 
 - levantamento de requisitos;
 - modelagem da solução;
@@ -113,7 +113,7 @@ Atualmente, o projeto encontra-se na fase de desenvolvimento da arquitetura back
 
 ## Objetivos de Desenvolvimento Sustentável
 
-A proposta da Conf-IA está alinhada aos Objetivos de Desenvolvimento Sustentável da Organização das Nações Unidas, especialmente:
+A proposta da Conf-U está alinhada aos Objetivos de Desenvolvimento Sustentável da Organização das Nações Unidas, especialmente:
 
 ### ODS 11 — Cidades e Comunidades Sustentáveis
 
