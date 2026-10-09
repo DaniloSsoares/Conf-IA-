@@ -83,9 +83,23 @@ export default function MapScreen() {
             case 'critico':
                 return [styles.calloutRiskBadge, styles.riskBadgeHigh];
             case 'moderado':
+            case 'médio':
                 return [styles.calloutRiskBadge, styles.riskBadgeMedium];
             default:
                 return [styles.calloutRiskBadge, styles.riskBadgeLow];
+        }
+    };
+
+    const getRiskTextStyle = (nivelRisco: string) => {
+        switch (nivelRisco?.toLowerCase()) {
+            case 'alto':
+            case 'critico':
+                return [styles.riskBadgeText, styles.riskBadgeTextHigh];
+            case 'moderado':
+            case 'médio':
+                return [styles.riskBadgeText, styles.riskBadgeTextMedium];
+            default:
+                return [styles.riskBadgeText, styles.riskBadgeTextLow];
         }
     };
 
@@ -263,12 +277,12 @@ export default function MapScreen() {
                                 </View>
                             </View>
 
-                            <Callout onPress={() => handleOpenAlerta(alerta)}>
+                            <Callout tooltip onPress={() => handleOpenAlerta(alerta)}>
                                 <View style={styles.calloutContainer}>
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagAlerta}>Alerta Oficial</Text>
                                         <Text style={getRiskBadgeStyle(alerta.alerta_nivel_risco)}>
-                                            {alerta.alerta_nivel_risco || 'Alerta'}
+                                            {alerta.alerta_nivel_risco || 'Médio'}
                                         </Text>
                                     </View>
                                     <Text style={styles.calloutTitle} numberOfLines={1}>{alerta.alerta_titulo}</Text>
@@ -302,12 +316,12 @@ export default function MapScreen() {
                                 </View>
                             </View>
 
-                            <Callout onPress={() => handleOpenReport(report)}>
+                            <Callout tooltip onPress={() => handleOpenReport(report)}>
                                 <View style={styles.calloutContainer}>
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagReporte}>Ocorrência</Text>
                                         <Text style={getRiskBadgeStyle(report.reporte_nivel_risco)}>
-                                            {report.reporte_nivel_risco || 'Risco'}
+                                            {report.reporte_nivel_risco || 'Médio'}
                                         </Text>
                                     </View>
                                     <Text style={styles.calloutTitle} numberOfLines={1}>{category?.label || 'Ocorrência'}</Text>
@@ -335,52 +349,57 @@ export default function MapScreen() {
                 />
             </MapView>
 
-            {selectedItem &&(
-                 <View style={[styles.previewCard, { bottom: insets.bottom + 80 }]}>
-        <View style={styles.previewHeader}>
-            <View style={styles.previewTypeTag}>
-                <Ionicons 
-                    name={selectedItem.type === 'alerta' ? "shield-checkmark" : "megaphone"} 
-                    size={16} 
-                    color={theme.primary} 
-                />
-                <Text style={styles.previewTypeText}>
-                    {selectedItem.type === 'alerta' ? "Alerta Oficial" : "Ocorrência Comunitária"}
-                </Text>
-            </View>
-            <TouchableOpacity onPress={() => setSelectedItem(null)}>
-                <Ionicons name="close-circle" size={24} color="#999" />
-            </TouchableOpacity>
-        </View>
+            {selectedItem && (
+                <View style={[styles.previewCard, { bottom: insets.bottom + 80 }]}>
+                    <View style={styles.previewHeader}>
+                        <View style={styles.previewTypeTag}>
+                            <Ionicons 
+                                name={selectedItem.type === 'alerta' ? "shield-checkmark" : "megaphone"} 
+                                size={16} 
+                                color={theme.primary} 
+                            />
+                            <Text style={styles.previewTypeText}>
+                                {selectedItem.type === 'alerta' ? "Alerta Oficial" : "Ocorrência Comunitária"}
+                            </Text>
+                        </View>
+                        <TouchableOpacity onPress={() => setSelectedItem(null)} style={{ padding: 4 }}>
+                            <Ionicons name="close-circle" size={24} color={theme.subtext || "#94A3B8"} />
+                        </TouchableOpacity>
+                    </View>
 
-        <Text style={styles.previewTitle}>
-            {selectedItem.alerta_titulo || REPORT_CATEGORIES.find(c => c.id === selectedItem.reporte_tipo_ocorrencia)?.label || "Detalhes"}
-        </Text>
+                    <Text style={styles.previewTitle}>
+                        {selectedItem.alerta_titulo || REPORT_CATEGORIES.find(c => c.id === selectedItem.reporte_tipo_ocorrencia)?.label || "Detalhes"}
+                    </Text>
 
-        <Text style={styles.previewDescription} numberOfLines={2}>
-            {selectedItem.alerta_descricao || selectedItem.reporte_descricao || "Sem descrição disponível."}
-        </Text>
+                    <Text style={styles.previewDescription} numberOfLines={2}>
+                        {selectedItem.alerta_descricao || selectedItem.reporte_descricao || "Sem descrição disponível."}
+                    </Text>
 
-        <View style={styles.previewFooter}>
-            <View style={getRiskBadgeStyle(selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco)}>
-                <Text style={styles.riskBadgeText}>
-                    Risco {selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco}
-                </Text>
-            </View>
+                    <View style={styles.previewFooter}>
+                        {(() => {
+                            const riskLevelVal = selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco || 'médio';
+                            return (
+                                <View style={getRiskBadgeStyle(riskLevelVal)}>
+                                    <Text style={getRiskTextStyle(riskLevelVal)}>
+                                        Risco {riskLevelVal.toUpperCase()}
+                                    </Text>
+                                </View>
+                            );
+                        })()}
 
-            <TouchableOpacity 
-                style={styles.detailsButton} 
-                onPress={() => {
-                    if (selectedItem.type === 'alerta') handleOpenAlerta(selectedItem);
-                    else handleOpenReport(selectedItem);
-                }}
-            >
-                <Text style={styles.detailsButtonText}>Ver detalhes</Text>
-                <Ionicons name="arrow-forward" size={16} color="#FFF" />
-            </TouchableOpacity>
-        </View>
-    </View>
-)}
+                        <TouchableOpacity 
+                            style={styles.detailsButton} 
+                            onPress={() => {
+                                if (selectedItem.type === 'alerta') handleOpenAlerta(selectedItem);
+                                else handleOpenReport(selectedItem);
+                            }}
+                        >
+                            <Text style={styles.detailsButtonText}>Ver detalhes</Text>
+                            <Ionicons name="arrow-forward" size={16} color="#FFF" />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
         </View>
     );
 }

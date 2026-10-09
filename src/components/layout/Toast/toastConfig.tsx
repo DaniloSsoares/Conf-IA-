@@ -124,6 +124,23 @@ const toastConfig = {
       </Animatable.View>
     );
   },
+
+  info:({text1, text2, props, animationType = 'fadeInDown' }: ToastConfigProps) => {
+    const { theme } = useAppTheme();
+    const styles = getStyles(theme);
+    return (
+      <Animatable.View animation={animationType} duration={500} style={styles.toastContainer}>
+        <View style={styles.infoToast}>
+          {props?.icon && <Text style={{ fontSize: 24 }}>{props.icon}</Text>}
+          <View style={{ flex: 1 }}>
+            <Text style={styles.infoText}>{text1}</Text>
+            {!!text2 && <Text style={styles.infoSubText}>{text2}</Text>}
+          </View>
+        </View>
+      </Animatable.View>
+    );
+  },
+
 };
 
 export default toastConfig;

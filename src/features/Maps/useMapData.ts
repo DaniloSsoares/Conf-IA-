@@ -72,57 +72,59 @@ export function useMapData() {
         fetchWeather();
     }, [location]);
 
-    useEffect(() => {
-        const fetchReports = async () => {
-            const activeReports = await getActiveReports();
-            setReports(activeReports);
-        };
-        fetchReports();
+    const fetchReports = useCallback(async () => {
+        const activeReports = await getActiveReports();
+        setReports(activeReports);
     }, []);
 
-        const fetchProfile = useCallback(async () => {
-            const { data, error } = await supabaseConfig.auth.getUser();
-            if (error || !data.user) return;
+    const fetchProfile = useCallback(async () => {
+        const { data, error } = await supabaseConfig.auth.getUser();
+        if (error || !data.user) return;
 
-            const perfilData = await getProfile(data.user.id);
-            if (perfilData) {
-                setProfile(perfilData);
-            }
+        const perfilData = await getProfile(data.user.id);
+        if (perfilData) {
+            setProfile(perfilData);
+        }
     }, []);
+
+    const fetchAlertas = useCallback(async () => {
+        if (!profile) return;
+
+        const categoriasAtivas = getEnabledCategories(profile.perfil_preferencias_alertas);
+        if (categoriasAtivas.length === 0) {
+            setAlerts([]);
+            return;
+        }
+
+        const { data, error } = await supabaseConfig
+            .from('alertas')
+            .select('*')
+            .eq('alerta_status', 'ativo')
+            .in('alerta_tipo_ocorrencia', categoriasAtivas);
+
+        if (!error && data) {
+            setAlerts(data);
+        }
+    }, [profile]);
+
+    // Recarrega todos os dados do mapa ao entrar na tela (Foco)
+    // E agenda uma atualização automática a cada 10 segundos enquanto a tela estiver visível
     useFocusEffect(
-    useCallback(() => {
-        fetchProfile();
-    }, [fetchProfile])
-);
+        useCallback(() => {
+            fetchProfile();
+            fetchReports();
+            fetchAlertas();
 
-    // Busca inicial de alertas — só roda depois que o perfil carrega,
-    // porque precisa saber quais categorias o usuário quer ver.
-    
-       const fetchAlertas = useCallback(async () => {
-    if (!profile) return;
+            const intervalId = setInterval(() => {
+                fetchReports();
+                fetchAlertas();
+            }, 10000);
 
-    const categoriasAtivas = getEnabledCategories(profile.perfil_preferencias_alertas);
-    if (categoriasAtivas.length === 0) {
-        setAlerts([]);
-        return;
-    }
-
-    const { data, error } = await supabaseConfig
-        .from('alertas')
-        .select('*')
-        .eq('alerta_status', 'ativo')
-        .in('alerta_tipo_ocorrencia', categoriasAtivas);
-
-    if (!error && data) {
-        setAlerts(data);
-    }
-}, [profile]);
-
-useFocusEffect(
-    useCallback(() => {
-        fetchAlertas();
-    }, [fetchAlertas])
-);
+            return () => {
+                clearInterval(intervalId);
+            };
+        }, [fetchProfile, fetchReports, fetchAlertas])
+    );
 
     // Realtime — também depende de [profile], porque o filtro de categoria
     // fica "congelado" dentro do closure no momento em que o canal é criado.

@@ -1,5 +1,6 @@
 import { StyleSheet, Platform } from 'react-native';
 import { colors } from '@/src/shared/constants/theme';
+import { InfoToast } from 'react-native-toast-message';
 
 export const getStyles = (theme: any) => {
   const isDark = theme.background === '#020617' || theme.text === '#FFFFFF';
@@ -233,5 +234,38 @@ export const getStyles = (theme: any) => {
       marginTop: 2,
       flexShrink: 1,
     },
+
+
+    infoToast: {
+      backgroundColor: theme.background,
+      borderRadius: 12,
+      width: '90%',
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      flexDirection: 'row',
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      elevation: 5,
+      borderWidth: 1.5,
+      borderColor: isDark ? (theme.neonAzul || '#10b9c0') : '#0284c7',
+    },
+
+    infoText: {
+      fontSize: 18,
+      color: isDark ? (theme.neonAzul || '#10b9c0') : '#0284c7',
+      fontWeight: 'bold',
+      marginLeft: 12,
+    },
+
+    infoSubText: {
+      fontSize: 14,
+      color: theme.text,
+      marginLeft: 12,
+      marginTop: 2,
+      flexShrink: 1,
+    }
   });
 };

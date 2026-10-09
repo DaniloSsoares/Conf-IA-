@@ -335,25 +335,27 @@ export const getStyles = (theme: AppTheme) => {
       letterSpacing: 0.5,
     },
     calloutRiskBadge: {
-      fontSize: 9,
-      fontWeight: '800',
-      textTransform: 'uppercase',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 6,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 10,
       overflow: 'hidden',
     },
     riskBadgeHigh: {
-      backgroundColor: 'rgba(239, 68, 68, 0.15)',
-      color: theme.alertRed,
+      backgroundColor: 'rgba(239, 68, 68, 0.2)',
+      borderColor: 'rgba(239, 68, 68, 0.4)',
+      borderWidth: 1,
     },
     riskBadgeMedium: {
-      backgroundColor: 'rgba(245, 158, 11, 0.15)',
-      color: '#F59E0B',
+      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+      borderColor: 'rgba(245, 158, 11, 0.4)',
+      borderWidth: 1,
     },
     riskBadgeLow: {
-      backgroundColor: 'rgba(16, 185, 129, 0.15)',
-      color: '#10B981',
+      backgroundColor: 'rgba(16, 185, 129, 0.2)',
+      borderColor: 'rgba(16, 185, 129, 0.4)',
+      borderWidth: 1,
     },
     calloutTitle: {
       fontWeight: '700',
@@ -443,10 +445,20 @@ export const getStyles = (theme: AppTheme) => {
       marginRight: 8,
     },
     riskBadgeText: {
-      color: theme.white,
-      fontSize: 12,
-      fontWeight: 'bold',
-    }
+      fontSize: 11,
+      fontWeight: '800',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    riskBadgeTextHigh: {
+      color: '#EF4444',
+    },
+    riskBadgeTextMedium: {
+      color: '#F59E0B',
+    },
+    riskBadgeTextLow: {
+      color: '#10B981',
+    },
   });
 };
 

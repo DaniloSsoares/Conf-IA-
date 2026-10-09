@@ -18,6 +18,7 @@ import { getActiveReports } from '@/src/shared/service/reportService';
 import { WeatherData } from '@/src/shared/types/weather';
 import { Profile } from '@/src/shared/types/profile';
 import { useAppTheme } from '@/src/shared/constants/theme';
+import { useFocusEffect } from 'expo-router';
 import styles from './style';
 
 export default function DashboardScreen({ navigation }: any) {
@@ -52,16 +53,18 @@ export default function DashboardScreen({ navigation }: any) {
     }
   };
 
-  useEffect(() => {
-    loadAllData();
-  }, []);
-
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     await Promise.all([
       loadUserDataAndWeather(),
       loadActiveAlerts(),
     ]);
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadAllData();
+    }, [loadAllData])
+  );
 
   const loadUserDataAndWeather = async () => {
     try {
