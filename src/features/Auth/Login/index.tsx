@@ -101,7 +101,7 @@ export default function LoginScreen() {
             </View>
             <Text style={styles.title}>Bem-vindo de volta!</Text>
             <Text style={styles.subtitle}>
-              Acesse sua plataforma inteligente de prevenção.
+              Acesse sua plataforma de prevenção.
             </Text>
           </View>
 

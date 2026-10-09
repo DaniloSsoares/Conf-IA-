@@ -50,40 +50,60 @@ export default function ReportScreen() {
 
   // Capturar Localização
   const handleCaptureLocation = async () => {
+    setLoadingLocation(true);
     try {
-      setLoadingLocation(true);
+      // 1. Checa a permissão do GPS
       const { status } = await Location.requestForegroundPermissionsAsync();
-
       if (status !== 'granted') {
         Toast.show({
           type: 'error',
           text1: 'Permissão negada',
-          text2: 'Precisamos de acesso à localização para registrar o reporte.',
+          text2: 'Habilite o acesso à localização nas configurações.',
         });
         return;
       }
 
-      const currentPosition = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
+      let currentPosition: Location.LocationObject | null = null;
+
+      // 2. Tenta capturar a localização atual com precisão equilibrada
+      try {
+        currentPosition = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+      } catch (gpsError) {
+        console.warn('Falha no GPS em tempo real. Tentando última posição conhecida:', gpsError);
+        // Fallback L1: Busca a última localização em cache do sistema operacional
+        currentPosition = await Location.getLastKnownPositionAsync();
+      }
+
+      // Se nem o cache do SO retornar coordenadas, interrompe com aviso claro
+      if (!currentPosition) {
+        Toast.show({
+          type: 'error',
+          text1: 'Sinal de GPS indisponível',
+          text2: 'Não foi possível obter sua posição. Verifique se o GPS está ativo.',
+        });
+        return;
+      }
 
       const { latitude, longitude } = currentPosition.coords;
+
+      // 3. Tenta realizar a geocodificação reversa (L2)
       let addressString = '';
-
       try {
-        const [geocode] = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
-        });
-
+        const [geocode] = await Location.reverseGeocodeAsync({ latitude, longitude });
         if (geocode) {
-          const street = geocode.street || geocode.name || '';
-          const subregion = geocode.subregion || geocode.district || '';
-          const city = geocode.city || geocode.subregion || '';
-          const parts = [street, subregion, city].filter(Boolean);
-          addressString = parts.length > 0 ? parts.join(', ') : `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          const parts = [geocode.street, geocode.district, geocode.city].filter(Boolean);
+          addressString = parts.join(', ');
         }
-      } catch (e) {
+      } catch (geocodeError) {
+        console.warn('Falha na geocodificação reversa, utilizando coordenadas brutas:', geocodeError);
+        // Fallback L2: Salva coordenadas brutas em texto
+        addressString = `Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`;
+      }
+
+      // Caso o serviço retorne com sucesso mas sem nomes de rua/bairro (área pouco mapeada)
+      if (!addressString.trim()) {
         addressString = `Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`;
       }
 
@@ -93,17 +113,22 @@ export default function ReportScreen() {
         endereco: addressString,
       });
 
+      // Feedback claro ao usuário
+      const isRawCoordinates = addressString.startsWith('Lat:');
       Toast.show({
-        type: 'success',
-        text1: 'Localização capturada',
-        text2: addressString || 'Coordenadas salvas com sucesso!',
+        type: isRawCoordinates ? 'info' : 'success',
+        text1: 'Localização obtida',
+        text2: isRawCoordinates
+          ? 'Endereço indisponível. Coordenadas salvas com sucesso.'
+          : addressString,
       });
+
     } catch (error) {
-      console.error('Erro ao capturar localização:', error);
+      console.error('Erro na captura de localização:', error);
       Toast.show({
         type: 'error',
-        text1: 'Erro de Localização',
-        text2: 'Não foi possível obter sua localização atual.',
+        text1: 'Erro de localização',
+        text2: 'Ocorreu uma falha ao tentar obter a posição.',
       });
     } finally {
       setLoadingLocation(false);

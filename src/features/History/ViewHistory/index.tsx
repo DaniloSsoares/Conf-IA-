@@ -1,10 +1,11 @@
-import React from 'react';
+import React ,{useEffect,useState} from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { getStatusStyle, getRiskStyle, getCategoryMeta } from '@/src/shared/constants/historyStatus';
+import { supabaseConfig } from '@/src/config/supabase';
 import { getStyles } from './styles';
 
 type ParamType = 'alerta' | 'reporte';
@@ -17,8 +18,16 @@ export default function ViewHistoryScreen() {
 
   const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
   const parsed = data ? JSON.parse(data) : null;
+  const [currentUseId, setCurrentUserId] = useState<string>('');
 
-
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const { data: { user } } = await supabaseConfig.auth.getUser();
+      setCurrentUserId(user?.id || '');
+    };
+    fetchUserId();
+  }, []);
+  const isOwner =  Boolean(currentUseId && parsed?.perfil_id === currentUseId);
 
   if (!parsed) {
     return (
@@ -55,7 +64,7 @@ export default function ViewHistoryScreen() {
         {isAlerta ? (
           <AlertaContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} />
         ) : (
-          <ReporteContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} />
+          <ReporteContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} isOwner={isOwner} />
         )}
       </ScrollView>
     </LinearGradient>
@@ -116,16 +125,17 @@ function AlertaContent({ parsed, meta, theme, styles, isDarkMode }: any) {
   );
 }
 
-function ReporteContent({ parsed, meta, theme, styles, isDarkMode }: any) {
+function ReporteContent({ parsed, meta, theme, styles, isDarkMode, isOwner }: any) {
   const statusStyle = getStatusStyle(parsed.reporte_status, theme);
   const photoUrl = parsed.reporte_midias?.[0]?.midia_url;
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
-   const handleEdit = () => {
+  const handleEdit = () => {
     router.push({
       pathname: '/(screens)/EditReport' as any, 
       params: { id: parsed?.id, data: JSON.stringify(parsed) }
     });
   };
+
   return (
     <>
       <View style={styles.heroCard}>
@@ -172,10 +182,12 @@ function ReporteContent({ parsed, meta, theme, styles, isDarkMode }: any) {
         />
       </View>
 
-       <TouchableOpacity style={styles.editButton} onPress={() => {handleEdit()}}>
+      {isOwner && (
+        <TouchableOpacity style={styles.editButton} onPress={() => {handleEdit()}}>
           <Ionicons name="create-outline" size={20} color={theme.primary || '#3AA77A'} />
           <Text style={styles.editButtonText}>Editar Reporte</Text>
         </TouchableOpacity>
+      )}
     </>
   );
 }

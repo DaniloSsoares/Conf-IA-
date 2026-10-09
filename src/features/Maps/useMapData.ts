@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as Location from 'expo-location';
 import Toast from 'react-native-toast-message';
 import { supabaseConfig } from '@/src/config/supabase';
@@ -24,6 +24,10 @@ export function useMapData() {
     const [profile, setProfile] = useState<any>(null);
     const [loadingLocation, setLoadingLocation] = useState(true);
     const [permissionDenied, setPermissionDenied] = useState(false);
+
+    // Controla se é a primeira conexão do WebSocket (para não re-sincronizar no subscribe inicial)
+    const isFirstSubscription = useRef(true);
+
 
     useEffect(() => {
         const getLocation = async () => {
@@ -184,12 +188,30 @@ useFocusEffect(
                     setAlerts((current) => current.filter((a) => a.id !== idRemovido));
                 }
             )
-            .subscribe();
+            .subscribe(async (status) => {
+                // Na primeira conexão os dados já foram carregados pelo fetch inicial.
+                // A partir da segunda vez que 'SUBSCRIBED' dispara (reconexão após queda
+                // de rede), fazemos um re-sync compulsório via HTTP REST para recuperar
+                // todos os eventos que o WebSocket perdeu durante a desconexão.
+                if (status === 'SUBSCRIBED') {
+                    if (isFirstSubscription.current) {
+                        isFirstSubscription.current = false;
+                        return;
+                    }
+
+                    // Re-sync de reportes via REST
+                    const activeReports = await getActiveReports();
+                    setReports(activeReports);
+
+                    // Re-sync de alertas via REST (reutiliza a lógica com filtro de categorias)
+                    fetchAlertas();
+                }
+            });
 
         return () => {
             supabaseConfig.removeChannel(subscription);
         };
-    }, [profile]);
+    }, [profile, fetchAlertas]);
 
     return {
         location,
