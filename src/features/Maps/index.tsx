@@ -29,6 +29,7 @@ export default function MapScreen() {
         alerts,
         reports,
         profile,
+        weather,
         loadingLocation,
         permissionDenied,
     } = useMapData();
@@ -133,6 +134,32 @@ export default function MapScreen() {
                             <Text style={styles.radiusBadgeText}>Raio: {raioKm}km</Text>
                         </View>
                     </View>
+
+                    {weather && (
+                        <View style={styles.weatherCard}>
+                            <View style={styles.weatherMain}>
+                                <Ionicons name="partly-sunny-outline" size={20} color={theme.primary} />
+                                <Text style={styles.weatherTempText}>{weather.clima_temperatura_c}°C</Text>
+                                {weather.descricao ? (
+                                    <Text style={styles.weatherDescText}>{weather.descricao}</Text>
+                                ) : null}
+                            </View>
+                            <View style={styles.weatherStats}>
+                                {weather.clima_umidade_pct !== null && (
+                                    <View style={styles.weatherStatItem}>
+                                        <Ionicons name="water-outline" size={13} color={theme.subtext} />
+                                        <Text style={styles.weatherStatText}>{weather.clima_umidade_pct}%</Text>
+                                    </View>
+                                )}
+                                {weather.clima_vento_kmh !== null && (
+                                    <View style={styles.weatherStatItem}>
+                                        <Ionicons name="swap-horizontal-outline" size={13} color={theme.subtext} />
+                                        <Text style={styles.weatherStatText}>{weather.clima_vento_kmh} km/h</Text>
+                                    </View>
+                                )}
+                            </View>
+                        </View>
+                    )}
 
                     <View style={styles.filtersRow}>
                         <TouchableOpacity

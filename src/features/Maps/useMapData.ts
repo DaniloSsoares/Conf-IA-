@@ -7,6 +7,8 @@ import { getActiveReports } from '@/src/shared/service/reportService';
 import { getProfile } from '@/src/shared/service/profileService';
 import { DEFAULT_ALERT_PREFERENCES } from '@/src/shared/constants/alertCategories';
 import { useFocusEffect } from 'expo-router';
+import { getCurrentWeather, saveWeatherReading } from '@/src/shared/service/weatherService';
+import { WeatherData } from '@/src/shared/types/weather';
 
 
 function getEnabledCategories(preferences: any): string[] {
@@ -22,6 +24,7 @@ export function useMapData() {
     const [alerts, setAlerts] = useState<any[]>([]);
     const [reports, setReports] = useState<Report[]>([]);
     const [profile, setProfile] = useState<any>(null);
+    const [weather, setWeather] = useState<WeatherData | null>(null);
     const [loadingLocation, setLoadingLocation] = useState(true);
     const [permissionDenied, setPermissionDenied] = useState(false);
 
@@ -50,6 +53,24 @@ export function useMapData() {
         };
         getLocation();
     }, []);
+
+    useEffect(() => {
+
+        if (!location) return;
+        const fetchWeather = async () => {
+            try {
+                const weatherData = await getCurrentWeather(location.latitude, location.longitude);
+                if (weatherData) {
+                    
+                    setWeather(weatherData);
+                    await saveWeatherReading(weatherData);
+                }
+            } catch (error) {
+                console.error('Erro ao obter dados meteorológicos:', error);
+            }
+        };
+        fetchWeather();
+    }, [location]);
 
     useEffect(() => {
         const fetchReports = async () => {
@@ -218,6 +239,7 @@ useFocusEffect(
         alerts,
         reports,
         profile,
+        weather,
         loadingLocation,
         permissionDenied,
     };

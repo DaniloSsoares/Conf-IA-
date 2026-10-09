@@ -497,4 +497,137 @@ export default StyleSheet.create({
   bottomSpace: {
     height: 25,
   },
+
+  /* =========================
+     INFORMAÇÕES DO USUÁRIO
+  ========================= */
+
+  userTopCard: {
+    marginHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#F0F1F5',
+    shadowColor: '#172033',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+
+  userAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#4F8EF7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+
+  userAvatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+
+  userAvatarText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+
+  userMetaContainer: {
+    flex: 1,
+  },
+
+  userMetaName: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#172033',
+    marginBottom: 4,
+  },
+
+  userBadgesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+
+  badgeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F4FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+
+  badgeText: {
+    fontSize: 11,
+    color: '#3F7FC4',
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+
+  trustBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+
+  trustBadgeText: {
+    fontSize: 11,
+    color: '#D97706',
+    fontWeight: '700',
+    marginLeft: 4,
+  },
+
+  /* =========================
+     TAG DA FONTE DO CLIMA
+  ========================= */
+
+  weatherSourceTag: {
+    marginTop: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: '#E7F0FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+
+  weatherSourceText: {
+    fontSize: 10,
+    color: '#3F7FC4',
+    fontWeight: '600',
+  },
+
+  /* =========================
+     ESTADOS VAZIOS
+  ========================= */
+
+  emptyAlertCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#F0F1F5',
+  },
+
+  emptyAlertText: {
+    fontSize: 13,
+    color: '#7A8290',
+    fontWeight: '500',
+  },
 });

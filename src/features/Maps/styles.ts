@@ -114,6 +114,54 @@ export const getStyles = (theme: AppTheme) => {
       fontWeight: '600',
       color: theme.primary,
     },
+    headerRightContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+
+    /* WEATHER CARD */
+    weatherCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: theme.inputBg,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 12,
+      marginBottom: 10,
+    },
+    weatherMain: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    weatherTempText: {
+      fontSize: 14,
+      fontWeight: '700',
+      color: theme.text,
+    },
+    weatherDescText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: theme.subtext,
+      textTransform: 'capitalize',
+    },
+    weatherStats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    weatherStatItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 3,
+    },
+    weatherStatText: {
+      fontSize: 11,
+      fontWeight: '500',
+      color: theme.subtext,
+    },
 
     /* FILTERS */
     filtersRow: {
