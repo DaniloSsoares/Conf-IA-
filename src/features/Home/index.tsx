@@ -18,7 +18,7 @@ import { getActiveReports } from '@/src/shared/service/reportService';
 import { WeatherData } from '@/src/shared/types/weather';
 import { Profile } from '@/src/shared/types/profile';
 import { useAppTheme } from '@/src/shared/constants/theme';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import styles from './style';
 
 export default function DashboardScreen({ navigation }: any) {
@@ -819,7 +819,7 @@ export default function DashboardScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.actionButton}
           activeOpacity={0.88}
-          onPress={() => navigation.navigate('Report')}
+          onPress={() => router.push("/Report")}
         >
           <Ionicons name="add-circle-outline" size={22} color="#FFFFFF" />
           <Text style={styles.actionButtonText}>Reportar Novo Evento</Text>
