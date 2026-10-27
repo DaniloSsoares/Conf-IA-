@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import { haversineKm } from '@/src/shared/utils/haversine';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { Load } from '@/src/components/ui';
 import { Report } from '@/src/shared/types/report';
@@ -83,7 +83,6 @@ export default function MapScreen() {
             case 'critico':
                 return [styles.calloutRiskBadge, styles.riskBadgeHigh];
             case 'moderado':
-            case 'médio':
                 return [styles.calloutRiskBadge, styles.riskBadgeMedium];
             default:
                 return [styles.calloutRiskBadge, styles.riskBadgeLow];
@@ -96,7 +95,6 @@ export default function MapScreen() {
             case 'critico':
                 return [styles.riskBadgeText, styles.riskBadgeTextHigh];
             case 'moderado':
-            case 'médio':
                 return [styles.riskBadgeText, styles.riskBadgeTextMedium];
             default:
                 return [styles.riskBadgeText, styles.riskBadgeTextLow];
@@ -105,6 +103,27 @@ export default function MapScreen() {
 
     const raioKm = profile?.perfil_raio_notificacao_km ?? 5;
     const raioMetros = raioKm * 1000;
+
+    // Filtra só o que está dentro do raio do usuário (o Circle é apenas visual)
+    const filteredAlerts = useMemo(() => {
+        if (!location) return alerts;
+        return alerts.filter((a) => {
+            const lat = Number(a.alerta_latitude);
+            const lng = Number(a.alerta_longitude);
+            return !isNaN(lat) && !isNaN(lng)
+                && haversineKm(location.latitude, location.longitude, lat, lng) <= raioKm;
+        });
+    }, [alerts, location, raioKm]);
+
+    const filteredReports = useMemo(() => {
+        if (!location) return reports;
+        return reports.filter((r) => {
+            const lat = Number(r.reporte_latitude);
+            const lng = Number(r.reporte_longitude);
+            return !isNaN(lat) && !isNaN(lng)
+                && haversineKm(location.latitude, location.longitude, lat, lng) <= raioKm;
+        });
+    }, [reports, location, raioKm]);
 
     if (loadingLocation) {
         return (
@@ -182,7 +201,7 @@ export default function MapScreen() {
                             activeOpacity={0.8}
                         >
                             <Text style={[styles.filterChipText, filterType === 'todos' && styles.filterChipTextActive]}>
-                                Todos ({alerts.length + reports.length})
+                                Todos ({filteredAlerts.length + filteredReports.length})
                             </Text>
                         </TouchableOpacity>
 
@@ -197,7 +216,7 @@ export default function MapScreen() {
                                 color={filterType === 'alertas' ? theme.buttonText : theme.alertRed}
                             />
                             <Text style={[styles.filterChipText, filterType === 'alertas' && styles.filterChipTextActive]}>
-                                Alertas ({alerts.length})
+                                Alertas ({filteredAlerts.length})
                             </Text>
                         </TouchableOpacity>
 
@@ -212,7 +231,7 @@ export default function MapScreen() {
                                 color={filterType === 'reportes' ? theme.buttonText : theme.primary}
                             />
                             <Text style={[styles.filterChipText, filterType === 'reportes' && styles.filterChipTextActive]}>
-                                Ocorrências ({reports.length})
+                                Ocorrências ({filteredReports.length})
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -253,7 +272,7 @@ export default function MapScreen() {
                 </Marker>
 
                 
-                {showAlerts && alerts.map((alerta: any) => {
+                {showAlerts && filteredAlerts.map((alerta: any) => {
                     const category = REPORT_CATEGORIES.find(item => item.id === alerta.alerta_tipo_ocorrencia);
                     const iconName = category?.icon || alerta.icon || 'alert-circle-outline';
                     const lat = Number(alerta.alerta_latitude);
@@ -282,7 +301,7 @@ export default function MapScreen() {
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagAlerta}>Alerta Oficial</Text>
                                         <Text style={getRiskBadgeStyle(alerta.alerta_nivel_risco)}>
-                                            {alerta.alerta_nivel_risco || 'Médio'}
+                                            {alerta.alerta_nivel_risco || 'Moderado'}
                                         </Text>
                                     </View>
                                     <Text style={styles.calloutTitle} numberOfLines={1}>{alerta.alerta_titulo}</Text>
@@ -297,7 +316,7 @@ export default function MapScreen() {
                 })}
 
                
-                {showReports && reports.map((report: any) => {
+                {showReports && filteredReports.map((report: any) => {
                     const category = REPORT_CATEGORIES.find(item => item.id === report.reporte_tipo_ocorrencia);
                     const iconName = category?.icon || report.icon || 'alert-circle-outline';
                     const lat = Number(report.reporte_latitude);
@@ -321,7 +340,7 @@ export default function MapScreen() {
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagReporte}>Ocorrência</Text>
                                         <Text style={getRiskBadgeStyle(report.reporte_nivel_risco)}>
-                                            {report.reporte_nivel_risco || 'Médio'}
+                                            {report.reporte_nivel_risco || 'Moderado'}
                                         </Text>
                                     </View>
                                     <Text style={styles.calloutTitle} numberOfLines={1}>{category?.label || 'Ocorrência'}</Text>
@@ -377,7 +396,7 @@ export default function MapScreen() {
 
                     <View style={styles.previewFooter}>
                         {(() => {
-                            const riskLevelVal = selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco || 'médio';
+                            const riskLevelVal = selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco || 'moderado';
                             return (
                                 <View style={getRiskBadgeStyle(riskLevelVal)}>
                                     <Text style={getRiskTextStyle(riskLevelVal)}>

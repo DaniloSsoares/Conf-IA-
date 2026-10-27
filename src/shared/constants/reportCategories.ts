@@ -12,7 +12,7 @@ export const REPORT_CATEGORIES: ReportCategoryItem[] = [
     icon: "triangle-outline",
   },
   {
-    id: "via_bloqueada",
+    id: "bloqueio_via",
     label: "Via bloqueada",
     icon: "ban-outline",
   },

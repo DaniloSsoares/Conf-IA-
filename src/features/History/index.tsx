@@ -55,7 +55,7 @@ export default function HistoryScreen() {
   );
 
   const handleOpenNotification = async (notification: AlertNotification) => {
-    if (notification.notificacao_lida) {
+    if (!notification.notificacao_lida) {
       await markNotificationAsRead(notification.id);
       setNotifications((prev) =>
         prev.map((n) => (n.id === notification.id ? { ...n, notificacao_lida: true } : n))

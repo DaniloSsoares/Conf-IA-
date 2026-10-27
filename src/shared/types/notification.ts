@@ -1,6 +1,6 @@
 import { ReportCategory } from "./report";
 
-export type NivelRisco = 'baixo' |'moderado'| 'medio' | 'alto' | 'critico';
+export type NivelRisco = 'baixo' |'moderado'| 'alto' | 'critico';
 export type StatusAlerta = 'ativo' | 'expirado' | 'cancelado';
 
 export interface Alerta {

@@ -1,7 +1,7 @@
 export type ReportCategory =
   | 'alagamento'
   | 'deslizamento'
-  | 'via_bloqueada'
+  | 'bloqueio_via'
   | 'fogo_em_mata'
   | 'queda_de_galho'
   | 'falta_de_luz'

@@ -20,6 +20,15 @@ import { Profile } from '@/src/shared/types/profile';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { router, useFocusEffect } from 'expo-router';
 import styles from './style';
+import { NivelRisco } from '@/src/shared/types/notification';
+
+// Valores do enum nivel_risco do banco -> texto exibido na tela
+const RISK_LABEL: Record<NivelRisco, string> = {
+  baixo: 'Baixo',
+  moderado: 'Moderado',
+  alto: 'Alto',
+  critico: 'Crítico',
+};
 
 export default function DashboardScreen({ navigation }: any) {
   const { isDarkMode, theme } = useAppTheme();
@@ -37,7 +46,7 @@ export default function DashboardScreen({ navigation }: any) {
 
   // Alertas e Risco
   const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
-  const [riskLevel, setRiskLevel] = useState<'baixo' | 'médio' | 'alto' | 'crítico'>('baixo');
+  const [riskLevel, setRiskLevel] = useState<NivelRisco>('baixo');
   const [riskDescription, setRiskDescription] = useState('Situação normal. Nenhum risco relevante identificado no momento.');
 
   // Data Formatada
@@ -159,7 +168,7 @@ export default function DashboardScreen({ navigation }: any) {
             alerta_titulo: rep.reporte_tipo_ocorrencia || 'Ocorrência Comunitária',
             alerta_descricao: rep.reporte_descricao || 'Reportado por usuário próximo',
             created_at: rep.created_at,
-            alerta_nivel_risco: 'médio',
+            alerta_nivel_risco: 'moderado',
           }))
         );
       } else {
@@ -167,18 +176,18 @@ export default function DashboardScreen({ navigation }: any) {
       }
 
       // 3. Calcular Nível de Risco Dinâmico
-      const hasCritical = list.some((a) => a.alerta_nivel_risco === 'crítico');
+      const hasCritical = list.some((a) => a.alerta_nivel_risco === 'critico');
       const hasHigh = list.some((a) => a.alerta_nivel_risco === 'alto');
       const totalEvents = list.length + communityReports.length;
 
       if (hasCritical) {
-        setRiskLevel('crítico');
+        setRiskLevel('critico');
         setRiskDescription('Alerta crítico na sua região! Siga as orientações de segurança.');
       } else if (hasHigh) {
         setRiskLevel('alto');
         setRiskDescription('Atenção elevada. Risco de chuva forte ou alagamento detectado.');
       } else if (totalEvents > 0) {
-        setRiskLevel('médio');
+        setRiskLevel('moderado');
         setRiskDescription('Risco moderado. Ocorrências ativas registradas na região.');
       } else {
         setRiskLevel('baixo');
@@ -201,11 +210,11 @@ export default function DashboardScreen({ navigation }: any) {
   // Cores adaptativas de Risco (Modo Claro vs Modo Escuro)
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'crítico':
+      case 'critico':
         return isDarkMode ? '#FF6B81' : '#E11D48';
       case 'alto':
         return isDarkMode ? '#FF9D5C' : '#F97316';
-      case 'médio':
+      case 'moderado':
         return isDarkMode ? '#FBBF24' : '#F59E0B';
       case 'baixo':
       default:
@@ -215,11 +224,11 @@ export default function DashboardScreen({ navigation }: any) {
 
   const getRiskBgColor = (level: string) => {
     switch (level) {
-      case 'crítico':
+      case 'critico':
         return isDarkMode ? 'rgba(225, 29, 72, 0.22)' : '#FFE4E6';
       case 'alto':
         return isDarkMode ? 'rgba(249, 115, 22, 0.22)' : '#FFEDD5';
-      case 'médio':
+      case 'moderado':
         return isDarkMode ? 'rgba(245, 158, 11, 0.22)' : '#FEF3C7';
       case 'baixo':
       default:
@@ -505,7 +514,7 @@ export default function DashboardScreen({ navigation }: any) {
               </Text>
 
               <Text style={[styles.riskLevel, { color: riskColor }]}>
-                {riskLevel.toUpperCase()}
+                {RISK_LABEL[riskLevel].toUpperCase()}
               </Text>
             </View>
 
@@ -514,7 +523,7 @@ export default function DashboardScreen({ navigation }: any) {
                 name={
                   riskLevel === 'baixo'
                     ? 'checkmark-circle'
-                    : riskLevel === 'médio'
+                    : riskLevel === 'moderado'
                     ? 'warning'
                     : 'alert-circle'
                 }
