@@ -149,15 +149,15 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 
 **Arquivos:** `reportService.ts` + `ViewHistory/index.tsx` + `ViewHistory/styles.ts`
 
-- [ ] `voteReport(reportId, userId, voto: 'confirma' | 'contesta', comentario?)` com `upsert` e `onConflict: 'reporte_id,perfil_id'` (a constraint UNIQUE já existe)
-- [ ] Tipo `TipoValidacao = 'confirma' | 'contesta'` em `src/shared/types/report.ts`
-- [ ] `getMyVote(reportId, userId)`, para mostrar qual botão o usuário já escolheu
-- [ ] Os botões aparecem só quando `!isOwner`
-- [ ] Destacar o botão do voto atual; permitir trocar o voto
-- [ ] Desabilitar enquanto a requisição está em andamento (evita clique duplo)
-- [ ] Depois de votar, buscar o reporte de novo e atualizar score e status
-- [ ] Mostrar o score como barra de progresso (melhoria C do plano anterior, esforço baixo e bom visualmente)
-- [ ] Toast de sucesso ou erro
+- [x] `voteReport(reportId, userId, voto: 'confirma' | 'contesta', comentario?)` com `upsert` e `onConflict: 'reporte_id,perfil_id'` (a constraint UNIQUE já existe)
+- [x] Tipo `TipoValidacao = 'confirma' | 'contesta'` em `src/shared/types/report.ts`
+- [x] `getMyVote(reportId, userId)`, para mostrar qual botão o usuário já escolheu
+- [x] Os botões aparecem só quando `!isOwner`
+- [x] Destacar o botão do voto atual; permitir trocar o voto
+- [x] Desabilitar enquanto a requisição está em andamento (evita clique duplo)
+- [x] Depois de votar, buscar o reporte de novo e atualizar score e status
+- [x] Mostrar o score como barra de progresso (melhoria C do plano anterior, esforço baixo e bom visualmente)
+- [x] Toast de sucesso ou erro
 
 ### 1.7 🟡 Comentários nos reportes (se sobrar tempo nesta semana)
 

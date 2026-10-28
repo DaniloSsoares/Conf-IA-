@@ -66,3 +66,5 @@ export interface ReportCategoryItem {
   icon: string;
   fullWidth?: boolean;
 }
+
+export type TipoValidacao = 'confirma'|'contesta';

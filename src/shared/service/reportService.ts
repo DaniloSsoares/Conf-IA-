@@ -1,21 +1,27 @@
 import { supabaseConfig } from "@/src/config/supabase";
 import { decode } from "base64-arraybuffer";
-import { CreateReportInput, Report, UpdateReportInput } from "../types/report";
+import {
+  CreateReportInput,
+  Report,
+  TipoValidacao,
+  UpdateReportInput,
+} from "../types/report";
 
 export async function uploadReportPhoto(
   userId: string,
   base64: string,
-  fileExt: string = "jpg"
+  fileExt: string = "jpg",
 ): Promise<string | null> {
   try {
     const fileName = `${userId}/${Date.now()}.${fileExt}`;
 
-    const { data: storageData, error: storageError } = await supabaseConfig.storage
-      .from("fotos-ocorrencia")
-      .upload(fileName, decode(base64), {
-        contentType: `image/${fileExt === "png" ? "png" : "jpeg"}`,
-        upsert: true,
-      });
+    const { data: storageData, error: storageError } =
+      await supabaseConfig.storage
+        .from("fotos-ocorrencia")
+        .upload(fileName, decode(base64), {
+          contentType: `image/${fileExt === "png" ? "png" : "jpeg"}`,
+          upsert: true,
+        });
 
     if (storageError) {
       console.error("Erro no upload da foto do reporte:", storageError);
@@ -35,11 +41,11 @@ export async function uploadReportPhoto(
 
 export async function createReport(
   userId: string,
-  input: CreateReportInput
+  input: CreateReportInput,
 ): Promise<{ data: Report | null; error: any }> {
   try {
     const { data: reportData, error: reportError } = await supabaseConfig
-      .from('reportes')
+      .from("reportes")
       .insert({
         perfil_id: userId,
         reporte_tipo_ocorrencia: input.reporte_tipo_ocorrencia,
@@ -52,11 +58,16 @@ export async function createReport(
       .single();
     if (reportError) {
       return {
-        data: null, error: reportError
+        data: null,
+        error: reportError,
       };
     }
     if (input.fotoBase64) {
-      const photoUrl = await uploadReportPhoto(userId, input.fotoBase64, input.fotoExt);
+      const photoUrl = await uploadReportPhoto(
+        userId,
+        input.fotoBase64,
+        input.fotoExt,
+      );
 
       if (photoUrl) {
         const { error: midiaError } = await supabaseConfig
@@ -68,7 +79,10 @@ export async function createReport(
           });
 
         if (midiaError) {
-          console.error("Reporte criado, mas falhou ao salvar a foto:", midiaError);
+          console.error(
+            "Reporte criado, mas falhou ao salvar a foto:",
+            midiaError,
+          );
         }
       }
     }
@@ -81,7 +95,7 @@ export async function createReport(
 export async function updateReport(
   reportId: string,
   userId: string,
-  input: UpdateReportInput
+  input: UpdateReportInput,
 ): Promise<{ data: Report | null; error: any }> {
   try {
     const updatePayload: Record<string, any> = {
@@ -105,9 +119,9 @@ export async function updateReport(
     }
 
     const { data: updatedReport, error: updateError } = await supabaseConfig
-      .from('reportes')
+      .from("reportes")
       .update(updatePayload)
-      .eq('id', reportId)
+      .eq("id", reportId)
       .select()
       .single();
 
@@ -117,34 +131,38 @@ export async function updateReport(
 
     if (input.removeFoto) {
       const { error: deleteMediaError } = await supabaseConfig
-        .from('reporte_midias')
+        .from("reporte_midias")
         .delete()
-        .eq('reporte_id', reportId);
+        .eq("reporte_id", reportId);
 
       if (deleteMediaError) {
-        console.error('Erro ao remover mídia do reporte:', deleteMediaError);
+        console.error("Erro ao remover mídia do reporte:", deleteMediaError);
       }
     }
 
     if (input.fotoBase64) {
-      const photoUrl = await uploadReportPhoto(userId, input.fotoBase64, input.fotoExt || 'jpg');
+      const photoUrl = await uploadReportPhoto(
+        userId,
+        input.fotoBase64,
+        input.fotoExt || "jpg",
+      );
 
       if (photoUrl) {
         await supabaseConfig
-          .from('reporte_midias')
+          .from("reporte_midias")
           .delete()
-          .eq('reporte_id', reportId);
+          .eq("reporte_id", reportId);
 
         const { error: midiaError } = await supabaseConfig
-          .from('reporte_midias')
+          .from("reporte_midias")
           .insert({
             reporte_id: reportId,
             midia_url: photoUrl,
-            midia_tipo: 'foto',
+            midia_tipo: "foto",
           });
 
         if (midiaError) {
-          console.error('Falhou ao salvar a nova foto:', midiaError);
+          console.error("Falhou ao salvar a nova foto:", midiaError);
         }
       }
     }
@@ -156,22 +174,22 @@ export async function updateReport(
 }
 
 export async function deleteReport(
-  reportId: string
+  reportId: string,
 ): Promise<{ success: boolean; error: any }> {
   try {
     const { error: mediaError } = await supabaseConfig
-      .from('reporte_midias')
+      .from("reporte_midias")
       .delete()
-      .eq('reporte_id', reportId);
+      .eq("reporte_id", reportId);
 
     if (mediaError) {
-      console.error('Erro ao excluir mídias do reporte:', mediaError);
+      console.error("Erro ao excluir mídias do reporte:", mediaError);
     }
 
     const { error: reportError } = await supabaseConfig
-      .from('reportes')
+      .from("reportes")
       .delete()
-      .eq('id', reportId);
+      .eq("id", reportId);
 
     if (reportError) {
       return { success: false, error: reportError };
@@ -185,7 +203,7 @@ export async function deleteReport(
 
 export async function getUserReports(userId: string): Promise<Report[]> {
   try {
-     const { data, error } = await supabaseConfig
+    const { data, error } = await supabaseConfig
       .from("reportes")
       .select("*, reporte_midias(*)")
       .eq("perfil_id", userId)
@@ -228,3 +246,29 @@ export async function getReportById(reportId: string): Promise<Report | null> {
   }
 }
 
+export async function voteReport(
+  reportId: string,
+  userId: string,
+  voto: TipoValidacao,
+): Promise<{ error: any }> {
+  const { error } = await supabaseConfig
+    .from("reporte_validacoes")
+    .upsert(
+      { reporte_id: reportId, perfil_id: userId, validacao_tipo: voto },
+      { onConflict: "reporte_id,perfil_id" },
+    );
+  return { error };
+  }
+
+  export async function getMyVote(
+    reportId: string,
+    userId: string,
+  ): Promise<TipoValidacao | null> {
+    const { data } = await supabaseConfig
+      .from("reporte_validacoes")
+      .select("validacao_tipo")
+      .eq("reporte_id", reportId)
+      .eq("perfil_id", userId)
+      .maybeSingle();
+    return (data?.validacao_tipo as TipoValidacao) ?? null;
+}

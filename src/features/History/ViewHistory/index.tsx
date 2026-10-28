@@ -6,10 +6,12 @@ import { router, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-ro
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { getStatusStyle, getRiskStyle, getCategoryMeta } from '@/src/shared/constants/historyStatus';
 import { supabaseConfig } from '@/src/config/supabase';
-import { getReportById } from '@/src/shared/service/reportService';
+import { getMyVote, getReportById, voteReport } from '@/src/shared/service/reportService';
 import { getAlertaById } from '@/src/shared/service/alertaNotificationService';
 import { Load } from '@/src/components/ui';
 import { getStyles } from './styles';
+import { TipoValidacao } from '@/src/shared/types/report';
+import Toast from 'react-native-toast-message';
 
 type ParamType = 'alerta' | 'reporte';
 
@@ -26,12 +28,13 @@ export default function ViewHistoryScreen() {
   const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
   const router = useRouter();
-  // `data` é só fallback: mostra algo na hora enquanto a versão do banco não chega
   const { type, id, data } = useLocalSearchParams<{ type: ParamType; id?: string; data?: string }>();
 
   const [parsed, setParsed] = useState<any>(() => parseData(data));
   const [loading, setLoading] = useState(true);
   const [currentUseId, setCurrentUserId] = useState<string>('');
+  const [myVote, setMyVote]= useState<TipoValidacao | null>(null);
+  const [voting, setVoting] = useState(false);
 
   const itemId = id ?? parsed?.id;
 
@@ -41,9 +44,14 @@ export default function ViewHistoryScreen() {
       return;
     }
     const result = type === 'alerta' ? await getAlertaById(itemId) : await getReportById(itemId);
+
+      if(type === "reporte"&& currentUseId){
+        setMyVote(await getMyVote(itemId, currentUseId));
+      }
+
     if (result) setParsed(result);
     setLoading(false);
-  }, [type, itemId]);
+  }, [type, itemId, currentUseId]);
 
   // Recarrega ao focar: cobre a volta da tela de edição e, depois, o voto
   useFocusEffect(
@@ -51,6 +59,21 @@ export default function ViewHistoryScreen() {
       load();
     }, [load])
   );
+
+  const handleVote = async(voto: TipoValidacao)=> {
+    if(voting || voto === myVote)return;
+      setVoting(true);
+      const {error}= await voteReport(parsed.id, currentUseId,voto);
+      setVoting(false);
+
+      if(error){
+        Toast.show({type:'error', text1:'Não foi possivel registrar seu voto'});
+        return
+      }
+        Toast.show({ type: 'success', text1: voto === 'confirma' ? 'Ocorrência confirmada' : 'Ocorrência contestada' });
+         load();   // busca score e status recalculados pelo trigger
+      };
+  
 
   const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
 
@@ -107,7 +130,7 @@ export default function ViewHistoryScreen() {
         {isAlerta ? (
           <AlertaContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} />
         ) : (
-          <ReporteContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} isOwner={isOwner} />
+          <ReporteContent parsed={parsed} meta={meta} theme={theme} styles={styles} isDarkMode={isDarkMode} isOwner={isOwner} myVote={myVote} voting={voting} onVote={handleVote} />
         )}
       </ScrollView>
     </LinearGradient>
@@ -168,7 +191,7 @@ function AlertaContent({ parsed, meta, theme, styles, isDarkMode }: any) {
   );
 }
 
-function ReporteContent({ parsed, meta, theme, styles, isDarkMode, isOwner }: any) {
+function ReporteContent({ parsed, meta, theme, styles, isDarkMode, isOwner,myVote, voting, onVote }: any) {
   const statusStyle = getStatusStyle(parsed.reporte_status, theme);
   const photoUrl = parsed.reporte_midias?.[0]?.midia_url;
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#0047FF");
@@ -214,7 +237,8 @@ function ReporteContent({ parsed, meta, theme, styles, isDarkMode, isOwner }: an
         ) : null}
         <MetaRow
           label="Score de confiança"
-          value={String(parsed.reporte_score_confianca ?? 0)}
+          // banco guarda fração 0.00–1.00 (numeric chega como texto, por isso o Number)
+          value={`${Math.round(Number(parsed.reporte_score_confianca ?? 0) * 100)}%`}
           styles={styles}
         />
         <Divider styles={styles} />
@@ -225,12 +249,37 @@ function ReporteContent({ parsed, meta, theme, styles, isDarkMode, isOwner }: an
         />
       </View>
 
-      {isOwner && (
-        <TouchableOpacity style={styles.editButton} onPress={() => {handleEdit()}}>
-          <Ionicons name="create-outline" size={20} color={theme.primary || '#3AA77A'} />
-          <Text style={styles.editButtonText}>Editar Reporte</Text>
-        </TouchableOpacity>
-      )}
+     {isOwner && (
+       <TouchableOpacity style={styles.editButton} onPress={() => {handleEdit()}}>
+         <Ionicons name="create-outline" size={20} color={theme.primary || '#3AA77A'} />
+         <Text style={styles.editButtonText}>Editar Reporte</Text>
+       </TouchableOpacity>
+     )}
+
+      {!isOwner && parsed.reporte_status !== 'resolvido' && (
+     <>
+       <Text style={styles.sectionTitle}>Essa ocorrência é real?</Text>
+        <View style={styles.voteRow}>
+         <TouchableOpacity
+        style={[styles.voteButton, myVote === 'confirma' && styles.voteConfirmActive]}
+        onPress={() => onVote('confirma')}
+        disabled={voting}
+      >
+        <Ionicons name="checkmark-circle" size={20} color="#10B981" />
+        <Text style={styles.voteText}>Confirmar</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.voteButton, myVote === 'contesta' && styles.voteContestActive]}
+        onPress={() => onVote('contesta')}
+        disabled={voting}
+      >
+        <Ionicons name="close-circle" size={20} color="#EF4444" />
+        <Text style={styles.voteText}>Contestar</Text>
+      </TouchableOpacity>
+    </View>
+  </>
+)}
     </>
   );
 }
