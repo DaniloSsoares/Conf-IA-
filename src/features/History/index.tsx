@@ -64,7 +64,7 @@ export default function HistoryScreen() {
     router.push({
       pathname: '/(screens)/ViewHistory',
       params: {
-        type: 'alerta', data: JSON.stringify(notification.alertas)
+        type: 'alerta', id: notification.alerta_id
       }
     });
   }
@@ -181,7 +181,7 @@ export default function HistoryScreen() {
                 <TouchableOpacity
                   key={report.id}
                   style={[styles.card, { borderLeftColor: statusStyle.border }]}
-                  onPress={() => { router.push({ pathname: '/(screens)/ViewHistory', params: { type: 'reporte', data: JSON.stringify(report) } }) }}
+                  onPress={() => { router.push({ pathname: '/(screens)/ViewHistory', params: { type: 'reporte', id: report.id } }) }}
                   activeOpacity={0.7}
                 >
                   <View style={styles.cardHeader}>

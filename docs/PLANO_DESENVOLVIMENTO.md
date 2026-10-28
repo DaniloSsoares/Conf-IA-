@@ -98,9 +98,9 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 
 **Problema:** não existe pasta `supabase/` no repositório. Tabelas, RLS e triggers estão só no dashboard, então ninguém consegue reproduzir o banco a partir do código.
 
-- [ ] Criar `supabase/migrations/`
-- [ ] Exportar o schema atual (Dashboard → Database → ou `supabase db dump` com a CLI) para `supabase/migrations/0001_schema_inicial.sql`
-- [ ] Cada mudança nova vira um arquivo numerado (`0002_validacoes.sql`, `0003_protecao_colunas.sql`, …)
+- [x] Criar `supabase/migrations/`
+- [x] Exportar o schema atual (Dashboard → Database → ou `supabase db dump` com a CLI) para `supabase/migrations/0001_schema_inicial.sql`
+- [x] Cada mudança nova vira um arquivo numerado (`0002_validacoes.sql`, `0003_protecao_colunas.sql`, …)
 
 ### 1.2 🔴 Completar a RLS de `reporte_validacoes`
 
@@ -108,7 +108,7 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 
 **Problema:** não há policy de **UPDATE** nem de **DELETE**. O `upsert` usado para trocar o voto vai falhar por RLS, e o usuário não consegue retirar o voto.
 
-- [ ] Criar as policies de UPDATE e DELETE ([Anexo A.2](#a2-policies-que-faltam-em-reporte_validacoes))
+- [x] Criar as policies de UPDATE e DELETE ([Anexo A.2](#a2-policies-que-faltam-em-reporte_validacoes))
 
 ### 1.3 🔴 Trigger de score (corrigido)
 
@@ -126,8 +126,8 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 - **Confirmado:** a policy `reportes_updates_own` deixa o dono editar a linha inteira. Ele consegue mudar `reporte_score_confianca` e `reporte_status` do próprio reporte, ou seja, se autovalidar. O mesmo vale para `perfil_trust_score` (policy de UPDATE do próprio perfil)
 
 **Fazer:**
-- [ ] Remover `perfil_trust_score` do `Pick` em `updateProfile`
-- [ ] Criar triggers `BEFORE INSERT/UPDATE` que ignoram esses campos quando vêm do cliente ([Anexo A.4](#a4-proteção-de-colunas-sensíveis))
+- [x] Remover `perfil_trust_score` do `Pick` em `updateProfile`
+- [x] Criar triggers `BEFORE INSERT/UPDATE` que ignoram esses campos quando vêm do cliente ([Anexo A.4](#a4-proteção-de-colunas-sensíveis))
 - [ ] Testar pelo app ou pelo SQL Editor com usuário autenticado ([Anexo B](#anexo-b--testes-manuais-com-duas-contas))
 
 ### 1.5 🟡 `ViewHistory` buscando dados pelo `id`
@@ -140,10 +140,10 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 - os dados podem estar velhos
 
 **Fazer:**
-- [ ] Criar `getReportById(id)` em `reportService.ts` com `select("*, reporte_midias(*)")`
-- [ ] Navegar passando só `{ type, id }` (Mapa e Histórico)
-- [ ] O `ViewHistory` busca o reporte ao montar e mostra um loading enquanto isso
-- [ ] Manter o `data` nos params só como fallback, durante a transição
+- [x] Criar `getReportById(id)` em `reportService.ts` com `select("*, reporte_midias(*)")`
+- [x] Navegar passando só `{ type, id }` (Mapa e Histórico)
+- [x] O `ViewHistory` busca o reporte ao montar e mostra um loading enquanto isso
+- [x] Manter o `data` nos params só como fallback, durante a transição
 
 ### 1.6 🔴 Botões Confirmar / Contestar
 
@@ -408,7 +408,8 @@ BEGIN
 
   -- updated_at é preenchido pelo trg_reportes_updated que já existe
   UPDATE reportes SET
-    reporte_score_confianca = ROUND(v_taxa * 100),
+    -- coluna é numeric(4,2): guarda a fração 0.00–1.00 (100 estouraria o tipo)
+    reporte_score_confianca = ROUND(v_taxa, 2),
     reporte_status = CASE
       WHEN reporte_status = 'resolvido'             THEN 'resolvido'::status_reporte
       WHEN v_total >= v_min_votos AND v_taxa >= 0.7 THEN 'validado'::status_reporte
@@ -462,7 +463,7 @@ CREATE OR REPLACE FUNCTION public.protect_perfil_trust_score()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
-    NEW.perfil_trust_score := 50;  -- ajustar para o valor inicial definido no projeto
+    NEW.perfil_trust_score := 0;  -- igual ao DEFAULT da coluna (conferido no dump)
   ELSIF pg_trigger_depth() = 1 THEN
     NEW.perfil_trust_score := OLD.perfil_trust_score;
   END IF;
@@ -476,7 +477,7 @@ BEFORE INSERT OR UPDATE ON public.perfil
 FOR EACH ROW EXECUTE FUNCTION public.protect_perfil_trust_score();
 ```
 
-> ⚠️ O valor `50` precisa ser igual ao `DEFAULT` da coluna `perfil_trust_score`. Confira no Table Editor antes de rodar.
+> O valor `0` é o `DEFAULT` da coluna `perfil_trust_score` (conferido em `supabase/migrations/20261028023004_remote_schema.sql`).
 > Os triggers `BEFORE` rodam em ordem alfabética: `trg_protect_reporte` roda antes de `trg_reportes_updated`, o que é o comportamento desejado.
 
 ### A.5 LGPD: perfil visível para todos

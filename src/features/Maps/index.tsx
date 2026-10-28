@@ -37,20 +37,14 @@ export default function MapScreen() {
     const handleOpenAlerta = (alerta: any) => {
         router.push({
             pathname: '/(screens)/ViewHistory',
-            params: {
-                type: 'alerta',
-                data: JSON.stringify(alerta),
-            },
+            params: { type: 'alerta', id: alerta.id }
         });
     };
 
     const handleOpenReport = (report: Report) => {
         router.push({
             pathname: '/(screens)/ViewHistory',
-            params: {
-                type: 'reporte',
-                data: JSON.stringify(report),
-            },
+            params: { type: 'reporte', id: report.id }
         });
     };
 

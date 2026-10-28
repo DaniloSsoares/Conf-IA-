@@ -1,24 +1,58 @@
-import React ,{useEffect,useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams, useRouter } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { getStatusStyle, getRiskStyle, getCategoryMeta } from '@/src/shared/constants/historyStatus';
 import { supabaseConfig } from '@/src/config/supabase';
+import { getReportById } from '@/src/shared/service/reportService';
+import { getAlertaById } from '@/src/shared/service/alertaNotificationService';
+import { Load } from '@/src/components/ui';
 import { getStyles } from './styles';
 
 type ParamType = 'alerta' | 'reporte';
+
+function parseData(data?: string) {
+  if (!data) return null;
+  try {
+    return JSON.parse(data);
+  } catch {
+    return null;
+  }
+}
 
 export default function ViewHistoryScreen() {
   const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
   const router = useRouter();
-  const { type, data } = useLocalSearchParams<{ type: ParamType; data: string }>();
+  // `data` é só fallback: mostra algo na hora enquanto a versão do banco não chega
+  const { type, id, data } = useLocalSearchParams<{ type: ParamType; id?: string; data?: string }>();
+
+  const [parsed, setParsed] = useState<any>(() => parseData(data));
+  const [loading, setLoading] = useState(true);
+  const [currentUseId, setCurrentUserId] = useState<string>('');
+
+  const itemId = id ?? parsed?.id;
+
+  const load = useCallback(async () => {
+    if (!itemId) {
+      setLoading(false);
+      return;
+    }
+    const result = type === 'alerta' ? await getAlertaById(itemId) : await getReportById(itemId);
+    if (result) setParsed(result);
+    setLoading(false);
+  }, [type, itemId]);
+
+  // Recarrega ao focar: cobre a volta da tela de edição e, depois, o voto
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
-  const parsed = data ? JSON.parse(data) : null;
-  const [currentUseId, setCurrentUserId] = useState<string>('');
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -28,6 +62,15 @@ export default function ViewHistoryScreen() {
     fetchUserId();
   }, []);
   const isOwner =  Boolean(currentUseId && parsed?.perfil_id === currentUseId);
+
+  if (loading && !parsed) {
+    return (
+      <LinearGradient colors={theme.primaryGradient} style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+        <Load />
+      </LinearGradient>
+    );
+  }
 
   if (!parsed) {
     return (

@@ -34,7 +34,6 @@ export async function updateProfile(
       | "perfil_preferencias_alertas"
       | "perfil_latitude"
       | "perfil_longitude"
-      | "perfil_trust_score"
     >
   >
 ) {

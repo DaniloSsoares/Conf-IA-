@@ -1,5 +1,21 @@
 import { supabaseConfig } from "../../config/supabase";
-import { AlertNotification } from "../types/notification";
+import { Alerta, AlertNotification } from "../types/notification";
+
+export async function getAlertaById(alertaId: string): Promise<Alerta | null> {
+  try {
+    const { data, error } = await supabaseConfig
+      .from("alertas")
+      .select("*")
+      .eq("id", alertaId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return (data as Alerta) || null;
+  } catch (error) {
+    console.error("Erro ao buscar alerta:", error);
+    return null;
+  }
+}
 
 export async function getUserNotifications(userId: string): Promise<AlertNotification[]> {
   try {

@@ -212,3 +212,19 @@ export async function getActiveReports(): Promise<Report[]> {
   }
 }
 
+export async function getReportById(reportId: string): Promise<Report | null> {
+  try {
+    const { data, error } = await supabaseConfig
+      .from("reportes")
+      .select("*, reporte_midias(*)")
+      .eq("id", reportId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return (data as Report) || null;
+  } catch (error) {
+    console.error("Erro ao buscar reporte:", error);
+    return null;
+  }
+}
+
