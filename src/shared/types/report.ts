@@ -70,10 +70,15 @@ export interface ReportCategoryItem {
 export type TipoValidacao = 'confirma'|'contesta';
 
 export interface ReportValidation {
+  id:string;
   perfil_id: string;
   validacao_tipo: TipoValidacao;
   validacao_comentario: string | null;
   created_at: string;
+}
+
+export interface ReportComment extends ReportValidation{
+autor_nome: string | null;
 }
 
 // Mesmo valor de v_min_votos no trigger recalculate_reporte_score

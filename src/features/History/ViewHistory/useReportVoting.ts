@@ -7,7 +7,7 @@ import {
   getReportValidations,
   voteReport,
 } from '@/src/shared/service/reportService';
-import { ReportValidation, TipoValidacao } from '@/src/shared/types/report';
+import { ReportComment, TipoValidacao } from '@/src/shared/types/report';
 import { validateComent } from '@/src/shared/yup';
 
 // Mesmo voto e mesmo comentário: nada mudou, não precisa enviar
@@ -37,7 +37,7 @@ export function useReportVoting(
 ) {
   const [myVote, setMyVote] = useState<TipoValidacao | null>(null);
   const [myComment, setMyComment] = useState('');
-  const [validacoes, setValidacoes] = useState<ReportValidation[]>([]);
+  const [validacoes, setValidacoes] = useState<ReportComment[]>([]);
   const [sending, setSending] = useState(false);
 
   const [comentario, setComentarioState] = useState('');

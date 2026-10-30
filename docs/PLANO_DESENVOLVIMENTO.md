@@ -179,8 +179,8 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 - [x] Contador "X de 3 votos necessários" perto do score: explica por que o status continua "pendente" com 100%
 
 **Depois:**
-- [ ] Nome do autor via `perfil_publico` ([Anexo A.5](#a5-lgpd-perfil-visível-para-todos))
-- [ ] Pós-MVP: tabela `reporte_comentarios` separada, se quiserem comentários sem voto
+- [x] Nome do autor via `perfil_publico` ([Anexo A.5](#a5-lgpd-perfil-visível-para-todos))
+- [X] Pós-MVP: tabela `reporte_comentarios` separada, se quiserem comentários sem voto
 
 ### 1.8 🟡 Moderação de fotos e comentários (pergunta dos professores)
 
@@ -550,15 +550,39 @@ DROP POLICY IF EXISTS "usuario edita o proprio perfil" ON public.perfil;
 --       "Usuarios podem inserir seu próprio perfil" (INSERT)
 
 -- 2. View só com dados não sensíveis, para mostrar autor de voto/comentário
+--    Só o primeiro nome sai do banco (minimização de dados, LGPD)
 CREATE OR REPLACE VIEW public.perfil_publico AS
-  SELECT id, perfil_nome_completo, perfil_avatar_url
+  SELECT
+    id,
+    split_part(perfil_nome_completo, ' ', 1) AS primeiro_nome,
+    perfil_avatar_url
   FROM public.perfil;
 
-REVOKE ALL ON public.perfil_publico FROM anon;
+-- O Supabase dá ALL (inclusive UPDATE/DELETE) em tudo que é criado no schema public.
+-- A view é "auto-atualizável" e roda como o dono (ignora a RLS de perfil): sem este
+-- REVOKE, qualquer usuário logado conseguiria alterar o perfil de outro pela view.
+REVOKE ALL ON public.perfil_publico FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.perfil_publico TO authenticated;
 ```
 
-> A view roda com permissão do dono (padrão do Postgres), então ignora a RLS de `perfil`, mas só expõe as 3 colunas acima.
+**Conferir as permissões** (deve aparecer só `SELECT` para `authenticated`, além de `postgres`/`service_role`):
+```sql
+SELECT grantee, privilege_type
+FROM information_schema.role_table_grants
+WHERE table_name = 'perfil_publico'
+ORDER BY grantee;
+```
+
+**Teste de invasão** (roda como usuário logado e desfaz tudo no final):
+```sql
+BEGIN;
+SET LOCAL ROLE authenticated;
+UPDATE public.perfil_publico SET perfil_avatar_url = 'hack' WHERE true;
+-- esperado: ERROR: permission denied for view perfil_publico
+ROLLBACK;
+```
+
+> A view roda com permissão do dono (padrão do Postgres), então ignora a RLS de `perfil`. Isso é intencional para a **leitura** (só 3 colunas inofensivas), e é exatamente por isso que a **escrita** precisa ser bloqueada pelo `REVOKE`.
 
 ### A.6 Restringir leitura a usuários logados
 

@@ -3,6 +3,7 @@ import { decode } from "base64-arraybuffer";
 import {
   CreateReportInput,
   Report,
+  ReportComment,
   ReportValidation,
   TipoValidacao,
   UpdateReportInput,
@@ -287,13 +288,10 @@ export async function getMyValidation(
   return (data as ReportValidation) ?? null;
 }
 
-export async function getReportValidations(
-  reportId: string,
-): Promise<ReportValidation[]> {
-  // Sem nome do autor por enquanto: o nome virá da view perfil_publico (Anexo A.5)
-  const { data, error } = await supabaseConfig
+export async function getReportValidations(reportId: string): Promise<ReportComment[]> {
+  const { data: votos, error } = await supabaseConfig
     .from("reporte_validacoes")
-    .select("perfil_id, validacao_tipo, validacao_comentario, created_at")
+    .select("id,perfil_id, validacao_tipo, validacao_comentario, created_at")
     .eq("reporte_id", reportId)
     .order("created_at", { ascending: false });
 
@@ -301,5 +299,33 @@ export async function getReportValidations(
     console.error("Erro ao buscar votos do reporte:", error);
     return [];
   }
-  return (data as ReportValidation[]) || [];
+  const idsAutores = [
+  ...new Set(
+     votos
+      .filter((v) => v.validacao_comentario)   
+      .map((v) => v.perfil_id)
+  ),
+];
+
+ let autores: { id: string; primeiro_nome: string | null }[] = [];
+
+  if (idsAutores.length > 0) {
+    const { data: perfis, error: perfisError } = await supabaseConfig
+      .from("perfil_publico")
+      .select("id, primeiro_nome")
+      .in("id", idsAutores);
+
+    if (perfisError) {
+      console.warn("Erro ao buscar nomes dos autores:", perfisError);
+    } else {
+      autores = perfis ?? [];
+    }
+  }
+
+  const nomePorId = new Map(autores.map((a) => [a.id, a.primeiro_nome]));
+
+  return votos.map((v) => ({
+    ...(v as ReportValidation),
+    autor_nome: nomePorId.get(v.perfil_id) ?? null,
+  }));
 }
