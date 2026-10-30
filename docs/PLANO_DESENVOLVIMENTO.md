@@ -200,8 +200,8 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 | 8. Moderador humano | Papel de admin / Defesa Civil para revisar o que foi ocultado | ⚪ Pós-MVP |
 
 **Fazer agora (~3h no total):**
-- [ ] Reporte novo: remover a opção de galeria em [src/features/Report/index.tsx](../src/features/Report/index.tsx) (`launchImageLibraryAsync`, linha ~193) e deixar só a câmera. Na edição ([useEditReport.ts](../src/features/History/EditReport/useEditReport.ts)), decidir se mantém a galeria (o dono pode querer trocar uma foto ruim)
-- [ ] Limite de 5 reportes por hora: trigger no banco ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação)). Mostrar um toast amigável quando o erro voltar
+- [x] Reporte novo: remover a opção de galeria em [src/features/Report/index.tsx](../src/features/Report/index.tsx) (`launchImageLibraryAsync`, linha ~193) e deixar só a câmera. Na edição ([useEditReport.ts](../src/features/History/EditReport/useEditReport.ts)), decidir se mantém a galeria (o dono pode querer trocar uma foto ruim)
+- [x] Limite de 5 reportes por hora: trigger no banco ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação)). Mostrar um toast amigável quando o erro voltar
 - [ ] Tabela `denuncias` + trigger que oculta após 3 denúncias ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação))
 - [ ] Botão "Denunciar" no `ViewHistory` (reporte e cada comentário), com motivo: foto inadequada, comentário ofensivo, informação falsa, spam, outro
 - [ ] Filtrar o que foi ocultado: `getActiveReports` com `.eq('reporte_oculto', false)`, e a lista de comentários com `.eq('validacao_oculta', false)`

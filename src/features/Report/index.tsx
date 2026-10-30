@@ -28,6 +28,7 @@ import { supabaseConfig } from '@/src/config/supabase';
 import ButtonBack from '@/src/components/ui/ButtonBack';
 import { takePhoto } from '@/src/shared/utils/photoPicker';
 import { SelectedPhoto } from '@/src/shared/types/photo';
+import { getErrorMessage } from '@/src/shared/utils/supabaseErrors';
 
 export default function ReportScreen() {
   const { theme, isDarkMode } = useAppTheme();
@@ -42,7 +43,6 @@ export default function ReportScreen() {
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
-  const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
 
   // Capturar Localização
   const handleCaptureLocation = async () => {
@@ -168,10 +168,11 @@ export default function ReportScreen() {
       });
 
       if (error) {
+        console.error('Erro ao criar reporte:', error);   
         Toast.show({
           type: 'error',
           text1: 'Erro ao enviar reporte',
-          text2: error.message || 'Ocorreu um erro ao salvar o reporte.',
+          text2: getErrorMessage(error, 'Ocorreu um erro ao salvar o reporte'),
         });
         return;
       }
@@ -365,27 +366,6 @@ export default function ReportScreen() {
         description={`1. Selecione a categoria da ocorrência.\n2. Capture sua localização precisa via GPS.\n3. Se desejar, adicione uma descrição e foto.\n4. Envie para que outros usuários fiquem alertas em tempo real.`}
         buttonText='Entendi'
       />
-
-      {/* Modal de Foto (Câmera / Galeria) */}
-      <Modal visible={photoModalVisible} transparent animationType="slide" onRequestClose={() => setPhotoModalVisible(false)}>
-        <TouchableOpacity style={styles.photoModalOverlay} activeOpacity={1} onPress={() => setPhotoModalVisible(false)}>
-          <View style={styles.photoModalContent}>
-            <Text style={styles.photoModalTitle}>Adicionar foto</Text>
-            <TouchableOpacity style={styles.photoOptionButton}
-             onPress={async () => {
-              const foto = await takePhoto();
-              if(foto) setPhoto(foto)
-            }}>
-              <Ionicons name="camera" size={22} color={theme.primary} />
-              <Text style={styles.photoOptionText}>Tirar Foto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.photoCancelButton} onPress={() => setPhotoModalVisible(false)}>
-              <Text style={styles.photoCancelText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
-
     </LinearGradient>
   );
 }

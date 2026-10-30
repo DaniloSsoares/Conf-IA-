@@ -274,53 +274,7 @@ export const getStyles = (theme: AppTheme) => {
       justifyContent: "center",
       alignItems: "center",
     },
-    photoModalOverlay: {
-      flex: 1,
-      backgroundColor: theme.transparency,
-      justifyContent: "flex-end",
-    },
-    photoModalContent: {
-      backgroundColor: theme.cardBg,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      padding: 24,
-      borderTopWidth: 1,
-      borderLeftWidth: 1,
-      borderRightWidth: 1,
-      borderColor: theme.cardBorder,
-    },
-    photoModalTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: theme.text,
-      marginBottom: 20,
-      textAlign: "center",
-    },
-    photoOptionButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 14,
-      backgroundColor: theme.inputBg,
-      paddingVertical: 16,
-      paddingHorizontal: 20,
-      borderRadius: 14,
-      marginBottom: 12,
-    },
-    photoOptionText: {
-      fontSize: 16,
-      fontWeight: "600",
-      color: theme.text,
-    },
-    photoCancelButton: {
-      paddingVertical: 14,
-      alignItems: "center",
-      marginTop: 8,
-    },
-    photoCancelText: {
-      fontSize: 15,
-      color: theme.subtext,
-      fontWeight: "600",
-    },
+ 
     // Botão Enviar
     submitButton: {
       backgroundColor: theme.ternary,
