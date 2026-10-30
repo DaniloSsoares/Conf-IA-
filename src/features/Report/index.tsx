@@ -26,12 +26,8 @@ import { HelpModal } from '@/src/components/ui';
 import { getStyles } from './styles';
 import { supabaseConfig } from '@/src/config/supabase';
 import ButtonBack from '@/src/components/ui/ButtonBack';
-
-export interface SelectedPhoto {
-  uri: string;
-  base64?: string;
-  ext?: string;
-}
+import { takePhoto } from '@/src/shared/utils/photoPicker';
+import { SelectedPhoto } from '@/src/shared/types/photo';
 
 export default function ReportScreen() {
   const { theme, isDarkMode } = useAppTheme();
@@ -42,7 +38,7 @@ export default function ReportScreen() {
   const [location, setLocation] = useState<ReportLocation | null>(null);
   const [loadingLocation, setLoadingLocation] = useState<boolean>(false);
   const [description, setDescription] = useState<string>('');
-  const [photo, setPhoto] = useState<SelectedPhoto | null>(null);
+  const [photo, setPhoto] = useState<SelectedPhoto| null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const [helpModalVisible, setHelpModalVisible] = useState<boolean>(false);
@@ -132,89 +128,6 @@ export default function ReportScreen() {
       });
     } finally {
       setLoadingLocation(false);
-    }
-  };
-
-  // Tirar foto com Câmera
-  const handleTakePhoto = async () => {
-    setPhotoModalVisible(false);
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Toast.show({
-          type: 'error',
-          text1: 'Permissão necessária',
-          text2: 'É preciso permitir acesso à câmera para tirar uma foto.',
-        });
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        quality: 0.7,
-        base64: true,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
-        const uriParts = asset.uri.split('.');
-        const ext = uriParts[uriParts.length - 1] || 'jpg';
-
-        setPhoto({
-          uri: asset.uri,
-          base64: asset.base64 || undefined,
-          ext,
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao tirar foto:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Erro',
-        text2: 'Não foi possível capturar a foto.',
-      });
-    }
-  };
-
-  // Escolher da Galeria
-  const handlePickFromGallery = async () => {
-    setPhotoModalVisible(false);
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Toast.show({
-          type: 'error',
-          text1: 'Permissão necessária',
-          text2: 'É preciso permitir acesso à galeria para selecionar foto.',
-        });
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        quality: 0.7,
-        base64: true,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
-        const uriParts = asset.uri.split('.');
-        const ext = uriParts[uriParts.length - 1] || 'jpg';
-
-        setPhoto({
-          uri: asset.uri,
-          base64: asset.base64 || undefined,
-          ext,
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao escolher da galeria:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Erro',
-        text2: 'Não foi possível carregar a foto.',
-      });
     }
   };
 
@@ -410,11 +323,13 @@ export default function ReportScreen() {
             ) : (
               <TouchableOpacity
                 style={styles.dashedCard}
-                onPress={() => setPhotoModalVisible(true)}
+                onPress={async () =>{ const foto = await takePhoto();
+                  if(foto)setPhoto(foto);
+                }}
                 activeOpacity={0.7}
               >
                 <Ionicons name="camera-outline" size={22} color={theme.primary} />
-                <Text style={styles.buttonText}>Adicionar foto (opcional)</Text>
+                <Text style={styles.buttonText}>Tirar Foto (opcional)</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -456,13 +371,13 @@ export default function ReportScreen() {
         <TouchableOpacity style={styles.photoModalOverlay} activeOpacity={1} onPress={() => setPhotoModalVisible(false)}>
           <View style={styles.photoModalContent}>
             <Text style={styles.photoModalTitle}>Adicionar foto</Text>
-            <TouchableOpacity style={styles.photoOptionButton} onPress={handleTakePhoto}>
+            <TouchableOpacity style={styles.photoOptionButton}
+             onPress={async () => {
+              const foto = await takePhoto();
+              if(foto) setPhoto(foto)
+            }}>
               <Ionicons name="camera" size={22} color={theme.primary} />
               <Text style={styles.photoOptionText}>Tirar Foto</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.photoOptionButton} onPress={handlePickFromGallery}>
-              <Ionicons name="images" size={22} color={theme.primary} />
-              <Text style={styles.photoOptionText}>Escolher da Galeria</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.photoCancelButton} onPress={() => setPhotoModalVisible(false)}>
               <Text style={styles.photoCancelText}>Cancelar</Text>
