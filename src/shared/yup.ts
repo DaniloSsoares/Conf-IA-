@@ -27,3 +27,7 @@ export const changePassSchema = yup.object({
     .oneOf([yup.ref('password')], 'As senhas não coincidem') 
     .required("Confirme sua senha"),
 });
+
+export const validateComent = yup.object({
+  comentario: yup.string().trim().max(500, "O comentário pode ter no máximo 500 caracteres").default(''),
+});

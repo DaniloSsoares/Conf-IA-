@@ -116,8 +116,8 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 
 **Problema no plano anterior:** o trigger fazia `UPDATE reportes` como o usuário que votou. Como o reporte é de outra pessoa, a RLS bloqueia o UPDATE **sem dar erro** e o score nunca muda. Ele também não tratava `DELETE` e usava os valores `confirmar`/`contestar`, mas o enum é `confirma`/`contesta`.
 
-- [ ] Criar a função com `SECURITY DEFINER` + `SET search_path = public` e trigger em `INSERT OR UPDATE OR DELETE` ([Anexo A.3](#a3-trigger-de-recálculo-de-score))
-- [ ] Deixar o mínimo de votos numa variável (`v_min_votos`). Para a demo, usar 3, para não depender de 5 contas
+- [x] Criar a função com `SECURITY DEFINER` + `SET search_path = public` e trigger em `INSERT OR UPDATE OR DELETE` ([Anexo A.3](#a3-trigger-de-recálculo-de-score))
+- [x] Deixar o mínimo de votos numa variável (`v_min_votos`). Para a demo, usar 3, para não depender de 5 contas
 
 ### 1.4 🔴 Proteger score e status contra edição pelo cliente
 
@@ -163,10 +163,52 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 
 `reporte_validacoes` já tem a coluna `validacao_comentario`. Para o MVP, o comentário vai **junto com o voto** ("Confirmo, a rua está alagada até o joelho"). Não precisa de tabela nova.
 
-- [ ] Campo de texto opcional ao confirmar ou contestar
-- [ ] Limite de tamanho (`CHECK (char_length(validacao_comentario) <= 500)`, no [Anexo A.2](#a2-policies-que-faltam-em-reporte_validacoes))
-- [ ] Lista dos votos com comentário no `ViewHistory` (ícone ✓/✗, texto, data). Para mostrar o nome de quem comentou, usar a view `perfil_publico` ([Anexo A.5](#a5-lgpd-perfil-visível-para-todos))
+**Decisões (29/10):**
+- O campo de texto fica **fixo acima dos botões** (não em modal), opcional, com `maxLength={500}` e o placeholder "Comentário opcional (ex.: água na altura do joelho)"
+- Clicar no **mesmo voto com comentário novo** atualiza o comentário. Hoje o `handleVote` bloqueia: trocar `voto === myVote` por `voto === myVote && !comentario`
+- Ao **trocar o tipo do voto**, mandar sempre `validacao_comentario` (mesmo `null`). O `upsert` só atualiza as colunas enviadas, e sem isso ficaria "contesta" + o comentário antigo de "confirma"
+- **Autor:** mostrar só o **primeiro nome** (minimização de dados, LGPD) ou "Morador da região"
+- **Busca em 2 consultas** (votos, depois `perfil_publico` com `.in('id', ids)`), não join, porque o Supabase nem sempre reconhece a relação tabela → view
+- **Ordem com o A.5:** criar a view `perfil_publico` (parte 2 do A.5) **antes** da lista com nomes. Se a lista ler direto de `perfil`, ela quebra quando a policy pública for removida (parte 1, Fase 3)
+
+**Fazer agora (~1h):**
+- [x] `voteReport` recebe `comentario?: string | null` como 4º parâmetro
+- [x] Campo de texto + regras de envio acima
+- [x] Conferir se a constraint de 500 caracteres do [Anexo A.2](#a2-policies-que-faltam-em-reporte_validacoes) foi criada. Se não, o `maxLength` protege o app, mas não o banco
+- [x] Lista simples dos comentários: ícone ✓/✗, texto e data, **sem nome** (não depende da view)
+- [x] Contador "X de 3 votos necessários" perto do score: explica por que o status continua "pendente" com 100%
+
+**Depois:**
+- [ ] Nome do autor via `perfil_publico` ([Anexo A.5](#a5-lgpd-perfil-visível-para-todos))
 - [ ] Pós-MVP: tabela `reporte_comentarios` separada, se quiserem comentários sem voto
+
+### 1.8 🟡 Moderação de fotos e comentários (pergunta dos professores)
+
+**A pergunta:** "qualquer um pode enviar qualquer coisa e estragar a experiência dos outros. Vale manter foto e comentário?"
+
+**Decisão: manter.** Num app de defesa civil, a foto é a **evidência** que permite aos vizinhos confirmar um reporte, e o comentário traz o detalhe que a categoria não tem. Tirar os dois enfraquece justamente a validação comunitária, que é o núcleo do TCC. A resposta para a banca é **moderação em camadas**: nenhuma camada sozinha resolve, juntas reduzem bastante o abuso.
+
+| Camada | Como funciona | Situação |
+|---|---|---|
+| 1. Identificação | Só usuário logado envia; aceite dos termos (`perfil_aceites`) | ✅ Já existe |
+| 2. Regras de conduta | O texto dos termos diz o que é proibido (fotos de pessoas, conteúdo ofensivo, informação falsa) e que o conteúdo pode ser removido | ⬜ Ajustar o texto do `TermsModal` |
+| 3. Limites | Foto **só pela câmera** em reporte novo (evidência do local, agora). Comentário de até 500 caracteres. **Máximo de 5 reportes por hora** por usuário | ⬜ Fazer agora |
+| 4. Validação comunitária | Reporte com muitas contestações vira "rejeitado" e some do mapa | ✅ Feito (1.3 + 1.6) |
+| 5. Denúncia + ocultação automática | Botão "Denunciar" no reporte e no comentário. Com **3 denúncias** de pessoas diferentes, o conteúdo some para os outros (o dono ainda vê no Histórico) | ⬜ Fazer agora |
+| 6. Reputação | Quem tem reportes rejeitados ou ocultados perde `perfil_trust_score`; abaixo de um limite, não pode enviar foto | ⚪ Pós-MVP |
+| 7. Moderação automática por IA | Edge Function analisa a imagem no upload com um serviço de moderação (ex.: Google Cloud Vision SafeSearch ou AWS Rekognition) e bloqueia conteúdo impróprio | ⚪ Pós-MVP: é um bom exemplo de "IA" para o nome Conf-IA |
+| 8. Moderador humano | Papel de admin / Defesa Civil para revisar o que foi ocultado | ⚪ Pós-MVP |
+
+**Fazer agora (~3h no total):**
+- [ ] Reporte novo: remover a opção de galeria em [src/features/Report/index.tsx](../src/features/Report/index.tsx) (`launchImageLibraryAsync`, linha ~193) e deixar só a câmera. Na edição ([useEditReport.ts](../src/features/History/EditReport/useEditReport.ts)), decidir se mantém a galeria (o dono pode querer trocar uma foto ruim)
+- [ ] Limite de 5 reportes por hora: trigger no banco ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação)). Mostrar um toast amigável quando o erro voltar
+- [ ] Tabela `denuncias` + trigger que oculta após 3 denúncias ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação))
+- [ ] Botão "Denunciar" no `ViewHistory` (reporte e cada comentário), com motivo: foto inadequada, comentário ofensivo, informação falsa, spam, outro
+- [ ] Filtrar o que foi ocultado: `getActiveReports` com `.eq('reporte_oculto', false)`, e a lista de comentários com `.eq('validacao_oculta', false)`
+- [ ] Acrescentar `reporte_oculto` à proteção de colunas do [Anexo A.4](#a4-proteção-de-colunas-sensíveis), para o dono não "desocultar" o próprio reporte
+- [ ] Atualizar o texto dos termos (camada 2)
+
+**Para a defesa:** mostrar a tabela acima como "modelo de moderação em camadas", dizer o que está implementado (1 a 5) e apresentar 6 a 8 como trabalho futuro.
 
 ---
 
@@ -292,6 +334,15 @@ Seguir o roteiro do [Anexo B](#anexo-b--testes-manuais-com-duas-contas):
 - [ ] Corrigir os erros de tipo e lint que aparecerem
 - [ ] Opcional: teste unitário de `haversineKm` (ex.: São Paulo → Rio ≈ 360 km)
 
+### 3.8 🔵 Separar responsabilidades nas telas grandes
+
+Padrão do projeto (já usado em `Maps/` e `EditReport/`): `index.tsx` só monta a tela, a lógica fica em hooks (`useXxx.ts`) e as partes visuais em `components/`.
+
+- [x] `ViewHistory`: refatorada em 29/10 (`useHistoryItem`, `useReportVoting`, `components/`) + hook compartilhado `src/shared/hooks/useCurrentUser.ts`
+- [ ] Aplicar o mesmo em `Home/index.tsx` (a maior tela hoje: clima, alertas, nível de risco e layout no mesmo arquivo)
+- [ ] Avaliar `Report/index.tsx` (formulário + câmera + localização)
+- [ ] Trocar as outras buscas de `supabaseConfig.auth.getUser()` espalhadas pelas telas por `useCurrentUser()`
+
 ---
 
 ## Fase 4 — Organização e entrega (16/11 a 22/11)
@@ -364,19 +415,26 @@ Enums: `tipo_validacao` = confirma, contesta · `nivel_risco` = baixo, moderado,
 
 ### A.2 Policies que faltam em `reporte_validacoes`
 
+> Pode rodar mais de uma vez: cada comando apaga a versão anterior antes de criar (evita o erro `42710 ... already exists`).
+> Lembrete: no SQL Editor, se um comando falha, **o bloco inteiro é cancelado**. Conferir depois com `SELECT policyname, cmd FROM pg_policies WHERE tablename = 'reporte_validacoes';`
+
 ```sql
 -- Trocar o voto (necessária para o upsert)
+DROP POLICY IF EXISTS "validacoes_update_own" ON public.reporte_validacoes;
 CREATE POLICY "validacoes_update_own" ON public.reporte_validacoes
   FOR UPDATE TO authenticated
   USING (auth.uid() = perfil_id)
   WITH CHECK (auth.uid() = perfil_id);
 
 -- Retirar o voto
+DROP POLICY IF EXISTS "validacoes_delete_own" ON public.reporte_validacoes;
 CREATE POLICY "validacoes_delete_own" ON public.reporte_validacoes
   FOR DELETE TO authenticated
   USING (auth.uid() = perfil_id);
 
 -- Limite de tamanho do comentário do voto
+ALTER TABLE public.reporte_validacoes
+  DROP CONSTRAINT IF EXISTS validacao_comentario_tamanho;
 ALTER TABLE public.reporte_validacoes
   ADD CONSTRAINT validacao_comentario_tamanho
   CHECK (validacao_comentario IS NULL OR char_length(validacao_comentario) <= 500);
@@ -586,6 +644,118 @@ FOR EACH ROW EXECUTE FUNCTION public.gerar_notificacoes_alerta();
 
 ---
 
+### A.9 Moderação: limite de envio, denúncias e ocultação
+
+Rodar um bloco por vez, na ordem.
+
+**1. Colunas de ocultação**
+```sql
+ALTER TABLE public.reportes
+  ADD COLUMN IF NOT EXISTS reporte_oculto BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE public.reporte_validacoes
+  ADD COLUMN IF NOT EXISTS validacao_oculta BOOLEAN NOT NULL DEFAULT false;
+```
+
+**2. Tabela de denúncias + RLS**
+```sql
+CREATE TABLE IF NOT EXISTS public.denuncias (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  perfil_id UUID NOT NULL REFERENCES public.perfil(id) ON DELETE CASCADE,
+  reporte_id UUID REFERENCES public.reportes(id) ON DELETE CASCADE,
+  validacao_id UUID REFERENCES public.reporte_validacoes(id) ON DELETE CASCADE,
+  denuncia_motivo TEXT NOT NULL CHECK (denuncia_motivo IN
+    ('foto_inadequada', 'comentario_ofensivo', 'informacao_falsa', 'spam', 'outro')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  -- denuncia OU um reporte OU um comentário
+  CHECK ((reporte_id IS NOT NULL) <> (validacao_id IS NOT NULL)),
+  -- cada pessoa denuncia o mesmo conteúdo uma vez só
+  UNIQUE (perfil_id, reporte_id),
+  UNIQUE (perfil_id, validacao_id)
+);
+
+ALTER TABLE public.denuncias ENABLE ROW LEVEL SECURITY;
+
+-- Denuncia como si mesmo e nunca o próprio reporte
+DROP POLICY IF EXISTS "denuncias_insert_own" ON public.denuncias;
+CREATE POLICY "denuncias_insert_own" ON public.denuncias
+  FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() = perfil_id
+    AND NOT EXISTS (
+      SELECT 1 FROM public.reportes r
+      WHERE r.id = reporte_id AND r.perfil_id = auth.uid()
+    )
+  );
+
+-- Cada um vê só as próprias denúncias (para o app saber se já denunciou)
+DROP POLICY IF EXISTS "denuncias_select_own" ON public.denuncias;
+CREATE POLICY "denuncias_select_own" ON public.denuncias
+  FOR SELECT TO authenticated
+  USING (auth.uid() = perfil_id);
+```
+
+**3. Ocultar automaticamente com 3 denúncias**
+```sql
+CREATE OR REPLACE FUNCTION public.ocultar_por_denuncias()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_limite INT := 3;
+BEGIN
+  IF NEW.reporte_id IS NOT NULL THEN
+    IF (SELECT COUNT(*) FROM denuncias WHERE reporte_id = NEW.reporte_id) >= v_limite THEN
+      UPDATE reportes SET reporte_oculto = true WHERE id = NEW.reporte_id;
+    END IF;
+  ELSE
+    IF (SELECT COUNT(*) FROM denuncias WHERE validacao_id = NEW.validacao_id) >= v_limite THEN
+      -- o voto continua contando no score; só o comentário deixa de aparecer
+      UPDATE reporte_validacoes SET validacao_oculta = true WHERE id = NEW.validacao_id;
+    END IF;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_ocultar_por_denuncias ON public.denuncias;
+CREATE TRIGGER trg_ocultar_por_denuncias
+AFTER INSERT ON public.denuncias
+FOR EACH ROW EXECUTE FUNCTION public.ocultar_por_denuncias();
+```
+
+**4. Limite de 5 reportes por hora por usuário**
+```sql
+CREATE OR REPLACE FUNCTION public.limitar_reportes_por_hora()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+  IF (SELECT COUNT(*) FROM reportes
+      WHERE perfil_id = NEW.perfil_id
+        AND created_at > NOW() - INTERVAL '1 hour') >= 5 THEN
+    RAISE EXCEPTION 'Limite de reportes por hora atingido'
+      USING ERRCODE = 'P0001', HINT = 'rate_limit';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_limitar_reportes ON public.reportes;
+CREATE TRIGGER trg_limitar_reportes
+BEFORE INSERT ON public.reportes
+FOR EACH ROW EXECUTE FUNCTION public.limitar_reportes_por_hora();
+```
+No app, no `createReport`: se `error.code === 'P0001'`, mostrar "Você enviou muitos reportes na última hora. Tente novamente mais tarde."
+
+**5. Proteger `reporte_oculto` (acrescentar à função do A.4)**
+
+Dentro de `protect_reporte_columns()`, no ramo `INSERT` acrescentar `NEW.reporte_oculto := false;` e no ramo `pg_trigger_depth() = 1` acrescentar `NEW.reporte_oculto := OLD.reporte_oculto;`. Depois rodar o `CREATE OR REPLACE FUNCTION` de novo. Sem isso, o dono consegue "desocultar" o próprio reporte.
+
+> A ocultação vale para o app. Pela API, `reporte_oculto = true` ainda é legível (a policy `reportes_select_all` é `true`). Restringir isso pela RLS fica para depois, junto com o papel de moderador (camada 8 do item 1.8).
+
+---
+
 ## Anexo B — Testes manuais com duas contas
 
 Criar a **Conta A** e a **Conta B**. Marcar cada teste quando passar.
@@ -609,5 +779,10 @@ Criar a **Conta A** e a **Conta B**. Marcar cada teste quando passar.
 | 15 | Criar reporte da categoria "Via bloqueada" | Salva sem erro | [ ] |
 | 16 | Inserir alerta `critico` perto de A | Home mostra risco CRÍTICO e A recebe notificação | [ ] |
 | 17 | Deslogado, chamar a API REST de `perfil` com a anon key | Nenhuma linha retornada | [ ] |
+| 18 | B confirma com comentário; depois contesta sem escrever nada | O comentário antigo some (não fica "contesta" + texto de confirmação) | [ ] |
+| 19 | A envia o 6º reporte em menos de 1 hora | Bloqueado, com mensagem amigável | [ ] |
+| 20 | 3 contas diferentes denunciam o reporte de A | Some do Mapa das outras contas; A ainda vê no Histórico | [ ] |
+| 21 | A tenta denunciar o próprio reporte | Bloqueado | [ ] |
+| 22 | Criar reporte novo | Só a câmera aparece como opção de foto | [ ] |
 
 > Para testar como um usuário específico no SQL Editor do Supabase, use a opção de "impersonate"/role do próprio editor, ou faça os testes pelo app com as duas contas.

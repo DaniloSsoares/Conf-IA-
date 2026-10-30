@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { StyleSheet } from "react-native";
+import { useAppTheme } from "@/src/shared/constants/theme";
 
 export const getStyles = (theme: any) => {
   const isDark = theme?.isDark;
@@ -157,8 +159,8 @@ export const getStyles = (theme: any) => {
       paddingVertical: 14,
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: theme.cardBorder,
-      backgroundColor: theme.card,
+      borderColor: theme?.cardBorder || "#E2E8F0",
+      backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "#FFFFFF",
     },
     voteConfirmActive: {
       backgroundColor: "rgba(16, 185, 129, 0.15)",
@@ -169,11 +171,40 @@ export const getStyles = (theme: any) => {
       borderColor: "#EF4444",
     },
     voteText: {
-      color: theme.text,
+      color: theme?.text || "#2C2B30",
       fontWeight: "600",
       fontSize: 15,
     },
+    voteSectionTitle: {
+      marginTop: 28,
+    },
+    commentRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 10,
+      paddingVertical: 10,
+    },
+    commentBody: {
+      flex: 1,
+    },
+    commentText: {
+      fontSize: 14,
+      color: theme?.text || "#2C2B30",
+      lineHeight: 20,
+    },
+    commentMeta: {
+      fontSize: 12,
+      color: isDark ? "rgba(255,255,255,0.5)" : "#858D99",
+      marginTop: 4,
+    },
   });
+};
+
+// Cada componente da tela pega os estilos daqui, sem precisar recebê-los por prop
+export const useViewHistoryStyles = () => {
+  const { theme, isDarkMode } = useAppTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+  return { styles, theme, isDarkMode };
 };
 
 export default getStyles;

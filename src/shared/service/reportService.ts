@@ -3,6 +3,7 @@ import { decode } from "base64-arraybuffer";
 import {
   CreateReportInput,
   Report,
+  ReportValidation,
   TipoValidacao,
   UpdateReportInput,
 } from "../types/report";
@@ -250,25 +251,55 @@ export async function voteReport(
   reportId: string,
   userId: string,
   voto: TipoValidacao,
+  comentario: string | null = null,
 ): Promise<{ error: any }> {
+  // validacao_comentario vai sempre (mesmo null): o upsert só atualiza as colunas
+  // enviadas, e sem isso um voto trocado manteria o comentário do voto anterior
   const { error } = await supabaseConfig
     .from("reporte_validacoes")
     .upsert(
-      { reporte_id: reportId, perfil_id: userId, validacao_tipo: voto },
+      {
+        reporte_id: reportId,
+        perfil_id: userId,
+        validacao_tipo: voto,
+        validacao_comentario: comentario,
+      },
       { onConflict: "reporte_id,perfil_id" },
     );
   return { error };
-  }
+}
 
-  export async function getMyVote(
-    reportId: string,
-    userId: string,
-  ): Promise<TipoValidacao | null> {
-    const { data } = await supabaseConfig
-      .from("reporte_validacoes")
-      .select("validacao_tipo")
-      .eq("reporte_id", reportId)
-      .eq("perfil_id", userId)
-      .maybeSingle();
-    return (data?.validacao_tipo as TipoValidacao) ?? null;
+export async function getMyValidation(
+  reportId: string,
+  userId: string,
+): Promise<ReportValidation | null> {
+  const { data, error } = await supabaseConfig
+    .from("reporte_validacoes")
+    .select("perfil_id, validacao_tipo, validacao_comentario, created_at")
+    .eq("reporte_id", reportId)
+    .eq("perfil_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Erro ao buscar voto do usuário:", error);
+    return null;
+  }
+  return (data as ReportValidation) ?? null;
+}
+
+export async function getReportValidations(
+  reportId: string,
+): Promise<ReportValidation[]> {
+  // Sem nome do autor por enquanto: o nome virá da view perfil_publico (Anexo A.5)
+  const { data, error } = await supabaseConfig
+    .from("reporte_validacoes")
+    .select("perfil_id, validacao_tipo, validacao_comentario, created_at")
+    .eq("reporte_id", reportId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Erro ao buscar votos do reporte:", error);
+    return [];
+  }
+  return (data as ReportValidation[]) || [];
 }
