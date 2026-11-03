@@ -202,9 +202,10 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 **Fazer agora (~3h no total):**
 - [x] Reporte novo: remover a opção de galeria em [src/features/Report/index.tsx](../src/features/Report/index.tsx) (`launchImageLibraryAsync`, linha ~193) e deixar só a câmera. Na edição ([useEditReport.ts](../src/features/History/EditReport/useEditReport.ts)), decidir se mantém a galeria (o dono pode querer trocar uma foto ruim)
 - [x] Limite de 5 reportes por hora: trigger no banco ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação)). Mostrar um toast amigável quando o erro voltar
-- [ ] Tabela `denuncias` + trigger que oculta após 3 denúncias ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação))
+- [x] Tabela `denuncias` + trigger que oculta após 3 denúncias ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação))
 - [ ] Botão "Denunciar" no `ViewHistory` (reporte e cada comentário), com motivo: foto inadequada, comentário ofensivo, informação falsa, spam, outro
-- [ ] Filtrar o que foi ocultado: `getActiveReports` com `.eq('reporte_oculto', false)`, e a lista de comentários com `.eq('validacao_oculta', false)`
+- [ ] Filtrar reporte oculto: `getActiveReports` com `.eq('reporte_oculto', false)` e o Realtime do Mapa (`useMapData`, evento UPDATE) removendo o reporte quando `reporte_oculto` for true
+- [ ] Filtrar comentário oculto **no service, sem remover o voto**: trazer `validacao_oculta` no select e devolver o comentário como `null`. Filtrar com `.eq()` na query tiraria o voto do contador, mas ele continua contando no score
 - [ ] Acrescentar `reporte_oculto` à proteção de colunas do [Anexo A.4](#a4-proteção-de-colunas-sensíveis), para o dono não "desocultar" o próprio reporte
 - [ ] Atualizar o texto dos termos (camada 2)
 
@@ -668,7 +669,7 @@ FOR EACH ROW EXECUTE FUNCTION public.gerar_notificacoes_alerta();
 
 ---
 
-### A.9 Moderação: limite de envio, denúncias e ocultação
+  ### A.9 Moderação: limite de envio, denúncias e ocultação
 
 Rodar um bloco por vez, na ordem.
 
@@ -689,7 +690,7 @@ CREATE TABLE IF NOT EXISTS public.denuncias (
   reporte_id UUID REFERENCES public.reportes(id) ON DELETE CASCADE,
   validacao_id UUID REFERENCES public.reporte_validacoes(id) ON DELETE CASCADE,
   denuncia_motivo TEXT NOT NULL CHECK (denuncia_motivo IN
-    ('foto_inadequada', 'comentario_ofensivo', 'informacao_falsa', 'spam', 'outro')),
+    ('foto_inadequada', 'comentario_ofensivo', 'informacao_falsa', 'spam', 'outro')),   
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   -- denuncia OU um reporte OU um comentário
   CHECK ((reporte_id IS NOT NULL) <> (validacao_id IS NOT NULL)),
@@ -700,7 +701,7 @@ CREATE TABLE IF NOT EXISTS public.denuncias (
 
 ALTER TABLE public.denuncias ENABLE ROW LEVEL SECURITY;
 
--- Denuncia como si mesmo e nunca o próprio reporte
+-- Denuncia como si mesmo e nunca o próprio reporte ou comentário
 DROP POLICY IF EXISTS "denuncias_insert_own" ON public.denuncias;
 CREATE POLICY "denuncias_insert_own" ON public.denuncias
   FOR INSERT TO authenticated
@@ -709,6 +710,10 @@ CREATE POLICY "denuncias_insert_own" ON public.denuncias
     AND NOT EXISTS (
       SELECT 1 FROM public.reportes r
       WHERE r.id = reporte_id AND r.perfil_id = auth.uid()
+    )
+    AND NOT EXISTS (
+      SELECT 1 FROM public.reporte_validacoes v
+      WHERE v.id = validacao_id AND v.perfil_id = auth.uid()
     )
   );
 

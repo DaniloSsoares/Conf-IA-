@@ -100,7 +100,7 @@ npx supabase link --project-ref <ID_DO_PROJETO>
 ```
 
 O `<ID_DO_PROJETO>` é o trecho da URL do Supabase: `https://<ID_DO_PROJETO>.supabase.co`.
-O `link` pede a **senha do banco** (Project Settings → Database). Ela não deve ser salva em nenhum arquivo do projeto.
+O `link` pede a **senha do banco** (menu lateral **Database → Settings**). Ela não deve ser salva em nenhum arquivo do projeto.
 
 > O `link` cria a pasta `supabase/.temp/`, que está no `.gitignore` e não deve ser enviada.
 
@@ -108,10 +108,18 @@ O `link` pede a **senha do banco** (Project Settings → Database). Ela não dev
 
 Parte desses comandos roda **dentro de um container Docker**, que não tem IPv6. O endereço direto do banco (`db.<ID>.supabase.co`) só tem IPv6, então eles falham com `ECONNREFUSED ... :5432`. A solução é passar o endereço do **Session Pooler**, que aceita IPv4.
 
-Rode este bloco **uma vez por terminal**, antes dos comandos abaixo:
+**Jeito mais fácil: o script do projeto**, que faz tudo abaixo sozinho (pede a senha, confere se não está vazia nem com espaço e conecta pelo pooler com a versão fixa do CLI):
 
 ```bash
-# Senha do banco: Project Settings → Database (não é a senha da conta do Supabase)
+./scripts/supabase-remote.sh migration list
+./scripts/supabase-remote.sh db pull
+./scripts/supabase-remote.sh db push --dry-run
+```
+
+Se preferir fazer à mão, rode este bloco **uma vez por terminal**, antes dos comandos abaixo:
+
+```bash
+# Senha do banco: menu lateral Database → Settings (não é a senha da conta do Supabase)
 read -s -p "Senha do banco: " PGPASS && echo
 
 # Codifica a senha para URL (caracteres como @ # / quebrariam o endereço)
