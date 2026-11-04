@@ -121,6 +121,7 @@ export function useReportVoting(
     setComentario,
     comentarioErro,
     vote,
+    reload: loadVotes,
   };
 }
 

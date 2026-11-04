@@ -6,7 +6,9 @@ import { getStatusStyle, getCategoryMeta } from '@/src/shared/constants/historyS
 import { MIN_VOTOS_VALIDACAO, Report } from '@/src/shared/types/report';
 import { useViewHistoryStyles } from '../styles';
 import { ReportVoting } from '../useReportVoting';
+import { Denuncia } from '../useDenuncia';
 import { MetaRow, Divider } from './MetaRow';
+import { ReportFlag } from './ReportFlag';
 import { VoteSection } from './VoteSection';
 import { CommentList } from './CommentList';
 
@@ -15,9 +17,10 @@ interface ReporteDetailsProps {
   isOwner: boolean;
   currentUserId: string;
   voting: ReportVoting;
+  denuncia: Denuncia;
 }
 
-export function ReporteDetails({ reporte, isOwner, currentUserId, voting }: ReporteDetailsProps) {
+export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denuncia }: ReporteDetailsProps) {
   const router = useRouter();
   const { styles, theme, isDarkMode } = useViewHistoryStyles();
   const meta = getCategoryMeta(reporte.reporte_tipo_ocorrencia);
@@ -25,6 +28,7 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting }: Repo
   const photoUrl = reporte.reporte_midias?.[0]?.midia_url;
   const iconColor = isDarkMode ? '#FFFFFF' : (theme.primary || '#0047FF');
   const { totalVotos } = voting;
+  const oculto = Boolean(reporte.reporte_oculto);
 
   // banco guarda fração 0.00–1.00 (numeric chega como texto, por isso o Number)
   const scorePct = Math.round(Number(reporte.reporte_score_confianca ?? 0) * 100);
@@ -44,6 +48,19 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting }: Repo
 
   return (
     <>
+      {/* Só aparece se a tela for aberta direto (Histórico do dono, notificação):
+          no Mapa e na Home o reporte oculto já não é listado */}
+      {oculto && (
+        <View style={styles.hiddenNotice}>
+          <Ionicons name="eye-off-outline" size={20} color="#F5A623" />
+          <Text style={styles.hiddenNoticeText}>
+            {isOwner
+              ? 'Este reporte foi ocultado para a comunidade após denúncias. Você ainda consegue vê-lo.'
+              : 'Este reporte foi ocultado após denúncias da comunidade.'}
+          </Text>
+        </View>
+      )}
+
       <View style={styles.heroCard}>
         <View style={styles.iconRow}>
           <View style={styles.iconBg}>
@@ -82,6 +99,15 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting }: Repo
         <MetaRow label="Enviado em" value={new Date(reporte.created_at).toLocaleString('pt-BR')} />
       </View>
 
+      {!isOwner && !oculto && (
+        <View style={styles.reportFlagRow}>
+          <ReportFlag
+            jaDenunciado={denuncia.jaDenunciou(reporte.id)}
+            onPress={() => denuncia.abrir({ tipo: 'reporte', id: reporte.id })}
+          />
+        </View>
+      )}
+
       {isOwner && (
         <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
           <Ionicons name="create-outline" size={20} color={theme.primary || '#3AA77A'} />
@@ -89,10 +115,11 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting }: Repo
         </TouchableOpacity>
       )}
 
-      <CommentList comentarios={voting.comentarios} currentUserId={currentUserId} />
+      <CommentList comentarios={voting.comentarios} currentUserId={currentUserId} denuncia={denuncia} />
 
-      {/* Votação por último (como num chat): ao abrir o teclado a tela rola até o fim e o campo fica visível */}
-      {!isOwner && reporte.reporte_status !== 'resolvido' && <VoteSection voting={voting} />}
+      {/* Votação por último (como num chat): ao abrir o teclado a tela rola até o fim e o campo fica visível.
+          Não vota em reporte resolvido nem em reporte ocultado por denúncias */}
+      {!isOwner && reporte.reporte_status !== 'resolvido' && !oculto && <VoteSection voting={voting} />}
     </>
   );
 }

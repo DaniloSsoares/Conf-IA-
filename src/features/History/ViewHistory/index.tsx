@@ -9,9 +9,11 @@ import { Report } from '@/src/shared/types/report';
 import { useViewHistoryStyles } from './styles';
 import { HistoryItemType, useHistoryItem } from './useHistoryItem';
 import { useReportVoting } from './useReportVoting';
+import { useDenuncia } from './useDenuncia';
 import { DetailsHeader } from './components/DetailsHeader';
 import { AlertaDetails } from './components/AlertaDetails';
 import { ReporteDetails } from './components/ReporteDetails';
+import { DenunciaModal } from './components/DenunciaModal';
 
 export default function ViewHistoryScreen() {
   const { styles, theme, isDarkMode } = useViewHistoryStyles();
@@ -21,6 +23,11 @@ export default function ViewHistoryScreen() {
   const { item, loading, reload } = useHistoryItem(type, id, data);
   // Hook sempre chamado (regra dos hooks); em alerta recebe undefined e não faz nada
   const voting = useReportVoting(type === 'reporte' ? item?.id : undefined, userId, reload);
+  // Depois de denunciar, recarrega reporte e comentários: a denúncia pode ter ocultado algo
+  const denuncia = useDenuncia(userId, () => {
+    reload();
+    voting.reload();
+  });
 
   // O campo de comentário fica no fim da tela: quando o teclado abre, rola até ele
   const scrollRef = useRef<ScrollView>(null);
@@ -78,10 +85,13 @@ export default function ViewHistoryScreen() {
               isOwner={Boolean(userId && (item as Report).perfil_id === userId)}
               currentUserId={userId}
               voting={voting}
+              denuncia={denuncia}
             />
           )}
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <DenunciaModal denuncia={denuncia} />
     </LinearGradient>
   );
 }

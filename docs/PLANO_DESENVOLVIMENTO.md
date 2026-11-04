@@ -203,11 +203,11 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 - [x] Reporte novo: remover a opção de galeria em [src/features/Report/index.tsx](../src/features/Report/index.tsx) (`launchImageLibraryAsync`, linha ~193) e deixar só a câmera. Na edição ([useEditReport.ts](../src/features/History/EditReport/useEditReport.ts)), decidir se mantém a galeria (o dono pode querer trocar uma foto ruim)
 - [x] Limite de 5 reportes por hora: trigger no banco ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação)). Mostrar um toast amigável quando o erro voltar
 - [x] Tabela `denuncias` + trigger que oculta após 3 denúncias ([Anexo A.9](#a9-moderação-limite-de-envio-denúncias-e-ocultação))
-- [ ] Botão "Denunciar" no `ViewHistory` (reporte e cada comentário), com motivo: foto inadequada, comentário ofensivo, informação falsa, spam, outro
-- [ ] Filtrar reporte oculto: `getActiveReports` com `.eq('reporte_oculto', false)` e o Realtime do Mapa (`useMapData`, evento UPDATE) removendo o reporte quando `reporte_oculto` for true
-- [ ] Filtrar comentário oculto **no service, sem remover o voto**: trazer `validacao_oculta` no select e devolver o comentário como `null`. Filtrar com `.eq()` na query tiraria o voto do contador, mas ele continua contando no score
-- [ ] Acrescentar `reporte_oculto` à proteção de colunas do [Anexo A.4](#a4-proteção-de-colunas-sensíveis), para o dono não "desocultar" o próprio reporte
-- [ ] Atualizar o texto dos termos (camada 2)
+- [x] Botão "Denunciar" no `ViewHistory` (reporte e cada comentário), com motivo: foto inadequada, comentário ofensivo, informação falsa, spam, outro
+- [x] Filtrar reporte oculto: `getActiveReports` com `.eq('reporte_oculto', false)` e o Realtime do Mapa (`useMapData`, evento UPDATE) removendo o reporte quando `reporte_oculto` for true
+- [x] Atualizar o texto dos termos (camada 2): versão 1.1.0, só com o que está implementado. Removidas as promessas de "suspensão de conta" e do trust score
+- [ ] Pedir o aceite da nova versão no **login**: hoje só a tela de Perfil confere (`getTerms` está importado no Login, mas não é usado), então quem não abre o Perfil nunca vê os termos novos
+- [ ] Incluir nos termos um **canal de contato** (e-mail da equipe) para pedidos de acesso ou exclusão de dados (LGPD)
 
 **Para a defesa:** mostrar a tabela acima como "modelo de moderação em camadas", dizer o que está implementado (1 a 5) e apresentar 6 a 8 como trabalho futuro.
 
@@ -267,6 +267,83 @@ Fecha a promessa do pitch ("Risk Mapping").
 - [ ] `fetchRiskAreas` no `useMapData`
 - [ ] Renderizar com `Polygon` (cor por nível de risco) antes dos marcadores, para não cobri-los
 - [ ] Opcional: legenda das cores no card do topo
+
+### 2.6 ⭐🔴 Alerta colaborativo a partir da validação comunitária
+
+**Por que é prioridade:** hoje **nada cria alertas**. O app só lê a tabela `alertas`, e um alerta só existe se alguém inserir manualmente no Supabase. Este item fecha o ciclo que o TCC promete:
+
+```
+cidadão reporta → comunidade confirma → vira alerta → vizinhos são notificados
+```
+
+**Como funciona:** quando o trigger de score muda um reporte para `validado`, um segundo trigger cria um alerta com `origem = 'colaborativo'`, na mesma posição e categoria do reporte. Se o reporte deixar de valer (voltar a pendente, ser rejeitado, ocultado ou resolvido), o alerta ligado a ele é cancelado ou expirado.
+
+**Decisões de design:**
+- **Trigger separado**, sem mexer no `recalculate_reporte_score`. Cada função faz uma coisa: uma calcula o score, outra reage à mudança de status
+- **Um alerta por reporte:** coluna nova `alertas.alerta_reporte_id` com índice único. Se o status oscilar (validado → pendente → validado), o mesmo alerta é reativado, sem duplicar
+- **Nível de risco derivado da categoria** (o reporte não tem nível próprio): deslizamento, alagamento e fogo em mata = `alto`; falta de luz = `baixo`; o resto = `moderado`
+- **Raio de 1 km e validade de 6 horas.** Ajustáveis no SQL, documentar o motivo dos valores escolhidos
+- **`alerta_emitido_por` fica nulo:** o alerta é da comunidade, não expõe quem fez o reporte (LGPD)
+- `SECURITY DEFINER`: a tabela `alertas` não tem policy de INSERT para usuários, e é certo que não tenha
+
+**Fazer:**
+- [ ] Rodar o SQL do [Anexo A.10](#a10-alerta-colaborativo-a-partir-de-reporte-validado) no SQL Editor e depois `./scripts/supabase-remote.sh db pull`
+- [ ] Testar sem celular, com o bloco de teste do A.10 (simula 3 confirmações e mostra o alerta criado)
+- [ ] Mapa ([src/features/Maps/index.tsx](../src/features/Maps/index.tsx), linhas ~296 e ~375): hoje todo alerta aparece como **"Alerta Oficial"** com o escudo. Mostrar "Alerta da comunidade" quando `alerta_origem === 'colaborativo'`. O `AlertaDetails` do ViewHistory já traduz a origem para "Comunidade"
+- [ ] Depois: o trigger de notificações ([Anexo A.8](#a8-gerar-notificações-quando-um-alerta-é-criado), item 3.3) dispara sozinho em cada alerta novo, inclusive nos colaborativos. Com os dois juntos, os vizinhos são avisados no Histórico
+- [ ] Depois: job para expirar alertas vencidos (`pg_cron`, marcando `expirado` quando passa de `alerta_expira_em`). Hoje um alerta vencido continua aparecendo como ativo
+- [ ] Atualizar os termos ([TermsModal](../src/components/ui/TermsModal/index.tsx), seção 4) e subir `VERSAO_TERMOS` em [termsService.ts](../src/shared/service/termsService.ts)
+- [ ] Testes 23 a 27 do [Anexo B](#anexo-b--testes-manuais-com-duas-contas)
+
+**Para a defesa:** este é o fluxo para demonstrar ao vivo. 3 contas confirmam um reporte e o alerta aparece no Mapa de todo mundo.
+
+### 2.7 🔴 Validade dos reportes (expirar em vez de excluir)
+
+**Problema:** hoje um reporte fica no Mapa **para sempre**. Um alagamento de 3 dias atrás aparece como se a rua ainda estivesse alagada. Num app de defesa civil, informação velha é tão ruim quanto informação falsa.
+
+**Decisão: expirar, não excluir.** O reporte muda para o status `expirado`: some do Mapa e da Home, mas continua no Histórico do dono, com votos, comentários e denúncias preservados. Excluir de verdade apagaria o histórico do usuário, a auditoria (abuso, denúncias) e os dados que servem de base para análises e para a futura IA ("quantos alagamentos por mês nesta rua?").
+
+**Como funciona:**
+1. **Validade por categoria**, calculada na criação e guardada em `reporte_expira_em`:
+
+   | Categoria | Validade | Por quê |
+   |---|---|---|
+   | Bloqueio de via | 4 h | Costuma ser liberado rápido |
+   | Alagamento | 6 h | A água baixa em horas depois da chuva |
+   | Falta de luz | 8 h | Prazo típico de restabelecimento |
+   | Queda de galho / Fogo em mata | 12 h | Exigem remoção ou combate |
+   | Deslizamento | 24 h | Risco que persiste |
+   | Outro | 6 h | Padrão |
+
+   Os valores ficam numa função SQL só (`validade_reporte`), fáceis de ajustar. Documentar a escolha no TCC.
+2. **Um job agendado** (`pg_cron`, a cada 15 min) marca como `expirado` os reportes e os alertas que passaram da validade.
+3. **O filtro também na consulta** (`reporte_expira_em > agora`), para o Mapa não depender do intervalo do job.
+4. **O alerta colaborativo acompanha:** quando o reporte expira, o alerta ligado expira junto (A.10, já ajustado).
+
+**Correções necessárias no que já existe** (descobertas ao desenhar este item):
+- **O trigger de score "ressuscitaria" um reporte expirado:** um voto atrasado recalcularia o status para pendente ou validado. Ele precisa preservar `expirado`, como já preserva `resolvido`
+- **A proteção de colunas (A.4) bloquearia o próprio job:** ela usa `pg_trigger_depth() = 1` para reconhecer "veio do cliente", mas o UPDATE do job também tem profundidade 1. A proteção passa a ser **pelo papel** (`authenticated`/`anon`, que é quem chama pela API), e não pela profundidade. Também passa a proteger `reporte_expira_em`, para o dono não "esticar" a validade
+
+**Fazer (banco):**
+- [ ] Rodar o [Anexo A.11](#a11-validade-dos-reportes), **bloco por bloco, na ordem**. O bloco 1 (novo valor do enum) precisa rodar **sozinho**
+- [ ] ⚠️ Antes do bloco de preenchimento, decidir o que fazer com os reportes antigos: com a validade nova, **todos os reportes criados há mais de 24 h expiram na hora** e o Mapa fica vazio. Para a demo, recriar reportes de teste no dia da apresentação
+- [ ] Refazer os testes de proteção (A.4/A.9): os testes com `DO $$` rodam como `postgres`, que agora **passa** pela proteção de propósito. Usar `SET LOCAL ROLE authenticated` para simular o app (bloco de teste no A.11)
+- [ ] `./scripts/supabase-remote.sh db pull` no final
+
+**Fazer (app):**
+- [ ] `ReportStatus` com `'expirado'` ([types/report.ts](../src/shared/types/report.ts)) e `reporte_expira_em?: string` no tipo `Report`
+- [ ] `getStatusStyle` ([historyStatus.ts](../src/shared/constants/historyStatus.ts)) com o selo "Expirado" (cinza)
+- [ ] `getActiveReports`: trocar `.neq("reporte_status", "rejeitado")` por `.in("reporte_status", ["pendente", "validado"])` e acrescentar `.gt("reporte_expira_em", new Date().toISOString())`
+- [ ] Realtime do Mapa ([useMapData.ts](../src/features/Maps/useMapData.ts)): remover também quando o status for `expirado`. A regra fica melhor como "manter só pendente/validado, não oculto", em vez de listar o que sai
+- [ ] ViewHistory: aviso "Este reporte expirou" e votação desabilitada, como já é feito para o oculto
+- [ ] Histórico do dono: mostrar há quanto tempo expira ("expira em 3 h") nos reportes ativos
+- [ ] Atualizar os termos ([TermsModal](../src/components/ui/TermsModal/index.tsx), seção 4) e subir `VERSAO_TERMOS` em [termsService.ts](../src/shared/service/termsService.ts)
+- [ ] Testes 28 a 32 do [Anexo B](#anexo-b--testes-manuais-com-duas-contas)
+
+**Decisões em aberto:**
+- 🤔 **Confirmação renova a validade?** Se alguém confirma um alagamento 5 horas depois, a ocorrência provavelmente continua. Renovar (por exemplo, `GREATEST(expira_em, agora + metade da validade)`) deixa o reporte vivo enquanto a comunidade o confirma, o que é coerente com a validação comunitária. O risco é estender um reporte para sempre com votos combinados
+- 🤔 **Botão "Já foi resolvido" para o dono:** hoje o status `resolvido` existe, mas não há botão no app. Com ele, o dono encerra o reporte antes da validade
+- ⚪ **Pós-MVP: retenção (LGPD).** Excluir fotos e anonimizar reportes com mais de N meses (princípio de término do tratamento). Definir N e documentar
 
 ---
 
@@ -785,6 +862,290 @@ Dentro de `protect_reporte_columns()`, no ramo `INSERT` acrescentar `NEW.reporte
 
 ---
 
+### A.10 Alerta colaborativo a partir de reporte validado
+
+Rodar um bloco por vez.
+
+**1. Ligação alerta → reporte (um alerta por reporte)**
+```sql
+ALTER TABLE public.alertas
+  ADD COLUMN IF NOT EXISTS alerta_reporte_id UUID
+  REFERENCES public.reportes(id) ON DELETE SET NULL;
+
+-- Único só quando preenchido: alertas manuais/Defesa Civil continuam com NULL
+CREATE UNIQUE INDEX IF NOT EXISTS alertas_reporte_id_unico
+  ON public.alertas (alerta_reporte_id)
+  WHERE alerta_reporte_id IS NOT NULL;
+```
+
+**2. Função e trigger**
+```sql
+CREATE OR REPLACE FUNCTION public.sincronizar_alerta_colaborativo()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER            -- alertas não tem policy de INSERT para usuários
+SET search_path = public
+AS $$
+DECLARE
+  v_nivel nivel_risco;
+BEGIN
+  IF NEW.reporte_status = 'validado' AND NOT NEW.reporte_oculto THEN
+    -- O reporte não tem nível de risco próprio: deriva da categoria
+    v_nivel := CASE NEW.reporte_tipo_ocorrencia
+      WHEN 'deslizamento' THEN 'alto'::nivel_risco
+      WHEN 'alagamento'   THEN 'alto'::nivel_risco
+      WHEN 'fogo_em_mata' THEN 'alto'::nivel_risco
+      WHEN 'falta_de_luz' THEN 'baixo'::nivel_risco
+      ELSE 'moderado'::nivel_risco
+    END;
+
+    -- Cria o alerta; se já existir (status oscilou), só reativa
+    INSERT INTO alertas (
+      alerta_tipo_ocorrencia, alerta_nivel_risco, alerta_titulo, alerta_descricao,
+      alerta_latitude, alerta_longitude, alerta_raio_km,
+      alerta_origem, alerta_status, alerta_expira_em, alerta_reporte_id
+    ) VALUES (
+      NEW.reporte_tipo_ocorrencia, v_nivel,
+      'Ocorrência confirmada pela comunidade',
+      COALESCE(NEW.reporte_descricao, 'Reporte confirmado por moradores da região.'),
+      NEW.reporte_latitude, NEW.reporte_longitude, 1,
+      'colaborativo'::origem_alerta, 'ativo'::status_alerta,
+      NOW() + INTERVAL '6 hours', NEW.id
+    )
+    ON CONFLICT (alerta_reporte_id) WHERE alerta_reporte_id IS NOT NULL
+    DO UPDATE SET
+      alerta_status    = 'ativo'::status_alerta,
+      alerta_expira_em = EXCLUDED.alerta_expira_em;
+  ELSE
+    -- Deixou de valer (pendente, rejeitado, oculto, resolvido ou expirado): encerra o alerta ligado
+    UPDATE alertas
+       SET alerta_status = CASE
+             -- ::text: funciona antes e depois de o enum ganhar o valor 'expirado' (A.11)
+             WHEN NEW.reporte_status::text IN ('resolvido', 'expirado') THEN 'expirado'::status_alerta
+             ELSE 'cancelado'::status_alerta
+           END
+     WHERE alerta_reporte_id = NEW.id
+       AND alerta_status = 'ativo';
+  END IF;
+
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_alerta_colaborativo ON public.reportes;
+CREATE TRIGGER trg_alerta_colaborativo
+AFTER UPDATE OF reporte_status, reporte_oculto ON public.reportes
+FOR EACH ROW
+WHEN (OLD.reporte_status IS DISTINCT FROM NEW.reporte_status
+      OR OLD.reporte_oculto IS DISTINCT FROM NEW.reporte_oculto)
+EXECUTE FUNCTION public.sincronizar_alerta_colaborativo();
+```
+
+> O `WHEN` faz o trigger rodar só quando o status ou a ocultação **mudam**. Um voto que não muda o status não mexe no alerta.
+
+**3. Teste sem celular** (simula a validação e desfaz tudo no final)
+```sql
+DO $$
+DECLARE
+  v_id UUID := 'COLE_O_ID_DE_UM_REPORTE_PENDENTE';
+  v_alerta RECORD;
+BEGIN
+  -- Simula o que o trigger de score faz quando o reporte atinge 3 votos e 70%
+  UPDATE reportes SET reporte_status = 'validado' WHERE id = v_id;
+
+  SELECT alerta_origem, alerta_status, alerta_nivel_risco, alerta_raio_km
+    INTO v_alerta FROM alertas WHERE alerta_reporte_id = v_id;
+
+  RAISE EXCEPTION 'Alerta criado: %', v_alerta;
+END $$;
+```
+Esperado: um erro com `Alerta criado: (colaborativo,ativo,...)`. O `RAISE` desfaz tudo, então nada fica gravado.
+
+> ⚠️ Esse UPDATE direto só funciona como `postgres` dentro de um DO block. Pelo app, a proteção de colunas (A.4) ignora mudança de status vinda do cliente. O caminho real é o trigger de score, a partir dos votos.
+
+---
+
+### A.11 Validade dos reportes
+
+Rodar **um bloco por vez, na ordem**.
+
+**1. Novo status `expirado`** (rodar **sozinho**: o Postgres não deixa usar um valor novo de enum na mesma transação em que ele foi criado)
+```sql
+ALTER TYPE public.status_reporte ADD VALUE IF NOT EXISTS 'expirado';
+```
+
+**2. Validade por categoria e coluna**
+```sql
+-- Um lugar só para ajustar as validades
+CREATE OR REPLACE FUNCTION public.validade_reporte(p_tipo public.tipo_ocorrencia)
+RETURNS INTERVAL
+LANGUAGE sql IMMUTABLE
+AS $$
+  SELECT CASE p_tipo
+    WHEN 'bloqueio_via'   THEN INTERVAL '4 hours'
+    WHEN 'alagamento'     THEN INTERVAL '6 hours'
+    WHEN 'falta_de_luz'   THEN INTERVAL '8 hours'
+    WHEN 'queda_de_galho' THEN INTERVAL '12 hours'
+    WHEN 'fogo_em_mata'   THEN INTERVAL '12 hours'
+    WHEN 'deslizamento'   THEN INTERVAL '24 hours'
+    ELSE INTERVAL '6 hours'
+  END
+$$;
+
+ALTER TABLE public.reportes
+  ADD COLUMN IF NOT EXISTS reporte_expira_em TIMESTAMPTZ;
+```
+
+**3. Preencher os reportes que já existem**
+> ⚠️ Reportes com mais de 24 h expiram assim que o job rodar, e o Mapa pode ficar vazio. Veja o item 2.7.
+```sql
+UPDATE public.reportes
+   SET reporte_expira_em = created_at + public.validade_reporte(reporte_tipo_ocorrencia)
+ WHERE reporte_expira_em IS NULL;
+
+ALTER TABLE public.reportes ALTER COLUMN reporte_expira_em SET NOT NULL;
+```
+
+**4. Proteção de colunas pelo papel (substitui a versão do A.4/A.9)**
+```sql
+CREATE OR REPLACE FUNCTION public.protect_reporte_columns()
+RETURNS TRIGGER LANGUAGE plpgsql AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    NEW.reporte_score_confianca := 0;
+    NEW.reporte_status := 'pendente';
+    NEW.reporte_oculto := false;
+    NEW.reporte_expira_em := NOW() + public.validade_reporte(NEW.reporte_tipo_ocorrencia);
+
+  -- Protege só o que vem do app (papéis da API do Supabase). Triggers SECURITY DEFINER
+  -- e o job agendado rodam como postgres e podem alterar essas colunas.
+  ELSIF current_user IN ('authenticated', 'anon') THEN
+    NEW.reporte_score_confianca := OLD.reporte_score_confianca;
+    NEW.reporte_oculto := OLD.reporte_oculto;
+    NEW.reporte_expira_em := OLD.reporte_expira_em;
+    -- o dono pode marcar como resolvido; qualquer outra mudança de status é ignorada
+    IF NEW.reporte_status::text IS DISTINCT FROM 'resolvido' THEN
+      NEW.reporte_status := OLD.reporte_status;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+```
+
+> Por que `current_user` funciona: numa chamada pela API, o Supabase roda a consulta com o papel `authenticated` (ou `anon`). Dentro de uma função `SECURITY DEFINER` (score, denúncias, alerta colaborativo) e no job do `pg_cron`, o papel é o dono, `postgres`. Fica mais explícito que contar a profundidade do trigger.
+
+**5. Score preserva `resolvido` e `expirado` (substitui a versão do A.3)**
+```sql
+CREATE OR REPLACE FUNCTION public.recalculate_reporte_score()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_reporte_id UUID := COALESCE(NEW.reporte_id, OLD.reporte_id);
+  v_min_votos  INT  := 3;   -- 3 para a demo, 5 em produção
+  v_total      INT;
+  v_confirm    INT;
+  v_taxa       NUMERIC;
+BEGIN
+  SELECT COUNT(*),
+         COUNT(*) FILTER (WHERE validacao_tipo = 'confirma')
+    INTO v_total, v_confirm
+    FROM reporte_validacoes
+   WHERE reporte_id = v_reporte_id;
+
+  v_taxa := CASE WHEN v_total = 0 THEN 0 ELSE v_confirm::NUMERIC / v_total END;
+
+  UPDATE reportes SET
+    -- coluna é numeric(4,2): guarda a fração 0.00–1.00
+    reporte_score_confianca = ROUND(v_taxa, 2),
+    reporte_status = CASE
+      -- status finais: um voto atrasado não "ressuscita" o reporte
+      WHEN reporte_status::text IN ('resolvido', 'expirado') THEN reporte_status
+      WHEN v_total >= v_min_votos AND v_taxa >= 0.7 THEN 'validado'::status_reporte
+      WHEN v_total >= v_min_votos AND v_taxa <  0.3 THEN 'rejeitado'::status_reporte
+      ELSE 'pendente'::status_reporte
+    END
+  WHERE id = v_reporte_id;
+
+  RETURN NULL;
+END;
+$$;
+```
+
+**6. Job agendado**
+```sql
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- A cada 15 minutos
+SELECT cron.schedule(
+  'expirar-reportes',
+  '*/15 * * * *',
+  $$ UPDATE public.reportes
+        SET reporte_status = 'expirado'
+      WHERE reporte_status IN ('pendente', 'validado')
+        AND reporte_expira_em < NOW() $$
+);
+
+SELECT cron.schedule(
+  'expirar-alertas',
+  '*/15 * * * *',
+  $$ UPDATE public.alertas
+        SET alerta_status = 'expirado'
+      WHERE alerta_status = 'ativo'
+        AND alerta_expira_em IS NOT NULL
+        AND alerta_expira_em < NOW() $$
+);
+
+-- Conferir: SELECT jobname, schedule, active FROM cron.job;
+-- Últimas execuções: SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 5;
+```
+
+> Rodar `cron.schedule` de novo com o mesmo nome atualiza o job (não duplica).
+
+**7. Testes** (desfazem tudo no final)
+
+a) O job expira um reporte vencido:
+```sql
+DO $$
+DECLARE
+  v_id UUID := 'COLE_O_ID_DE_UM_REPORTE';
+  v_status TEXT;
+BEGIN
+  UPDATE reportes SET reporte_expira_em = NOW() - INTERVAL '1 minute' WHERE id = v_id;
+  -- mesmo UPDATE do job
+  UPDATE reportes SET reporte_status = 'expirado'
+   WHERE id = v_id AND reporte_status IN ('pendente', 'validado') AND reporte_expira_em < NOW();
+  SELECT reporte_status INTO v_status FROM reportes WHERE id = v_id;
+  RAISE EXCEPTION 'Resultado: %', v_status;   -- esperado: expirado
+END $$;
+```
+
+b) O **dono**, logado pelo app, **não** consegue alterar a validade nem o status:
+```sql
+BEGIN;
+-- Simula o app: papel authenticated + login do DONO do reporte
+-- (sem o "sub", auth.uid() fica nulo e a RLS bloqueia antes do trigger, e o teste não provaria nada)
+SET LOCAL ROLE authenticated;
+SELECT set_config(
+  'request.jwt.claims',
+  json_build_object('sub', (SELECT perfil_id FROM public.reportes WHERE id = 'COLE_O_ID_DE_UM_REPORTE'), 'role', 'authenticated')::text,
+  true
+);
+
+UPDATE public.reportes
+   SET reporte_expira_em = NOW() + INTERVAL '10 years', reporte_status = 'validado'
+ WHERE id = 'COLE_O_ID_DE_UM_REPORTE';
+
+SELECT reporte_expira_em, reporte_status FROM public.reportes WHERE id = 'COLE_O_ID_DE_UM_REPORTE';
+ROLLBACK;
+```
+Esperado: o UPDATE afeta **1 linha** (a RLS deixou, porque é o dono), mas o SELECT mostra os valores **antigos**: quem barrou foi a proteção de colunas. Se aparecer "10 years" ou `validado`, o bloco 4 não foi aplicado.
+
+---
+
 ## Anexo B — Testes manuais com duas contas
 
 Criar a **Conta A** e a **Conta B**. Marcar cada teste quando passar.
@@ -813,5 +1174,15 @@ Criar a **Conta A** e a **Conta B**. Marcar cada teste quando passar.
 | 20 | 3 contas diferentes denunciam o reporte de A | Some do Mapa das outras contas; A ainda vê no Histórico | [ ] |
 | 21 | A tenta denunciar o próprio reporte | Bloqueado | [ ] |
 | 22 | Criar reporte novo | Só a câmera aparece como opção de foto | [ ] |
+| 23 | B, C e D confirmam o reporte de A (3 votos, 100%) | Status vira "validado" e aparece um alerta **da comunidade** no Mapa de todos (toast "Novo alerta") | [ ] |
+| 24 | Mais 2 contas contestam (3 de 5 = 60%, abaixo dos 70%) | O status volta a "pendente" e o alerta some do Mapa (`cancelado`) | [ ] |
+| 25 | Uma das contas troca o voto para confirmar (4 de 5 = 80%) | O **mesmo** alerta volta (sem duplicar: 1 linha em `alertas` para esse reporte) | [ ] |
+| 26 | O reporte validado é ocultado por 3 denúncias | O alerta ligado é cancelado | [ ] |
+| 27 | O reporte é marcado como resolvido (pelo SQL Editor, se o app ainda não tiver essa opção) | O alerta ligado vira `expirado` | [ ] |
+| 28 | Criar um reporte de "bloqueio de via" e conferir no Table Editor | `reporte_expira_em` = criação + 4 h | [ ] |
+| 29 | Esperar o job (ou rodar o teste A.11.7a) com um reporte vencido | Status vira `expirado`; some do Mapa e da Home, mas continua no Histórico do dono com o selo "Expirado" | [ ] |
+| 30 | Votar num reporte expirado (por outra tela aberta) | O status continua `expirado` (não volta para pendente) | [ ] |
+| 31 | Reporte validado com alerta colaborativo expira | O alerta ligado vira `expirado` e some do Mapa | [ ] |
+| 32 | Tentar alterar `reporte_expira_em` pela API (teste A.11.7b) | Valor não muda | [ ] |
 
 > Para testar como um usuário específico no SQL Editor do Supabase, use a opção de "impersonate"/role do próprio editor, ou faça os testes pelo app com as duas contas.

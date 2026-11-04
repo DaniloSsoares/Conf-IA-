@@ -1,16 +1,19 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { ReportComment, ReportValidation } from '@/src/shared/types/report';
+import { ReportComment } from '@/src/shared/types/report';
 import { useViewHistoryStyles } from '../styles';
+import { Denuncia } from '../useDenuncia';
 import { Divider } from './MetaRow';
+import { ReportFlag } from './ReportFlag';
 
 interface CommentListProps {
   comentarios: ReportComment[];
   currentUserId: string;
+  denuncia: Denuncia;
 }
 
-export function CommentList({ comentarios, currentUserId }: CommentListProps) {
+export function CommentList({ comentarios, currentUserId, denuncia }: CommentListProps) {
   const { styles } = useViewHistoryStyles();
   if (comentarios.length === 0) return null;
 
@@ -21,7 +24,11 @@ export function CommentList({ comentarios, currentUserId }: CommentListProps) {
         {comentarios.map((v, index) => (
           <View key={v.id}>
             {index > 0 && <Divider />}
-            <CommentItem validacao={v} isMine={v.perfil_id === currentUserId} />
+            <CommentItem
+              validacao={v}
+              isMine={v.perfil_id === currentUserId}
+              denuncia={denuncia}
+            />
           </View>
         ))}
       </View>
@@ -29,7 +36,13 @@ export function CommentList({ comentarios, currentUserId }: CommentListProps) {
   );
 }
 
-function CommentItem({ validacao, isMine }: { validacao: ReportComment; isMine: boolean }) {
+interface CommentItemProps {
+  validacao: ReportComment;
+  isMine: boolean;
+  denuncia: Denuncia;
+}
+
+function CommentItem({ validacao, isMine, denuncia }: CommentItemProps) {
   const { styles } = useViewHistoryStyles();
   const confirma = validacao.validacao_tipo === 'confirma';
 
@@ -42,11 +55,21 @@ function CommentItem({ validacao, isMine }: { validacao: ReportComment; isMine: 
       />
       <View style={styles.commentBody}>
         <Text style={styles.commentText}>{validacao.validacao_comentario}</Text>
-        {/* Sem nome por enquanto (LGPD): o primeiro nome virá da view perfil_publico */}
+        {/* Só o primeiro nome (view perfil_publico, LGPD); sem nome → "Morador da região" */}
         <Text style={styles.commentMeta}>
-          {isMine ? 'Você' : validacao.autor_nome??'Morador da Região'} · {new Date(validacao.created_at).toLocaleString('pt-BR')}
+          {isMine ? 'Você' : validacao.autor_nome ?? 'Morador da região'} ·{' '}
+          {new Date(validacao.created_at).toLocaleString('pt-BR')}
         </Text>
       </View>
+
+      {/* O banco também impede denunciar o próprio comentário; aqui só não mostra o botão */}
+      {!isMine && (
+        <ReportFlag
+          compacto
+          jaDenunciado={denuncia.jaDenunciou(validacao.id)}
+          onPress={() => denuncia.abrir({ tipo: 'comentario', id: validacao.id })}
+        />
+      )}
     </View>
   );
 }

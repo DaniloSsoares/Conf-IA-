@@ -223,7 +223,8 @@ export async function getActiveReports(): Promise<Report[]> {
     const { data, error } = await supabaseConfig
       .from("reportes")
       .select("*")
-      .neq("reporte_status", "rejeitado");
+      .neq("reporte_status", "rejeitado")
+      .eq("reporte_oculto", false);
     if (error) throw error;
     return (data as Report[]) || [];
   } catch (error) {
@@ -291,21 +292,26 @@ export async function getMyValidation(
 export async function getReportValidations(reportId: string): Promise<ReportComment[]> {
   const { data: votos, error } = await supabaseConfig
     .from("reporte_validacoes")
-    .select("id,perfil_id, validacao_tipo, validacao_comentario, created_at")
+    .select("id, perfil_id, validacao_tipo, validacao_comentario, validacao_oculta, created_at")
     .eq("reporte_id", reportId)
     .order("created_at", { ascending: false });
 
-  if (error) {
+  if (error || !votos) {
     console.error("Erro ao buscar votos do reporte:", error);
     return [];
   }
+
+  // Comentário ocultado por denúncias: some o texto, mas o voto continua (conta no
+  // contador e no score). Filtrar a linha na query tiraria o voto junto.
+  const votosVisiveis = votos.map((v) => ({
+    ...v,
+    validacao_comentario: v.validacao_oculta ? null : v.validacao_comentario,
+  }));
+
+  // Só busca nome de quem tem comentário visível; Set remove repetidos
   const idsAutores = [
-  ...new Set(
-     votos
-      .filter((v) => v.validacao_comentario)   
-      .map((v) => v.perfil_id)
-  ),
-];
+    ...new Set(votosVisiveis.filter((v) => v.validacao_comentario).map((v) => v.perfil_id)),
+  ];
 
  let autores: { id: string; primeiro_nome: string | null }[] = [];
 
@@ -324,7 +330,7 @@ export async function getReportValidations(reportId: string): Promise<ReportComm
 
   const nomePorId = new Map(autores.map((a) => [a.id, a.primeiro_nome]));
 
-  return votos.map((v) => ({
+  return votosVisiveis.map((v) => ({
     ...(v as ReportValidation),
     autor_nome: nomePorId.get(v.perfil_id) ?? null,
   }));

@@ -177,7 +177,9 @@ export function useMapData() {
         (payload) => {
           const atualizado = payload.new as Report;
           setReports((current) => {
-            if (atualizado.reporte_status === "rejeitado") {
+            // A lista tem duas fontes (consulta + Realtime): o filtro de getActiveReports
+            // precisa valer aqui também, senão um voto num reporte oculto o traz de volta
+            if (atualizado.reporte_status === "rejeitado" || atualizado.reporte_oculto) {
               return current.filter((r) => r.id !== atualizado.id);
             }
             const existe = current.some((r) => r.id === atualizado.id);

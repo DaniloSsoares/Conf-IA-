@@ -37,6 +37,8 @@ export interface Report {
   created_at: string;
   updated_at: string;
   reporte_midias?: ReportMedia[];
+  // true quando 3 pessoas denunciaram: some do Mapa/Home, o dono ainda vê no Histórico
+  reporte_oculto?: boolean;
 }
 
 export interface CreateReportInput {
@@ -75,6 +77,8 @@ export interface ReportValidation {
   validacao_tipo: TipoValidacao;
   validacao_comentario: string | null;
   created_at: string;
+  // true quando o comentário foi ocultado por denúncias (o voto continua contando)
+  validacao_oculta?: boolean;
 }
 
 export interface ReportComment extends ReportValidation{
