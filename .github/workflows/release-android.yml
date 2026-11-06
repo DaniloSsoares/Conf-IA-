@@ -1,0 +1,97 @@
+# CD: gera o APK Android e publica numa Release do GitHub.
+#
+# Como disparar:
+#   git tag v1.0.0 && git push origin v1.0.0     → gera o APK e cria a Release "v1.0.0"
+#   Aba Actions → "CD - APK Android" → Run workflow → gera o APK (sem Release), para testar
+#
+# O build roda no próprio runner do GitHub (expo prebuild + Gradle), sem depender de conta na Expo/EAS.
+# O APK é assinado com a chave de debug: serve para instalar e demonstrar, não para publicar na Play Store.
+name: CD - APK Android
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+# Só um build por vez para a mesma tag/branch
+concurrency:
+  group: release-android-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write   # necessário para criar a Release
+
+jobs:
+  apk:
+    name: Gerar APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # As EXPO_PUBLIC_* são embutidas no app na hora do build (o .env não vai para o repositório).
+      # Configure em: Settings → Secrets and variables → Actions → New repository secret
+      EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+      EXPO_PUBLIC_OPENWEATHER_API_KEY: ${{ secrets.EXPO_PUBLIC_OPENWEATHER_API_KEY }}
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Falha logo no começo com uma mensagem clara, em vez de gerar um APK que não conecta no banco
+      - name: Conferir secrets obrigatórios
+        run: |
+          faltando=0
+          for nome in EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY GOOGLE_MAPS_API_KEY; do
+            if [ -z "${!nome}" ]; then
+              echo "::error::Secret $nome não configurado (Settings → Secrets and variables → Actions)"
+              faltando=1
+            fi
+          done
+          if [ -z "$EXPO_PUBLIC_OPENWEATHER_API_KEY" ]; then
+            echo "::warning::EXPO_PUBLIC_OPENWEATHER_API_KEY vazio: o clima vai aparecer como 'Estimado'"
+          fi
+          exit $faltando
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Mesma verificação do CI: não gera APK de código que não compila
+      - name: Verificar tipos
+        run: npm run typecheck
+
+      # Gera a pasta android/ a partir do app.json/app.config.js (Continuous Native Generation)
+      - name: Gerar projeto Android
+        run: npx expo prebuild --platform android --no-install --clean
+
+      # Depois do prebuild: o cache do Gradle precisa dos arquivos .gradle que ele gera
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17   # versão exigida pelo React Native 0.81
+          cache: gradle
+
+      - name: Compilar APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Nomear o APK
+        run: cp android/app/build/outputs/apk/release/app-release.apk "conf-ia-${GITHUB_REF_NAME}.apk"
+
+      # Fica disponível para download na página da execução (aba Actions) por 30 dias
+      - uses: actions/upload-artifact@v4
+        with:
+          name: conf-ia-${{ github.ref_name }}-apk
+          path: conf-ia-*.apk
+          retention-days: 30
+
+      # Só quando disparado por tag: cria a Release com o APK e as notas geradas pelos commits
+      - name: Publicar Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: conf-ia-*.apk
+          generate_release_notes: true

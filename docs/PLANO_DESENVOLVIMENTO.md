@@ -400,7 +400,7 @@ Seguir o roteiro do [Anexo B](#anexo-b--testes-manuais-com-duas-contas):
 
 ### 3.6 🔵 Limpeza
 
-- [ ] Remover a URL e a chave do Supabase comentadas em [src/config/supabase.tsx](../src/config/supabase.tsx) (é uma chave pública, mas pega mal)
+- [x] Remover a URL e a chave do Supabase comentadas em [src/config/supabase.tsx](../src/config/supabase.tsx) (é uma chave pública, mas pega mal)
 - [ ] Mostrar um erro claro se `EXPO_PUBLIC_SUPABASE_URL` estiver vazia, em vez de `|| ''` falhando em silêncio
 - [ ] Remover a pasta `app-example/` e o script `reset-project` do `package.json`
 - [ ] Revisar `src/shared/utils/examples.tsx` (remover se não for usado)
@@ -408,8 +408,8 @@ Seguir o roteiro do [Anexo B](#anexo-b--testes-manuais-com-duas-contas):
 
 ### 3.7 🔵 CI no GitLab
 
-- [ ] `.gitlab-ci.yml` com `npm ci`, `npx tsc --noEmit` e `npx expo lint`
-- [ ] Corrigir os erros de tipo e lint que aparecerem
+- [x] CI no GitHub Actions e no GitLab CI (`npm ci`, tipos, lint, gitleaks) + CD do APK Android por tag. Ver [CI_CD.md](CI_CD.md)
+- [x] Corrigir os erros de lint (5 erros de hooks em `toastConfig.tsx`). Sobraram 47 avisos, sem erros
 - [ ] Opcional: teste unitário de `haversineKm` (ex.: São Paulo → Rio ≈ 360 km)
 
 ### 3.8 🔵 Separar responsabilidades nas telas grandes

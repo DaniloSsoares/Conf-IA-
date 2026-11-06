@@ -1,0 +1,53 @@
+# CI: roda em todo push na main e em todo Pull Request.
+# Se algum job falhar, o commit/PR fica com ❌ e ninguém precisa descobrir o erro "na mão".
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Dois pushes seguidos: cancela a verificação do primeiro e roda só a do mais recente
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    name: Tipos e lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22   # Expo 54 / React Native 0.81 pedem Node 20.19+
+          cache: npm
+
+      # npm ci instala exatamente o package-lock.json (e falha se ele estiver desatualizado)
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Verificar tipos (TypeScript)
+        run: npm run typecheck
+
+      - name: Lint (ESLint)
+        run: npm run lint
+
+  segredos:
+    name: Procurar segredos
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # histórico inteiro: um segredo apagado continua nos commits antigos
+
+      # Falha se encontrar chaves/senhas. Achados revisados e aceitos ficam em .gitleaksignore
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

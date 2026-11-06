@@ -79,3 +79,6 @@ service-account*.json
 
 expo-env.d.ts
 # @end expo-cli
+# Expo prebuild (gerados pelo CD a partir do app.json; não versionar)
+/android
+/ios

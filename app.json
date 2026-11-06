@@ -12,6 +12,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.confia.app",
       "adaptiveIcon": {
         "backgroundColor": "#020617",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

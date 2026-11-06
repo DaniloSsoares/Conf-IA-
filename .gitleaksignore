@@ -1,0 +1,8 @@
+# Achados do gitleaks revisados e aceitos.
+#
+# Chave "publishable" (anon) do Supabase, que ficou em src/config/supabase.tsx em commits antigos.
+# Ela é pública por natureza: vai dentro do app e qualquer usuário consegue extraí-la do APK.
+# Quem protege os dados é a RLS do banco, não o segredo dessa chave.
+# A chave service_role (essa sim secreta) nunca esteve no repositório.
+5a1dc24e6560bf3004277f7babb8c9ad61571db7:src/config/supabase.tsx:generic-api-key:6
+e4e36a743481746154e2dbc3b8ba519f512b3ce0:src/config/supabase.tsx:generic-api-key:6

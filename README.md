@@ -1,5 +1,9 @@
 # Conf-U — Plataforma de Prevenção e Resposta a Desastres Climáticos
 
+[![CI](https://github.com/DaniloSsoares/Conf-IA-/actions/workflows/ci.yml/badge.svg)](https://github.com/DaniloSsoares/Conf-IA-/actions/workflows/ci.yml) [![CD - APK Android](https://github.com/DaniloSsoares/Conf-IA-/actions/workflows/release-android.yml/badge.svg)](https://github.com/DaniloSsoares/Conf-IA-/actions/workflows/release-android.yml)
+
+Como o projeto é verificado e publicado: [docs/CI_CD.md](docs/CI_CD.md)
+
 Bem-vindo ao projeto **Conf-U**.
 
 A **Conf-U** é uma plataforma digital de monitoramento, prevenção e resposta a desastres climáticos, desenvolvida com o objetivo de integrar informações meteorológicas, dados geográficos e participação colaborativa da população em um ambiente tecnológico acessível e orientado à redução de riscos socioambientais.
