@@ -26,9 +26,9 @@ export default function MapScreen() {
 
     const {
         location,
+        raioKm,
         alerts,
         reports,
-        profile,
         weather,
         loadingLocation,
         permissionDenied,
@@ -95,7 +95,7 @@ export default function MapScreen() {
         }
     };
 
-    const raioKm = profile?.perfil_raio_notificacao_km ?? 5;
+    // O raio vem do hook: é o mesmo usado para buscar no banco
     const raioMetros = raioKm * 1000;
 
     // Filtra só o que está dentro do raio do usuário (o Circle é apenas visual)

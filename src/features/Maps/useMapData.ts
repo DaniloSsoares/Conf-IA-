@@ -12,6 +12,7 @@ import {
   saveWeatherReading,
 } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
+import { boundingBox } from "@/src/shared/utils/haversine";
 
 function getEnabledCategories(preferences: any): string[] {
   const merged = { ...DEFAULT_ALERT_PREFERENCES, ...(preferences || {}) };
@@ -76,10 +77,30 @@ export function useMapData() {
     fetchWeather();
   }, [location]);
 
+  // numeric no banco chega como texto: sem o Number, "5" + 20 viraria "520"
+  const raioKm = Number(profile?.perfil_raio_notificacao_km ?? 5);
+
+  // Quadrado em volta do usuário para o banco devolver só o que está perto.
+  // useMemo: só muda quando a localização ou o raio mudam (um objeto novo a cada
+  // render recriaria o fetchReports e dispararia a busca sem parar).
+  const bounds = useMemo(
+    () =>
+      location
+        ? boundingBox(location.latitude, location.longitude, raioKm)
+        : undefined,
+    [location, raioKm],
+  );
+
   const fetchReports = useCallback(async () => {
-    const activeReports = await getActiveReports();
-    setReports(activeReports);
-  }, []);
+    // GPS ainda não respondeu: espera em vez de buscar o país inteiro.
+    // Quando a localização chegar, `bounds` muda e o useFocusEffect busca de novo sozinho.
+    if (!bounds) return;
+    setReports(await getActiveReports(bounds));
+  }, [bounds]);
+
+  // Ref para o re-sync do Realtime usar a caixa atual sem recriar o canal
+  const fetchReportsRef = useRef(fetchReports);
+  fetchReportsRef.current = fetchReports;
 
   const fetchProfile = useCallback(async () => {
     const { data, error } = await supabaseConfig.auth.getUser();
@@ -259,9 +280,8 @@ export function useMapData() {
             return;
           }
 
-          // Re-sync de reportes via REST
-          const activeReports = await getActiveReports();
-          setReports(activeReports);
+          // Re-sync de reportes via REST (com a mesma caixa da busca normal)
+          fetchReportsRef.current();
 
           // Re-sync de alertas via REST (reutiliza a lógica com filtro de categorias)
           fetchAlertas();
@@ -275,6 +295,7 @@ export function useMapData() {
 
   return {
     location,
+    raioKm,
     alerts,
     reports,
     profile,

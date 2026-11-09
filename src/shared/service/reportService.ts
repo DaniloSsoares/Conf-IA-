@@ -8,6 +8,8 @@ import {
   TipoValidacao,
   UpdateReportInput,
 } from "../types/report";
+import { BoundingBox } from "../utils/haversine";
+
 
 export async function uploadReportPhoto(
   userId: string,
@@ -218,15 +220,28 @@ export async function getUserReports(userId: string): Promise<Report[]> {
   }
 }
 
-export async function getActiveReports(): Promise<Report[]> {
+export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
   try {
-    const { data, error } = await supabaseConfig
-      .from("reportes")
-      .select("*")
-      .neq("reporte_status", "rejeitado")
-      .eq("reporte_oculto", false);
+
+    let query = supabaseConfig
+    .from('reportes')
+    .select("*")
+    .neq("reporte_status", "rejeitado")
+    .eq("reporte_oculto", false);
+
+    if(bounds){ 
+     query = query
+     .gte("reporte_latitude", bounds.minLat)
+     .gte("reporte_longitude", bounds.minLng)
+     .lte("reporte_latitude", bounds.maxLat)
+     .lte("reporte_longitude", bounds.maxLng)
+    }
+    const {data, error} = await query;
+
+    
     if (error) throw error;
     return (data as Report[]) || [];
+
   } catch (error) {
     console.error("Erro ao buscar reportes ativos:", error);
     return [];
