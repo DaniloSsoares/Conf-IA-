@@ -229,10 +229,10 @@ Hoje o app baixa **todos** os reportes e alertas do banco e só filtra no client
 
 ### 2.2 🟡 Realtime e polling
 
-- [ ] Remover o `setInterval` de 10s ([useMapData.ts:538](../src/features/Maps/useMapData.ts)): o Realtime com re-sync na reconexão já cobre. Se quiser manter algo, usar 60s
-- [ ] O toast "Nova ocorrência próxima a você" só deve aparecer se o reporte estiver dentro do raio (usar `haversineKm`)
-- [ ] No `INSERT`, evitar duplicata: só adicionar se o `id` ainda não estiver na lista
-- [ ] Dar um nome único ao canal (`mapa-realtime-${profile.id}`) para evitar conflito em re-montagem
+- [x] Polling de 10 s para 60 s (`INTERVALO_SYNC_MS`): o Realtime cobre o tempo real; o polling fica como rede de segurança para quando o canal cai sem avisar
+- [x] O toast "Nova ocorrência próxima a você" só aparece se o reporte estiver dentro do raio (`estaPerto`), e não aparece para o próprio autor. Alertas usam o raio do usuário + o raio do alerta, e o texto diferencia alerta oficial de alerta da comunidade
+- [x] No `INSERT`, evitar duplicata: só adicionar se o `id` ainda não estiver na lista (reportes e alertas)
+- [x] Dar um nome único ao canal (`mapa-realtime-${profileId}`) para evitar conflito em re-montagem
 
 ### 2.3 🔴 Clima: parar de exibir e gravar dado falso
 
