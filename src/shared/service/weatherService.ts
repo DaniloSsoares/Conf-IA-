@@ -1,5 +1,9 @@
-import { supabaseConfig } from "@/src/config/supabase";
 import { WeatherData } from "../types/weather";
+
+// Este serviço só LÊ o clima. Ele não grava em dados_climaticos de propósito:
+// a chave do app é pública, então qualquer usuário conseguiria inserir leituras falsas
+// (ex.: 500 mm de chuva) e disparar alertas automáticos. A gravação, quando existir,
+// deve ser feita no servidor (Edge Function agendada), a partir da API do clima.
 
 const WEATHERAPI_BASE_URL = "https://api.weatherapi.com/v1/current.json";
 const OPENWEATHER_BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
@@ -94,36 +98,7 @@ export async function getCurrentWeather(
     }
   }
 
-  // 3. Fallback de dados para simulação local se APIs externas não responderem
-  return {
-    clima_latitude: latitude,
-    clima_longitude: longitude,
-    clima_temperatura_c: 24,
-    clima_precipitacao_mm: 0,
-    clima_umidade_pct: 68,
-    clima_vento_kmh: 12,
-    clima_fonte: 'Estimado',
-    clima_referente_a: new Date().toISOString(),
-    descricao: 'Ensolarado com poucas nuvens',
-    cidade: 'Sua Região',
-    icone_ionicon: 'sunny',
-  };
-}
-
-export async function saveWeatherReading(weather: WeatherData): Promise<void> {
-  try {
-    const { descricao, cidade, icone_ionicon, ...dbFields } = weather as any;
-    const { error } = await supabaseConfig.from("dados_climaticos").insert(dbFields);
-    if (error) {
-      if (error.code === '42501') {
-        console.warn(
-          "Aviso RLS (dados_climaticos): Permissão de inserção restrita pelas políticas RLS do Supabase. Para permitir o salvamento, configure a política de INSERT no Supabase."
-        );
-      } else {
-        console.error("Erro ao salvar leitura climática:", error.message || error);
-      }
-    }
-  } catch (error) {
-    console.error("Erro ao salvar leitura climática:", error);
-  }
+  // 3. Nenhuma API respondeu: devolve null em vez de inventar um clima.
+  // Num app de defesa civil, "ensolarado" falso é pior que "indisponível".
+  return null;
 }

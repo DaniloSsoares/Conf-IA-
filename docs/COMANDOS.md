@@ -49,6 +49,7 @@ EXPO_PUBLIC_OPENWEATHER_API_KEY=
 | `EXPO_PUBLIC_OPENWEATHER_API_KEY` | [openweathermap.org](https://openweathermap.org) → My API keys |
 
 > Opcional: `EXPO_PUBLIC_WEATHERAPI_KEY` (weatherapi.com). Se existir, o app usa a WeatherAPI primeiro e a OpenWeather como reserva.
+> Se nenhuma das duas responder (chave ausente, inválida ou sem internet), o app mostra **"Clima indisponível"**: ele nunca inventa um clima.
 > Nunca coloque a chave `service_role` do Supabase no `.env` do app.
 
 ---
@@ -219,7 +220,7 @@ Prefixos usados nos commits: `feat:` (funcionalidade nova), `fix:` (correção),
 | `Port 8081 is being used` | Fechar outro terminal com o Expo aberto, ou aceitar a porta alternativa que ele sugere |
 | Erro de módulo não encontrado depois de um `git pull` | Rodar `npm install` de novo |
 | Mapa abre sem marcadores | Conferir a permissão de localização do Expo Go no celular e o raio configurado no Perfil |
-| Clima aparece como "Sua Região" / 24°C | A chave da OpenWeather está faltando ou inválida no `.env` |
+| Aparece "Clima indisponível" | A chave da OpenWeather está faltando ou inválida no `.env` (depois de corrigir, reinicie com `npx expo start -c`) |
 | `ECONNREFUSED ...:5432` no `db pull`/`db push` | O container do Docker não tem IPv6. Usar `--db-url "$DB_URL"` (ver seção 5) |
 | Erro de RLS (`42501`) no log | A operação foi bloqueada pelas regras de segurança do banco. Ver as policies no Supabase |
 
