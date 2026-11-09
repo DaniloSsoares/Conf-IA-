@@ -12,12 +12,16 @@ import {
   saveWeatherReading,
 } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
-import { boundingBox } from "@/src/shared/utils/haversine";
+import { boundingBox, haversineKm } from "@/src/shared/utils/haversine";
 
 // Alerta tem raio próprio: o centro pode estar fora do raio do usuário e ainda
 // assim cobrir a posição dele. A caixa dos alertas é maior por essa margem.
 // Limite conhecido: alertas com raio maior que isso, e centro longe, não chegam.
 const MARGEM_ALERTA_KM = 20;
+
+// O Realtime atualiza na hora; o polling é só a rede de segurança para quando
+// o canal cai sem avisar (troca de rede, app em segundo plano)
+const INTERVALO_SYNC_MS = 60_000;
 
 export function useMapData() {
   const [location, setLocation] = useState<{
@@ -98,6 +102,10 @@ export function useMapData() {
     [location, raioKm],
   );
 
+  // O Realtime lê daqui a posição e o raio atuais sem precisar recriar o canal
+  const areaRef = useRef({ location, raioKm });
+  areaRef.current = { location, raioKm };
+
   const fetchReports = useCallback(async () => {
     // GPS ainda não respondeu: espera em vez de buscar o país inteiro.
     // Quando a localização chegar, `bounds` muda e o useFocusEffect busca de novo sozinho.
@@ -166,7 +174,7 @@ export function useMapData() {
   }, [fetchAlertas]);
 
   // Recarrega todos os dados do mapa ao entrar na tela (Foco)
-  // E agenda uma atualização automática a cada 10 segundos enquanto a tela estiver visível
+  // e agenda uma sincronização de segurança enquanto a tela estiver visível (ver INTERVALO_SYNC_MS)
   useFocusEffect(
     useCallback(() => {
       fetchProfile();
@@ -176,7 +184,7 @@ export function useMapData() {
       const intervalId = setInterval(() => {
         fetchReports();
         fetchAlertasRef.current();
-      }, 10000);
+      }, INTERVALO_SYNC_MS);
 
       return () => {
         clearInterval(intervalId);
@@ -190,8 +198,20 @@ export function useMapData() {
   useEffect(() => {
     if (!profileId) return;
 
+    // true se o ponto está dentro do raio do usuário (+ o raio do próprio alerta, se houver).
+    // Lê a posição/raio da ref: assim o canal não precisa ser recriado quando eles mudam.
+    const estaPerto = (lat: unknown, lng: unknown, raioExtraKm = 0) => {
+      const { location: atual, raioKm: raio } = areaRef.current;
+      if (!atual) return false;
+      const latN = Number(lat);
+      const lngN = Number(lng);
+      if (isNaN(latN) || isNaN(lngN)) return false;
+      return haversineKm(atual.latitude, atual.longitude, latN, lngN) <= raio + raioExtraKm;
+    };
+
     const subscription = supabaseConfig
-      .channel("mapa-realtime")
+      // Nome único por usuário: o canal antigo (ainda fechando) e o novo não se confundem
+      .channel(`mapa-realtime-${profileId}`)
 
       // --- REPORTES (sem filtro de preferência — comunidade é sempre visível) ---
       .on(
@@ -199,7 +219,17 @@ export function useMapData() {
         { event: "INSERT", schema: "public", table: "reportes" },
         (payload) => {
           const novoReporte = payload.new as Report;
-          setReports((current) => [...current, novoReporte]);
+          // Longe: ignora, igual à busca do banco (que só traz o que está na caixa)
+          if (!estaPerto(novoReporte.reporte_latitude, novoReporte.reporte_longitude)) return;
+
+          // Polling e Realtime podem trazer o mesmo reporte: só adiciona se ainda não está.
+          // Devolver o mesmo array evita redesenhar o mapa à toa.
+          setReports((current) =>
+            current.some((r) => r.id === novoReporte.id) ? current : [...current, novoReporte],
+          );
+
+          // O próprio usuário acabou de criar: não precisa ser avisado
+          if (novoReporte.perfil_id === profileId) return;
           Toast.show({
             type: "info",
             text1: "Novo reporte comunitário!",
@@ -247,11 +277,25 @@ export function useMapData() {
           const novoAlerta = payload.new as any;
           if (!categoriasAtivas.includes(novoAlerta.alerta_tipo_ocorrencia))
             return;
+          // Alerta tem raio próprio: vale se o raio dele alcança o raio do usuário
+          if (
+            !estaPerto(
+              novoAlerta.alerta_latitude,
+              novoAlerta.alerta_longitude,
+              Number(novoAlerta.alerta_raio_km ?? 0),
+            )
+          )
+            return;
 
-          setAlerts((current) => [...current, novoAlerta]);
+          setAlerts((current) =>
+            current.some((a) => a.id === novoAlerta.id) ? current : [...current, novoAlerta],
+          );
           Toast.show({
             type: "info",
-            text1: "Novo alerta oficial!",
+            text1:
+              novoAlerta.alerta_origem === "colaborativo"
+                ? "Novo alerta da comunidade!"
+                : "Novo alerta oficial!",
             text2: novoAlerta.alerta_titulo,
           });
         },
