@@ -5,7 +5,7 @@ import { supabaseConfig } from "@/src/config/supabase";
 import { Report } from "@/src/shared/types/report";
 import { getActiveReports } from "@/src/shared/service/reportService";
 import { getProfile } from "@/src/shared/service/profileService";
-import { DEFAULT_ALERT_PREFERENCES } from "@/src/shared/constants/alertCategories";
+import { getEnabledCategories } from "@/src/shared/constants/alertCategories";
 import { useFocusEffect } from "expo-router";
 import {
   getCurrentWeather,
@@ -13,13 +13,6 @@ import {
 } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
 import { boundingBox } from "@/src/shared/utils/haversine";
-
-function getEnabledCategories(preferences: any): string[] {
-  const merged = { ...DEFAULT_ALERT_PREFERENCES, ...(preferences || {}) };
-  return Object.entries(merged)
-    .filter(([_, enabled]) => enabled === true)
-    .map(([categoria]) => categoria);
-}
 
 export function useMapData() {
   const [location, setLocation] = useState<{
@@ -135,9 +128,11 @@ export function useMapData() {
       .eq("alerta_status", "ativo")
       .in("alerta_tipo_ocorrencia", categoriasAtivas);
 
-    if (!error && data) {
-      setAlerts(data);
+    if (error) {
+      console.error("Erro ao buscar alertas:", error);
+      return;
     }
+    setAlerts(data ?? []);
   }, [profileId, categoriasAtivas]);
 
   // Ref para o foco/polling sempre chamarem a versão mais recente sem

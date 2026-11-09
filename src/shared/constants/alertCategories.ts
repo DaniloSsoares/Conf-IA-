@@ -23,3 +23,22 @@ export const DEFAULT_ALERT_PREFERENCES: AlertPreferences = {
   falta_de_luz: true,
   outro: true,
 };
+
+// O JSON de preferências salvo no perfil pode ter chaves antigas que não existem mais
+// no enum tipo_ocorrencia do banco (ex.: "chuva", "acidente"). Mandar uma delas numa
+// consulta derruba a consulta inteira (erro 22P02 do Postgres). Por isso a lista
+// oficial do app (ALERT_CATEGORIES) é a fonte da verdade, nunca as chaves do JSON.
+export function normalizeAlertPreferences(raw: unknown): AlertPreferences {
+  const salvas = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const preferencias = { ...DEFAULT_ALERT_PREFERENCES };
+  for (const { key } of ALERT_CATEGORIES) {
+    if (typeof salvas[key] === 'boolean') preferencias[key] = salvas[key] as boolean;
+  }
+  return preferencias;
+}
+
+// Categorias ligadas, prontas para usar num filtro .in() da consulta de alertas
+export function getEnabledCategories(raw: unknown): (keyof AlertPreferences)[] {
+  const preferencias = normalizeAlertPreferences(raw);
+  return ALERT_CATEGORIES.map((c) => c.key).filter((key) => preferencias[key]);
+}
