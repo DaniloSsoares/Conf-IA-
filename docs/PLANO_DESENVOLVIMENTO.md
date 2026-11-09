@@ -221,11 +221,11 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 
 Hoje o app baixa **todos** os reportes e alertas do banco e só filtra no cliente.
 
-- [ ] `getActiveReports(bounds?)` com `.gte/.lte` em latitude e longitude
+- [x] `getActiveReports(bounds?)` com `.gte/.lte` em latitude e longitude
   - `deltaLat = raioKm / 111`
   - `deltaLng = raioKm / (111 * Math.cos(lat * Math.PI / 180))`
-- [ ] Mesma coisa na query de `alertas`
-- [ ] Manter o Haversine no cliente para refinar (o bounding box é um quadrado, o raio é um círculo)
+- [x] Mesma coisa na query de `alertas`
+- [x] Manter o Haversine no cliente para refinar (o bounding box é um quadrado, o raio é um círculo)
 
 ### 2.2 🟡 Realtime e polling
 
@@ -249,7 +249,7 @@ Hoje o app baixa **todos** os reportes e alertas do banco e só filtra no client
 ### 2.4 🟡 Ajustes visuais no Mapa
 
 - [ ] Usar `weather.icone_ionicon` no lugar do ícone fixo `partly-sunny-outline` ([Maps/index.tsx:170](../src/features/Maps/index.tsx))
-- [ ] **Filtro de alertas pelo raio do alerta:** `alertas` tem `alerta_raio_km`, e o filtro atual só considera o centro do alerta. Um alerta de 10 km com centro a 7 km do usuário não aparece, mesmo cobrindo a posição dele. Trocar por `haversineKm(...) <= raioKm + Number(a.alerta_raio_km ?? 0)`
+- [x] **Filtro de alertas pelo raio do alerta:** `alertas` tem `alerta_raio_km`, e o filtro atual só considera o centro do alerta. Um alerta de 10 km com centro a 7 km do usuário não aparece, mesmo cobrindo a posição dele. Trocar por `haversineKm(...) <= raioKm + Number(a.alerta_raio_km ?? 0)`
 - [ ] `reporte_nivel_risco` é usado no Mapa, mas **não existe** no banco (confirmado no diagrama). Hoje todo reporte aparece igual. Decidir entre:
   - (a) derivar da categoria (ex.: deslizamento = alto, falta de luz = baixo), ou
   - (b) derivar do score de confiança, ou

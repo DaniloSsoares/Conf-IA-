@@ -256,7 +256,9 @@ export const getStyles = (theme: AppTheme) => {
       justifyContent: 'center',
       borderWidth: 1.5,
       borderColor: theme.white,
-      zIndex: 2,
+      // Fica acima do ícone (elevation 6) sem zIndex: na Nova Arquitetura o zIndex reordena
+      // os filhos, e o marcador do react-native-maps quebra ("addViewAt: failed to insert view")
+      elevation: 7,
     },
     iconHighRisk: {
       backgroundColor: theme.alertRed,

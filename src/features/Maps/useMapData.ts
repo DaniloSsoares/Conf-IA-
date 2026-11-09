@@ -14,6 +14,11 @@ import {
 import { WeatherData } from "@/src/shared/types/weather";
 import { boundingBox } from "@/src/shared/utils/haversine";
 
+// Alerta tem raio próprio: o centro pode estar fora do raio do usuário e ainda
+// assim cobrir a posição dele. A caixa dos alertas é maior por essa margem.
+// Limite conhecido: alertas com raio maior que isso, e centro longe, não chegam.
+const MARGEM_ALERTA_KM = 20;
+
 export function useMapData() {
   const [location, setLocation] = useState<{
     latitude: number;
@@ -84,6 +89,15 @@ export function useMapData() {
     [location, raioKm],
   );
 
+  // Caixa maior para os alertas (ver MARGEM_ALERTA_KM)
+  const boundsAlertas = useMemo(
+    () =>
+      location
+        ? boundingBox(location.latitude, location.longitude, raioKm + MARGEM_ALERTA_KM)
+        : undefined,
+    [location, raioKm],
+  );
+
   const fetchReports = useCallback(async () => {
     // GPS ainda não respondeu: espera em vez de buscar o país inteiro.
     // Quando a localização chegar, `bounds` muda e o useFocusEffect busca de novo sozinho.
@@ -115,7 +129,7 @@ export function useMapData() {
   );
 
   const fetchAlertas = useCallback(async () => {
-    if (!profileId) return;
+    if (!profileId || !boundsAlertas) return;
 
     if (categoriasAtivas.length === 0) {
       setAlerts([]);
@@ -126,14 +140,20 @@ export function useMapData() {
       .from("alertas")
       .select("*")
       .eq("alerta_status", "ativo")
-      .in("alerta_tipo_ocorrencia", categoriasAtivas);
+      .in("alerta_tipo_ocorrencia", categoriasAtivas)
+      .gte("alerta_latitude", boundsAlertas.minLat)
+      .lte("alerta_latitude", boundsAlertas.maxLat)
+      .gte("alerta_longitude", boundsAlertas.minLng)
+      .lte("alerta_longitude", boundsAlertas.maxLng);
 
     if (error) {
       console.error("Erro ao buscar alertas:", error);
       return;
     }
     setAlerts(data ?? []);
-  }, [profileId, categoriasAtivas]);
+    // boundsAlertas nas dependências: sem ela, a função guardaria o `undefined` de antes
+    // do GPS responder e sairia no `if` para sempre (os alertas nunca carregariam)
+  }, [profileId, categoriasAtivas, boundsAlertas]);
 
   // Ref para o foco/polling sempre chamarem a versão mais recente sem
   // precisar colocar fetchAlertas nas dependências do useFocusEffect
