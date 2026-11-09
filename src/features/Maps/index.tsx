@@ -30,6 +30,7 @@ export default function MapScreen() {
         alerts,
         reports,
         weather,
+        weatherLoaded,
         loadingLocation,
         permissionDenied,
     } = useMapData();
@@ -168,7 +169,11 @@ export default function MapScreen() {
                     {weather && (
                         <View style={styles.weatherCard}>
                             <View style={styles.weatherMain}>
-                                <Ionicons name="partly-sunny-outline" size={20} color={theme.primary} />
+                                <Ionicons
+                                    name={(weather.icone_ionicon as any) || 'partly-sunny-outline'}
+                                    size={20}
+                                    color={theme.primary}
+                                />
                                 <Text style={styles.weatherTempText}>{weather.clima_temperatura_c}°C</Text>
                                 {weather.descricao ? (
                                     <Text style={styles.weatherDescText}>{weather.descricao}</Text>
@@ -187,6 +192,16 @@ export default function MapScreen() {
                                         <Text style={styles.weatherStatText}>{weather.clima_vento_kmh} km/h</Text>
                                     </View>
                                 )}
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Tentou carregar e nenhuma API respondeu: avisa em vez de inventar um clima */}
+                    {weatherLoaded && !weather && (
+                        <View style={styles.weatherCard}>
+                            <View style={styles.weatherMain}>
+                                <Ionicons name="cloud-offline-outline" size={20} color={theme.subtext} />
+                                <Text style={styles.weatherDescText}>Clima indisponível</Text>
                             </View>
                         </View>
                     )}

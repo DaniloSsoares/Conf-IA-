@@ -240,15 +240,15 @@ Hoje o app baixa **todos** os reportes e alertas do banco e só filtra no client
 
 **Problema:** quando as APIs falham, o serviço devolve "24°C, ensolarado, Sua Região" como se fosse real, e o `saveWeatherReading` grava isso em `dados_climaticos`. Isso contamina os dados que o `sistema_ia` usaria. Além disso, cada abertura do mapa por cada usuário grava uma leitura nova.
 
-- [ ] **Estado atual:** `dados_climaticos` só tem policy de SELECT, então o `saveWeatherReading` **sempre falha** (aviso `42501`). Decidir: (a) criar uma policy de INSERT para `authenticated` junto com as regras abaixo, ou (b) tirar a gravação do app e deixar para uma Edge Function (pós-MVP)
-- [ ] Não gravar quando `clima_fonte === 'Estimado'`
-- [ ] Na UI, mostrar "Clima indisponível" (ou um selo "estimado") em vez do dado fake
-- [ ] Limitar a gravação: no máximo 1 leitura por região a cada 30–60 min (checar a última leitura antes de inserir). Pós-MVP: mover para uma Edge Function agendada
-- [ ] Observação: o `.env` só tem `EXPO_PUBLIC_OPENWEATHER_API_KEY`. O ramo da WeatherAPI nunca roda, o que está ok, mas deve ser documentado no README
+- [x] **Decisão (b):** o app não grava mais em `dados_climaticos` (`saveWeatherReading` removido). A chave do app é pública: qualquer usuário poderia inserir leituras falsas e disparar alertas automáticos. A gravação fica para uma Edge Function (pós-MVP)
+- [x] Não gravar quando `clima_fonte === 'Estimado'` (resolvido pela decisão acima: o app não grava nada, e o service não inventa mais clima)
+- [x] Na UI, mostrar "Clima indisponível" em vez do dado fake: o service devolve `null`; a Home tinha mais valores inventados ("Ensolarado", "22° Graus", 78%, 28°C, 12 km/h), trocados por `--`; o Mapa mostra o aviso só depois de tentar carregar
+- [x] Limitar a gravação (resolvido: o app não grava). Pós-MVP: Edge Function agendada
+- [x] Documentado no [COMANDOS.md](COMANDOS.md): OpenWeather obrigatória, WeatherAPI opcional, e o que acontece sem nenhuma
 
 ### 2.4 🟡 Ajustes visuais no Mapa
 
-- [ ] Usar `weather.icone_ionicon` no lugar do ícone fixo `partly-sunny-outline` ([Maps/index.tsx:170](../src/features/Maps/index.tsx))
+- [x] Usar `weather.icone_ionicon` no lugar do ícone fixo `partly-sunny-outline` ([Maps/index.tsx:170](../src/features/Maps/index.tsx))
 - [x] **Filtro de alertas pelo raio do alerta:** `alertas` tem `alerta_raio_km`, e o filtro atual só considera o centro do alerta. Um alerta de 10 km com centro a 7 km do usuário não aparece, mesmo cobrindo a posição dele. Trocar por `haversineKm(...) <= raioKm + Number(a.alerta_raio_km ?? 0)`
 - [ ] `reporte_nivel_risco` é usado no Mapa, mas **não existe** no banco (confirmado no diagrama). Hoje todo reporte aparece igual. Decidir entre:
   - (a) derivar da categoria (ex.: deslizamento = alto, falta de luz = baixo), ou
@@ -459,7 +459,7 @@ Padrão do projeto (já usado em `Maps/` e `EditReport/`): `index.tsx` só monta
 
 - [ ] ⚪ Push notifications: `expo-notifications`, coluna `perfil.push_token`, Edge Function `send-push` e trigger no novo alerta
 - [ ] ⚪ Alertas automáticos por clima (`sistema_ia`) via Edge Function agendada
-- [ ] ⚪ Leitura climática centralizada no servidor (cron), em vez de cada cliente gravar
+- [ ] ⚪ Edge Function agendada (cron) que lê a API do clima e grava `dados_climaticos`: fonte confiável para o `sistema_ia` (o app não grava mais)
 - [ ] ⚪ Peso do voto proporcional ao `perfil_trust_score` de quem vota
 - [ ] ⚪ Filtro por tipo de ocorrência no Histórico
 - [ ] ⚪ Compartilhar reporte (share nativo)

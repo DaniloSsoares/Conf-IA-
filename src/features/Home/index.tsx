@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { supabaseConfig } from '@/src/config/supabase';
 import { getProfile } from '@/src/shared/service/profileService';
-import { getCurrentWeather, saveWeatherReading } from '@/src/shared/service/weatherService';
+import { getCurrentWeather } from '@/src/shared/service/weatherService';
 import { getActiveReports } from '@/src/shared/service/reportService';
 import { WeatherData } from '@/src/shared/types/weather';
 import { Profile } from '@/src/shared/types/profile';
@@ -133,11 +133,8 @@ export default function DashboardScreen({ navigation }: any) {
       }
 
       // Buscar Dados do WeatherAPI / OpenWeather
-      const weatherRes = await getCurrentWeather(lat, lon);
-      if (weatherRes) {
-        setWeather(weatherRes);
-        saveWeatherReading(weatherRes).catch(() => {});
-      }
+      // null quando nenhuma API respondeu: a tela mostra "Clima indisponível"
+      setWeather(await getCurrentWeather(lat, lon));
     } catch (error) {
       console.error('Erro ao carregar dados do usuário e clima:', error);
     } finally {
@@ -240,7 +237,10 @@ export default function DashboardScreen({ navigation }: any) {
   const riskBackground = getRiskBgColor(riskLevel);
 
   // Icone do Clima
-  const weatherIconName = (weather?.icone_ionicon as any) || 'sunny';
+  // Sem dados do clima: ícone de "offline", nunca um sol inventado
+  const weatherIconName = weather
+    ? ((weather.icone_ionicon as any) || 'partly-sunny')
+    : 'cloud-offline-outline';
   const isSunny = weatherIconName === 'sunny' || weatherIconName === 'partly-sunny';
 
   return (
@@ -435,7 +435,9 @@ export default function DashboardScreen({ navigation }: any) {
             >
               {weather?.descricao
                 ? weather.descricao.charAt(0).toUpperCase() + weather.descricao.slice(1)
-                : 'Ensolarado'}
+                : weather
+                ? '—'
+                : 'Clima indisponível'}
             </Text>
 
             <Text
@@ -446,7 +448,7 @@ export default function DashboardScreen({ navigation }: any) {
             >
               {weather?.clima_temperatura_c !== undefined && weather?.clima_temperatura_c !== null
                 ? `${weather.clima_temperatura_c}° Graus`
-                : '22° Graus'}
+                : '--'}
             </Text>
 
             {weather?.clima_fonte && (
@@ -588,7 +590,7 @@ export default function DashboardScreen({ navigation }: any) {
                 >
                   {weather?.clima_umidade_pct !== undefined && weather?.clima_umidade_pct !== null
                     ? `${weather.clima_umidade_pct}%`
-                    : '78%'}
+                    : '--'}
                 </Text>
 
                 <Text
@@ -637,7 +639,7 @@ export default function DashboardScreen({ navigation }: any) {
                 >
                   {weather?.clima_temperatura_c !== undefined && weather?.clima_temperatura_c !== null
                     ? `${weather.clima_temperatura_c}°C`
-                    : '28°C'}
+                    : '--'}
                 </Text>
 
                 <Text
@@ -686,7 +688,9 @@ export default function DashboardScreen({ navigation }: any) {
                 >
                   {weather?.clima_precipitacao_mm !== undefined && weather?.clima_precipitacao_mm > 0
                     ? `${weather.clima_precipitacao_mm} mm`
-                    : `${weather?.clima_vento_kmh ?? 12} km/h`}
+                    : weather?.clima_vento_kmh != null
+                    ? `${weather.clima_vento_kmh} km/h`
+                    : '--'}
                 </Text>
 
                 <Text

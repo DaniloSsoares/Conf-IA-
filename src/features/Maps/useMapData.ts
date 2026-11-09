@@ -7,10 +7,7 @@ import { getActiveReports } from "@/src/shared/service/reportService";
 import { getProfile } from "@/src/shared/service/profileService";
 import { getEnabledCategories } from "@/src/shared/constants/alertCategories";
 import { useFocusEffect } from "expo-router";
-import {
-  getCurrentWeather,
-  saveWeatherReading,
-} from "@/src/shared/service/weatherService";
+import { getCurrentWeather } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
 import { boundingBox, haversineKm } from "@/src/shared/utils/haversine";
 
@@ -32,6 +29,9 @@ export function useMapData() {
   const [reports, setReports] = useState<Report[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  // Distingue "ainda carregando" de "carregou e não há dados": só no segundo caso
+  // a tela mostra "Clima indisponível"
+  const [weatherLoaded, setWeatherLoaded] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
 
@@ -64,16 +64,12 @@ export function useMapData() {
     if (!location) return;
     const fetchWeather = async () => {
       try {
-        const weatherData = await getCurrentWeather(
-          location.latitude,
-          location.longitude,
-        );
-        if (weatherData) {
-          setWeather(weatherData);
-          await saveWeatherReading(weatherData);
-        }
+        // null quando nenhuma API respondeu
+        setWeather(await getCurrentWeather(location.latitude, location.longitude));
       } catch (error) {
         console.error("Erro ao obter dados meteorológicos:", error);
+      } finally {
+        setWeatherLoaded(true);
       }
     };
     fetchWeather();
@@ -359,6 +355,7 @@ export function useMapData() {
     reports,
     profile,
     weather,
+    weatherLoaded,
     loadingLocation,
     permissionDenied,
   };
