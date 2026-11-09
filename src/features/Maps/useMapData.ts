@@ -5,20 +5,19 @@ import { supabaseConfig } from "@/src/config/supabase";
 import { Report } from "@/src/shared/types/report";
 import { getActiveReports } from "@/src/shared/service/reportService";
 import { getProfile } from "@/src/shared/service/profileService";
-import { DEFAULT_ALERT_PREFERENCES } from "@/src/shared/constants/alertCategories";
+import { getEnabledCategories } from "@/src/shared/constants/alertCategories";
 import { useFocusEffect } from "expo-router";
 import {
   getCurrentWeather,
   saveWeatherReading,
 } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
+import { boundingBox } from "@/src/shared/utils/haversine";
 
-function getEnabledCategories(preferences: any): string[] {
-  const merged = { ...DEFAULT_ALERT_PREFERENCES, ...(preferences || {}) };
-  return Object.entries(merged)
-    .filter(([_, enabled]) => enabled === true)
-    .map(([categoria]) => categoria);
-}
+// Alerta tem raio próprio: o centro pode estar fora do raio do usuário e ainda
+// assim cobrir a posição dele. A caixa dos alertas é maior por essa margem.
+// Limite conhecido: alertas com raio maior que isso, e centro longe, não chegam.
+const MARGEM_ALERTA_KM = 20;
 
 export function useMapData() {
   const [location, setLocation] = useState<{
@@ -76,10 +75,39 @@ export function useMapData() {
     fetchWeather();
   }, [location]);
 
+  // numeric no banco chega como texto: sem o Number, "5" + 20 viraria "520"
+  const raioKm = Number(profile?.perfil_raio_notificacao_km ?? 5);
+
+  // Quadrado em volta do usuário para o banco devolver só o que está perto.
+  // useMemo: só muda quando a localização ou o raio mudam (um objeto novo a cada
+  // render recriaria o fetchReports e dispararia a busca sem parar).
+  const bounds = useMemo(
+    () =>
+      location
+        ? boundingBox(location.latitude, location.longitude, raioKm)
+        : undefined,
+    [location, raioKm],
+  );
+
+  // Caixa maior para os alertas (ver MARGEM_ALERTA_KM)
+  const boundsAlertas = useMemo(
+    () =>
+      location
+        ? boundingBox(location.latitude, location.longitude, raioKm + MARGEM_ALERTA_KM)
+        : undefined,
+    [location, raioKm],
+  );
+
   const fetchReports = useCallback(async () => {
-    const activeReports = await getActiveReports();
-    setReports(activeReports);
-  }, []);
+    // GPS ainda não respondeu: espera em vez de buscar o país inteiro.
+    // Quando a localização chegar, `bounds` muda e o useFocusEffect busca de novo sozinho.
+    if (!bounds) return;
+    setReports(await getActiveReports(bounds));
+  }, [bounds]);
+
+  // Ref para o re-sync do Realtime usar a caixa atual sem recriar o canal
+  const fetchReportsRef = useRef(fetchReports);
+  fetchReportsRef.current = fetchReports;
 
   const fetchProfile = useCallback(async () => {
     const { data, error } = await supabaseConfig.auth.getUser();
@@ -101,7 +129,7 @@ export function useMapData() {
   );
 
   const fetchAlertas = useCallback(async () => {
-    if (!profileId) return;
+    if (!profileId || !boundsAlertas) return;
 
     if (categoriasAtivas.length === 0) {
       setAlerts([]);
@@ -112,12 +140,20 @@ export function useMapData() {
       .from("alertas")
       .select("*")
       .eq("alerta_status", "ativo")
-      .in("alerta_tipo_ocorrencia", categoriasAtivas);
+      .in("alerta_tipo_ocorrencia", categoriasAtivas)
+      .gte("alerta_latitude", boundsAlertas.minLat)
+      .lte("alerta_latitude", boundsAlertas.maxLat)
+      .gte("alerta_longitude", boundsAlertas.minLng)
+      .lte("alerta_longitude", boundsAlertas.maxLng);
 
-    if (!error && data) {
-      setAlerts(data);
+    if (error) {
+      console.error("Erro ao buscar alertas:", error);
+      return;
     }
-  }, [profileId, categoriasAtivas]);
+    setAlerts(data ?? []);
+    // boundsAlertas nas dependências: sem ela, a função guardaria o `undefined` de antes
+    // do GPS responder e sairia no `if` para sempre (os alertas nunca carregariam)
+  }, [profileId, categoriasAtivas, boundsAlertas]);
 
   // Ref para o foco/polling sempre chamarem a versão mais recente sem
   // precisar colocar fetchAlertas nas dependências do useFocusEffect
@@ -259,9 +295,8 @@ export function useMapData() {
             return;
           }
 
-          // Re-sync de reportes via REST
-          const activeReports = await getActiveReports();
-          setReports(activeReports);
+          // Re-sync de reportes via REST (com a mesma caixa da busca normal)
+          fetchReportsRef.current();
 
           // Re-sync de alertas via REST (reutiliza a lógica com filtro de categorias)
           fetchAlertas();
@@ -275,6 +310,7 @@ export function useMapData() {
 
   return {
     location,
+    raioKm,
     alerts,
     reports,
     profile,

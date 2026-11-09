@@ -20,7 +20,7 @@ import { supabaseConfig } from '@/src/config/supabase';
 import { getProfile, updateProfile } from '@/src/shared/service/profileService';
 import { Profile } from '@/src/shared/types/profile';
 import { formatDate } from '@/src/shared/utils/dateMember'
-import { ALERT_CATEGORIES, DEFAULT_ALERT_PREFERENCES } from '@/src/shared/constants/alertCategories';
+import { ALERT_CATEGORIES, DEFAULT_ALERT_PREFERENCES, normalizeAlertPreferences } from '@/src/shared/constants/alertCategories';
 import { AlertPreferences } from '@/src/shared/types/profile';
 import { ChangePassModel } from '@/src/components/ui/ChangePassModel';
 import { TermsModal } from '@/src/components/ui/TermsModal';
@@ -64,10 +64,9 @@ export default function ProfileScreen() {
         return;
       }
       setProfile(profileData);
-      setPreferences({
-        ...DEFAULT_ALERT_PREFERENCES,
-        ...(profileData.perfil_preferencias_alertas || {}),
-      });
+      // Só as categorias oficiais: assim, ao trocar uma preferência, o que é salvo de
+      // volta no banco já vai sem as chaves antigas (ex.: "chuva")
+      setPreferences(normalizeAlertPreferences(profileData.perfil_preferencias_alertas));
 
       const accepted = await getTerms(user.id);
       setHasAcceptedTerms(accepted);

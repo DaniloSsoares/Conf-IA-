@@ -26,9 +26,9 @@ export default function MapScreen() {
 
     const {
         location,
+        raioKm,
         alerts,
         reports,
-        profile,
         weather,
         loadingLocation,
         permissionDenied,
@@ -95,7 +95,7 @@ export default function MapScreen() {
         }
     };
 
-    const raioKm = profile?.perfil_raio_notificacao_km ?? 5;
+    // O raio vem do hook: é o mesmo usado para buscar no banco
     const raioMetros = raioKm * 1000;
 
     // Filtra só o que está dentro do raio do usuário (o Circle é apenas visual)
@@ -104,8 +104,11 @@ export default function MapScreen() {
         return alerts.filter((a) => {
             const lat = Number(a.alerta_latitude);
             const lng = Number(a.alerta_longitude);
+            // Alerta tem raio próprio: aparece se o raio dele alcança o raio do usuário,
+            // mesmo com o centro fora (numeric chega como texto, por isso o Number)
+            const raioAlertaKm = Number(a.alerta_raio_km ?? 0);
             return !isNaN(lat) && !isNaN(lng)
-                && haversineKm(location.latitude, location.longitude, lat, lng) <= raioKm;
+                && haversineKm(location.latitude, location.longitude, lat, lng) <= raioKm + raioAlertaKm;
         });
     }, [alerts, location, raioKm]);
 
@@ -282,11 +285,12 @@ export default function MapScreen() {
                                 
                         >
                             <View style={styles.markerWrapper}>
-                                <View style={styles.markerBadgeOfficial}>
-                                    <Ionicons name="shield-checkmark" size={10} color={theme.white} />
-                                </View>
                                 <View style={getIconStyle(alerta.alerta_nivel_risco)}>
                                     <Ionicons name={iconName as any} size={22} color={theme.white} />
+                                </View>
+                                {/* Selo depois do ícone para ficar por cima sem zIndex (ver markerBadgeOfficial) */}
+                                <View style={styles.markerBadgeOfficial}>
+                                    <Ionicons name="shield-checkmark" size={10} color={theme.white} />
                                 </View>
                             </View>
 
