@@ -13,6 +13,15 @@ import getStyles, { darkMapStyle } from './styles';
 import { useMapData } from './useMapData';
 
 type FilterType = 'todos' | 'alertas' | 'reportes';
+type IconeIonicons = keyof typeof Ionicons.glyphMap;
+
+
+function getOrigemAlerta(origem?: string | null): { texto: string; icone: IconeIonicons } {
+    if (origem === 'colaborativo') {
+        return { texto: 'Alerta da comunidade', icone: 'people' };
+    }
+    return { texto: 'Alerta Oficial', icone: 'shield-checkmark' };
+}
 
 export default function MapScreen() {
     const router = useRouter();
@@ -151,6 +160,7 @@ export default function MapScreen() {
 
     const showAlerts = filterType === 'todos' || filterType === 'alertas';
     const showReports = filterType === 'todos' || filterType === 'reportes';
+    const origemSelecionada = getOrigemAlerta(selectedItem?.alerta_origem);
 
     return (
         <View style={styles.container}>
@@ -287,6 +297,7 @@ export default function MapScreen() {
                 {showAlerts && filteredAlerts.map((alerta: any) => {
                     const category = REPORT_CATEGORIES.find(item => item.id === alerta.alerta_tipo_ocorrencia);
                     const iconName = category?.icon || alerta.icon || 'alert-circle-outline';
+                    const origem = getOrigemAlerta(alerta.alerta_origem);
                     const lat = Number(alerta.alerta_latitude);
                     const lng = Number(alerta.alerta_longitude);
 
@@ -305,14 +316,14 @@ export default function MapScreen() {
                                 </View>
                                 {/* Selo depois do ícone para ficar por cima sem zIndex (ver markerBadgeOfficial) */}
                                 <View style={styles.markerBadgeOfficial}>
-                                    <Ionicons name="shield-checkmark" size={10} color={theme.white} />
+                                    <Ionicons name={origem.icone} size={10} color={theme.white} />
                                 </View>
                             </View>
 
                             <Callout tooltip onPress={() => handleOpenAlerta(alerta)}>
                                 <View style={styles.calloutContainer}>
                                     <View style={styles.calloutHeader}>
-                                        <Text style={styles.calloutTagAlerta}>Alerta Oficial</Text>
+                                        <Text style={styles.calloutTagAlerta}>{origem.texto}</Text>
                                         <Text style={getRiskBadgeStyle(alerta.alerta_nivel_risco)}>
                                             {alerta.alerta_nivel_risco || 'Moderado'}
                                         </Text>
@@ -386,12 +397,12 @@ export default function MapScreen() {
                     <View style={styles.previewHeader}>
                         <View style={styles.previewTypeTag}>
                             <Ionicons 
-                                name={selectedItem.type === 'alerta' ? "shield-checkmark" : "megaphone"} 
+                                name={selectedItem.type === 'alerta' ? origemSelecionada.icone : 'megaphone'}
                                 size={16} 
                                 color={theme.primary} 
                             />
                             <Text style={styles.previewTypeText}>
-                                {selectedItem.type === 'alerta' ? "Alerta Oficial" : "Ocorrência Comunitária"}
+                                {selectedItem.type === 'alerta' ? origemSelecionada.texto : 'Ocorrência Comunitária'}
                             </Text>
                         </View>
                         <TouchableOpacity onPress={() => setSelectedItem(null)} style={{ padding: 4 }}>

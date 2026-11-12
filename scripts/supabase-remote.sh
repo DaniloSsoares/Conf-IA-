@@ -47,4 +47,34 @@ unset PGPASS
 DB_URL="postgresql://postgres.$REF:$PGPASS_URL@$POOLER_HOST:5432/postgres"
 unset PGPASS_URL
 
+# Migrations que já existiam: depois de um db pull, só as novas são conferidas
+ANTES=$(ls supabase/migrations/*.sql 2>/dev/null || true)
+
 npx --yes "supabase@$SUPABASE_VERSION" "$@" --db-url "$DB_URL"
+
+# O db pull compara o banco real com um banco temporário montado com a versão do CLI.
+# As diferenças de versão do próprio Supabase (extensão pg_net e triggers internos de
+# storage.buckets) aparecem como se fossem mudanças nossas. Elas não são, e quebram a
+# recriação do banco a partir das migrations (erro 42883 no próximo pull).
+RUIDO='pg_net|storage\.buckets'
+
+if [ "${1:-}" = "db" ] && [ "${2:-}" = "pull" ]; then
+  for arquivo in supabase/migrations/*.sql; do
+    if grep -qxF "$arquivo" <<< "$ANTES"; then
+      continue
+    fi
+    if grep -qE "$RUIDO" "$arquivo"; then
+      echo
+      echo "⚠️  $arquivo tem linhas de ruído de versão do Supabase:"
+      grep -nE "$RUIDO" "$arquivo" | sed 's/^/     /'
+      read -r -p "   Remover essas linhas agora? [S/n] " resposta < /dev/tty
+      if [[ ! "$resposta" =~ ^[Nn] ]]; then
+        sed -i -E "/$RUIDO/d" "$arquivo"
+        cat -s "$arquivo" > "$arquivo.tmp" && mv "$arquivo.tmp" "$arquivo"   # tira linhas em branco repetidas
+        echo "   ✅ Removidas. Confira o arquivo antes do commit."
+      else
+        echo "   Mantidas. Apague à mão antes do commit."
+      fi
+    fi
+  done
+fi

@@ -50,6 +50,7 @@ const SECOES: SecaoTermos[] = [
       'A foto de um novo reporte deve ser tirada com a câmera no momento do envio, como registro da ocorrência.',
       'Comentários têm no máximo 500 caracteres.',
       'A equipe responsável pelo projeto pode remover conteúdos ou contas que violem estes termos.',
+      'Quando um reporte é validado, ele vira automaticamente um alerta da comunidade, visível para os moradores próximos. O alerta é encerrado se o reporte deixar de ser válido.'
     ],
   },
   {

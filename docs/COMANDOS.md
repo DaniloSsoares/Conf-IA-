@@ -170,6 +170,8 @@ npx supabase db pull --db-url "$DB_URL"
 
 Gera um arquivo novo em `supabase/migrations/` com tudo que mudou no banco desde a última migration. Se perguntar `Update remote migration history table?`, responda **Y**.
 
+> **Ruído de versão do Supabase:** o pull compara o banco real com um banco temporário montado na versão do CLI, e por isso costuma trazer linhas que **não são mudanças nossas**: `drop extension if exists "pg_net"` e triggers em `storage.buckets`. Elas quebram a recriação do banco (erro `42883` no próximo pull). Pelo `./scripts/supabase-remote.sh db pull`, o script mostra essas linhas e oferece removê-las. Pelo comando direto, apague-as à mão antes do commit.
+
 Se, em vez disso, você criou o arquivo com `migration new` e colou à mão um SQL que **já tinha rodado** no painel, marque-o como aplicado. Senão o próximo `db push` tenta rodar de novo e dá erro de "already exists":
 
 ```bash
