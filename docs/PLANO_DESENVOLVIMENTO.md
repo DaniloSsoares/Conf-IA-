@@ -7,8 +7,38 @@
 
 ---
 
+## ⏱️ Cronograma até 18/11 (código congelado)
+
+> Definido em 10/11/2026. Critério: **o que a banca precisa ver funcionando**, as promessas do TCC e dos termos, e o custo (vários itens já têm o SQL pronto).
+> **Regra:** fechar cada dia com um PR aceito na `main`. Assim a `main` do dia anterior sempre está pronta para a demo.
+
+| Dia | Prioridade | O que fazer | Itens do plano |
+|---|---|---|---|
+| **10–11/11** | 🔴 1. Ciclo central do TCC | Alerta colaborativo + notificações + salvar a localização do usuário ao abrir o Mapa (só 3 de 7 perfis têm localização, e sem ela a notificação não chega) | [2.6](#26-alerta-colaborativo-a-partir-da-validação-comunitária), [3.3](#33-notificações) (A.8) |
+| **12/11** | 🔴 2. Segurança e LGPD | Remover a leitura pública de `perfil` (A.5 parte 1), leitura só para logados (A.6), tirar `perfil` do Realtime, aceite dos termos no login | [3.4](#34-lgpd-e-limpeza-das-policies), [1.8](#18-moderação-de-fotos-e-comentários-pergunta-dos-professores) |
+| **13/11** | 🟡 3. Demo sem lixo | Nível de risco dos reportes; validade **mínima** (só filtro na consulta, sem job) | [2.4](#24-ajustes-visuais-no-mapa), [2.7](#27-validade-dos-reportes-expirar-em-vez-de-excluir) |
+| **14–15/11** | 🟡 4. Visual | Áreas de risco oficiais do **GeoSampa** (script de importação + `Polygon`). Se apertar: só uma região, sem filtro por caixa | [2.5](#25-áreas-de-risco-areas_risco--polygon) |
+| **16/11** | 🔴 5. APK da demo | Chave do Google Maps + secrets no GitHub, gerar e **instalar** o APK, popular o banco com dados de demo | [CI_CD.md](CI_CD.md) |
+| **17/11** | Margem | Corrigir o que aparecer no teste do APK; testes principais com duas contas | [Anexo B](#anexo-b--testes-manuais-com-duas-contas) |
+| **18/11** | 🧊 Congelar | Último PR, `git tag v1.0.0`, Release com o APK. **Nada de feature nova depois disso** | |
+
+**Fora do escopo até 18/11** (vira "trabalho futuro" na apresentação): push notifications, `sistema_ia`, alertas automáticos do INMET, Jest, refatoração da Home, tipos gerados do banco, PostGIS, atualizar o Supabase CLI para a v3.
+
+**Depois de 18/11:** apresentação (Fases 4 e 5): nome oficial, README e pitch, roteiro da demo, **vídeo de backup**, slides e ensaio das perguntas da banca.
+
+- [ ] 10–11/11 · Prioridade 1
+- [ ] 12/11 · Prioridade 2
+- [ ] 13/11 · Prioridade 3
+- [ ] 14–15/11 · Prioridade 4
+- [ ] 16/11 · Prioridade 5
+- [ ] 17/11 · Margem
+- [ ] 18/11 · Código congelado + `v1.0.0`
+
+---
+
 ## Sumário
 
+- [⏱️ Cronograma até 18/11](#️-cronograma-até-1811-código-congelado)
 - [Fase 0 — Estabilizar (hoje)](#fase-0--estabilizar-hoje)
 - [Fase 1 — Validação comunitária (27/10 a 01/11)](#fase-1--validação-comunitária-2710-a-0111)
 - [Fase 2 — Mapa e clima (02/11 a 08/11)](#fase-2--mapa-e-clima-0211-a-0811)
@@ -460,7 +490,7 @@ Padrão do projeto (já usado em `Maps/` e `EditReport/`): `index.tsx` só monta
 - [ ] ⚪ Push notifications: `expo-notifications`, coluna `perfil.push_token`, Edge Function `send-push` e trigger no novo alerta
 - [ ] ⚪ Alertas automáticos por clima (`sistema_ia`) via Edge Function agendada
 - [ ] ⚪ Edge Function agendada (cron) que lê a API do clima e grava `dados_climaticos`: fonte confiável para o `sistema_ia` (o app não grava mais)
-- [ ] ⚪ Peso do voto proporcional ao `perfil_trust_score` de quem vota
+    - [ ] ⚪ Peso do voto proporcional ao `perfil_trust_score` de quem vota
 - [ ] ⚪ Filtro por tipo de ocorrência no Histórico
 - [ ] ⚪ Compartilhar reporte (share nativo)
 - [ ] ⚪ Mapa de calor dos reportes
@@ -943,25 +973,31 @@ EXECUTE FUNCTION public.sincronizar_alerta_colaborativo();
 
 > O `WHEN` faz o trigger rodar só quando o status ou a ocultação **mudam**. Um voto que não muda o status não mexe no alerta.
 
-**3. Teste sem celular** (simula a validação e desfaz tudo no final)
+**3. Teste sem celular** (segue o caminho real: 3 votos de confirmação → o score valida → nasce o alerta; desfaz tudo no final)
 ```sql
 DO $$
 DECLARE
   v_id UUID := 'COLE_O_ID_DE_UM_REPORTE_PENDENTE';
+  v_status TEXT;
   v_alerta RECORD;
 BEGIN
-  -- Simula o que o trigger de score faz quando o reporte atinge 3 votos e 70%
-  UPDATE reportes SET reporte_status = 'validado' WHERE id = v_id;
+  -- 3 confirmações de perfis diferentes do dono (o trigger do score valida com 3 votos e 70%+)
+  INSERT INTO reporte_validacoes (reporte_id, perfil_id, validacao_tipo)
+  SELECT v_id, p.id, 'confirma'
+  FROM perfil p
+  WHERE p.id <> (SELECT perfil_id FROM reportes WHERE id = v_id)
+  LIMIT 3;
 
+  SELECT reporte_status INTO v_status FROM reportes WHERE id = v_id;
   SELECT alerta_origem, alerta_status, alerta_nivel_risco, alerta_raio_km
     INTO v_alerta FROM alertas WHERE alerta_reporte_id = v_id;
 
-  RAISE EXCEPTION 'Alerta criado: %', v_alerta;
+  RAISE EXCEPTION 'Status do reporte: % | Alerta criado: %', v_status, v_alerta;
 END $$;
 ```
-Esperado: um erro com `Alerta criado: (colaborativo,ativo,...)`. O `RAISE` desfaz tudo, então nada fica gravado.
+Esperado: um erro com `Status do reporte: validado | Alerta criado: (colaborativo,ativo,...)`. O `RAISE` desfaz tudo (votos, status e alerta), então nada fica gravado.
 
-> ⚠️ Esse UPDATE direto só funciona como `postgres` dentro de um DO block. Pelo app, a proteção de colunas (A.4) ignora mudança de status vinda do cliente. O caminho real é o trigger de score, a partir dos votos.
+> ⚠️ Não teste com `UPDATE reportes SET reporte_status = 'validado'` direto: a proteção de colunas (A.4) desfaz mudanças de status feitas direto (`pg_trigger_depth() = 1`), mesmo no SQL Editor. O status continuaria `pendente` e pareceria que o trigger do alerta não funciona. Pelos votos, o UPDATE vem de dentro do trigger do score (profundidade 2) e passa.
 
 ---
 
