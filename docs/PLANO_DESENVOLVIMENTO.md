@@ -979,23 +979,29 @@ DO $$
 DECLARE
   v_id UUID := 'COLE_O_ID_DE_UM_REPORTE_PENDENTE';
   v_status TEXT;
+  v_votos TEXT;
   v_alerta RECORD;
 BEGIN
-  -- 3 confirmações de perfis diferentes do dono (o trigger do score valida com 3 votos e 70%+)
+  -- 3 confirmações de perfis diferentes do dono. Se a pessoa já votou, troca o voto
+  -- para "confirma" (é o que o app faz com o upsert), em vez de tentar votar de novo
   INSERT INTO reporte_validacoes (reporte_id, perfil_id, validacao_tipo)
   SELECT v_id, p.id, 'confirma'
   FROM perfil p
   WHERE p.id <> (SELECT perfil_id FROM reportes WHERE id = v_id)
-  LIMIT 3;
+  LIMIT 3
+  ON CONFLICT (reporte_id, perfil_id) DO UPDATE SET validacao_tipo = 'confirma';
 
   SELECT reporte_status INTO v_status FROM reportes WHERE id = v_id;
+  SELECT string_agg(validacao_tipo::text, ', ') INTO v_votos
+    FROM reporte_validacoes WHERE reporte_id = v_id;
   SELECT alerta_origem, alerta_status, alerta_nivel_risco, alerta_raio_km
     INTO v_alerta FROM alertas WHERE alerta_reporte_id = v_id;
 
-  RAISE EXCEPTION 'Status do reporte: % | Alerta criado: %', v_status, v_alerta;
+  RAISE EXCEPTION 'Votos: [%] | Status: % | Alerta: %', v_votos, v_status, v_alerta;
 END $$;
 ```
-Esperado: um erro com `Status do reporte: validado | Alerta criado: (colaborativo,ativo,...)`. O `RAISE` desfaz tudo (votos, status e alerta), então nada fica gravado.
+Esperado: um erro com `Votos: [confirma, confirma, confirma] | Status: validado | Alerta: (colaborativo,ativo,...)`. O `RAISE` desfaz tudo (votos, status e alerta), então nada fica gravado.
+Se o status ficar `pendente` com algum `contesta` nos votos, o reporte já tinha contestações e a taxa ficou abaixo de 70%: o trigger está certo, use um reporte sem votos.
 
 > ⚠️ Não teste com `UPDATE reportes SET reporte_status = 'validado'` direto: a proteção de colunas (A.4) desfaz mudanças de status feitas direto (`pg_trigger_depth() = 1`), mesmo no SQL Editor. O status continuaria `pendente` e pareceria que o trigger do alerta não funciona. Pelos votos, o UPDATE vem de dentro do trigger do score (profundidade 2) e passa.
 
