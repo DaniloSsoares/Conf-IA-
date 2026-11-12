@@ -2,7 +2,7 @@ import { supabaseConfig } from "@/src/config/supabase";
 
 // Ao mudar o texto dos termos, suba a versão: todos os usuários precisam aceitar de novo
 // (o consentimento da LGPD vale para o texto que a pessoa leu, não para o novo).
-export const VERSAO_TERMOS = '1.1.0';
+export const VERSAO_TERMOS = '1.2.0';
 export const DATA_TERMOS = 'Novembro de 2026';
 
 export  async function createTerms(){
