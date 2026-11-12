@@ -1,4 +1,3 @@
-drop extension if exists "pg_net";
 
 alter table "public"."alertas" add column "alerta_reporte_id" uuid;
 
@@ -65,12 +64,8 @@ $function$
 
 CREATE TRIGGER trg_alerta_colaborativo AFTER UPDATE OF reporte_status, reporte_oculto ON public.reportes FOR EACH ROW WHEN (((old.reporte_status IS DISTINCT FROM new.reporte_status) OR (old.reporte_oculto IS DISTINCT FROM new.reporte_oculto))) EXECUTE FUNCTION public.sincronizar_alerta_colaborativo();
 
-CREATE TRIGGER enforce_versioning_status_transition BEFORE UPDATE OF versioning_status ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.enforce_versioning_status_transition();
 
-CREATE TRIGGER protect_active_lifecycle_states BEFORE DELETE ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.protect_active_lifecycle_states();
 
-CREATE TRIGGER wake_lifecycle_on_policy_write AFTER INSERT OR UPDATE OF lifecycle_configuration_generation ON storage.buckets FOR EACH ROW EXECUTE FUNCTION storage.wake_lifecycle_state();
 
-CREATE TRIGGER wake_lifecycle_on_versioning_enable AFTER UPDATE OF versioning_status ON storage.buckets FOR EACH ROW WHEN ((new.lifecycle_configuration IS NOT NULL)) EXECUTE FUNCTION storage.wake_lifecycle_state();
 
 
