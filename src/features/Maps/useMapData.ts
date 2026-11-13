@@ -4,7 +4,7 @@ import Toast from "react-native-toast-message";
 import { supabaseConfig } from "@/src/config/supabase";
 import { Report } from "@/src/shared/types/report";
 import { getActiveReports } from "@/src/shared/service/reportService";
-import { getProfile } from "@/src/shared/service/profileService";
+import { getProfile, updateProfile } from "@/src/shared/service/profileService";
 import { getEnabledCategories } from "@/src/shared/constants/alertCategories";
 import { useFocusEffect } from "expo-router";
 import { getCurrentWeather } from "@/src/shared/service/weatherService";
@@ -29,13 +29,9 @@ export function useMapData() {
   const [reports, setReports] = useState<Report[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
-  // Distingue "ainda carregando" de "carregou e não há dados": só no segundo caso
-  // a tela mostra "Clima indisponível"
   const [weatherLoaded, setWeatherLoaded] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
-
-  // Controla se é a primeira conexão do WebSocket (para não re-sincronizar no subscribe inicial)
   const isFirstSubscription = useRef(true);
 
   useEffect(() => {
@@ -123,14 +119,30 @@ export function useMapData() {
     }
   }, []);
 
-  // Chaves estáveis derivadas do perfil. O getProfile devolve um objeto novo a cada
-  // chamada, então depender de [profile] recriava os callbacks e gerava loop de fetch.
   const profileId: string | undefined = profile?.id;
   const prefsKey = JSON.stringify(profile?.perfil_preferencias_alertas ?? {});
   const categoriasAtivas = useMemo(
     () => getEnabledCategories(JSON.parse(prefsKey)),
     [prefsKey],
   );
+
+  useEffect(()=> {
+    if(!location || !profileId)return
+    const arredondar = (n: number)=> Math.round(n*1000)/1000
+
+    const salvarLocalização = async()=>{
+      const {error}= await updateProfile(profileId,{
+        perfil_latitude: arredondar(location.latitude),
+        perfil_longitude:arredondar(location.longitude),
+      });
+      if(error){
+        console.warn("Não foi possivel dalvar a localização no perfil", error);
+      }
+    };
+    salvarLocalização();
+  },
+  [location, profileId]
+)
 
   const fetchAlertas = useCallback(async () => {
     if (!profileId || !boundsAlertas) return;
