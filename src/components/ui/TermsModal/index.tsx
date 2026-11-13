@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { getStyles } from './style';
@@ -11,8 +11,6 @@ interface SecaoTermos {
   itens?: string[];
 }
 
-// O texto descreve só o que o app faz de verdade. Ao mudar qualquer regra aqui,
-// suba VERSAO_TERMOS em termsService.ts para todos aceitarem de novo.
 const SECOES: SecaoTermos[] = [
   {
     titulo: '1. Aceitação dos Termos',
@@ -82,6 +80,8 @@ const SECOES: SecaoTermos[] = [
 
 export interface TermsModalProps {
   visible?: boolean;
+  obrigatorio?: boolean;
+  onRecusar?:()=> void;
   onClose?: () => void;
   onAccept?: () => void;
   buttonText?: string;
@@ -90,6 +90,8 @@ export interface TermsModalProps {
 export function TermsModal({
   visible,
   onClose,
+  obrigatorio,
+  onRecusar,
   onAccept,
   buttonText = "Li e Concordo",
 }: TermsModalProps) {
@@ -112,54 +114,58 @@ export function TermsModal({
       visible={visible}
       transparent
       animationType="fade"
-      onRequestClose={onClose}
+      // Obrigatório: o voltar do Android e o toque fora não fecham (só aceitar ou recusar)
+      onRequestClose={obrigatorio ? undefined : onClose}
     >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <TouchableWithoutFeedback>
-          <View style={styles.modalContainer}>
-            <View style={styles.header}>
-              <View style={styles.headerTitleContainer}>
-                <Ionicons name="document-text" size={24} color={iconColor} />
-                <Text style={styles.modalTitle}>Termos de Serviço</Text>
-              </View>
+      <View style={styles.modalOverlay}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={obrigatorio ? undefined : onClose} />
+        <View style={styles.modalContainer}>
+          <View style={styles.header}>
+            <View style={styles.headerTitleContainer}>
+              <Ionicons name="document-text" size={24} color={iconColor} />
+              <Text style={styles.modalTitle}>Termos de Serviço</Text>
+            </View>
+            {!obrigatorio && (
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
                 <Ionicons name="close" size={22} color={isDarkMode ? "#FFFFFF" : "#333333"} />
               </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              showsVerticalScrollIndicator={true}
-              contentContainerStyle={styles.scrollContent}
-            >
-              <Text style={styles.lastUpdated}>
-                Última atualização: {DATA_TERMOS} · Versão {VERSAO_TERMOS}
-              </Text>
-
-              {SECOES.map((secao) => (
-                <View key={secao.titulo} style={styles.section}>
-                  <Text style={styles.sectionTitle}>{secao.titulo}</Text>
-                  {secao.paragrafos.map((p) => (
-                    <Text key={p} style={styles.paragraph}>{p}</Text>
-                  ))}
-                  {secao.itens?.map((item) => (
-                    <Text key={item} style={styles.paragraph}>{`•  ${item}`}</Text>
-                  ))}
-                </View>
-              ))}
-            </ScrollView>
-
-            <View style={styles.footer}>
-              <TouchableOpacity style={styles.button} onPress={handleConfirm}>
-                <Text style={styles.buttonText}>{buttonText}</Text>
-              </TouchableOpacity>
-            </View>
+            )}
           </View>
-        </TouchableWithoutFeedback>
-      </TouchableOpacity>
+
+          <ScrollView
+            style={{ flexShrink: 1 }}
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={styles.scrollContent}
+          >
+            <Text style={styles.lastUpdated}>
+              Última atualização: {DATA_TERMOS} · Versão {VERSAO_TERMOS}
+            </Text>
+
+            {SECOES.map((secao) => (
+              <View key={secao.titulo} style={styles.section}>
+                <Text style={styles.sectionTitle}>{secao.titulo}</Text>
+                {secao.paragrafos.map((p) => (
+                  <Text key={p} style={styles.paragraph}>{p}</Text>
+                ))}
+                {secao.itens?.map((item) => (
+                  <Text key={item} style={styles.paragraph}>{`•  ${item}`}</Text>
+                ))}
+              </View>
+            ))}
+          </ScrollView>
+
+          <View style={styles.footer}>
+            <TouchableOpacity style={styles.button} onPress={handleConfirm}>
+              <Text style={styles.buttonText}>{buttonText}</Text>
+            </TouchableOpacity>
+            {obrigatorio && (
+              <TouchableOpacity style={styles.recusarButton} onPress={onRecusar}>
+                <Text style={styles.recusarText}>Recusar e sair</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
     </Modal>
   );
 }

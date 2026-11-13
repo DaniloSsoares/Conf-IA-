@@ -70,10 +70,6 @@ export default function ProfileScreen() {
 
       const accepted = await getTerms(user.id);
       setHasAcceptedTerms(accepted);
-      if (!accepted) {
-        setIsTermsModalVisible(true);
-      }
-
     } catch (error: any) {
       Toast.show({
         type: 'error',

@@ -86,6 +86,17 @@ export const getStyles = (theme: any) => {
       alignItems: "center",
       justifyContent: "center",
     },
+    // Botão "fantasma" (só texto): deixa claro que aceitar é a ação principal
+    recusarButton: {
+      paddingVertical: 12,
+      alignItems: "center",
+      marginTop: 4,
+    },
+    recusarText: {
+      color: theme?.subtext || "#616A78",
+      fontSize: 15,
+      fontWeight: "600",
+    },
     buttonText: {
       color: "#FFFFFF",
       fontSize: 15,
