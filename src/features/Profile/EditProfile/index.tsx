@@ -28,10 +28,11 @@ import Slider from '@react-native-community/slider';
 import * as Location from 'expo-location';
 import { updateProfile, getProfile, uploadAvatar } from '@/src/shared/service/profileService';
 import { Load } from '@/src/components/ui/Load';
+import { arredondarCoordenada, buscarCidadeEstado } from '@/src/shared/utils/endereco';
 
 export default function EditProfileScreen() {
   type FormData = yup.InferType<typeof profileSchema>;
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
+  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
     resolver: yupResolver(profileSchema),
   });
 
@@ -111,7 +112,9 @@ export default function EditProfileScreen() {
       }
       setGettingLocation(true);
       const position = await Location.getCurrentPositionAsync({});
-      const { latitude, longitude } = position.coords;
+      // Arredonda antes de salvar, igual ao Mapa (LGPD)
+      const latitude = arredondarCoordenada(position.coords.latitude);
+      const longitude = arredondarCoordenada(position.coords.longitude);
       const { data: { user } } = await supabaseConfig.auth.getUser();
       if (!user) {
         Toast.show({
@@ -137,9 +140,23 @@ export default function EditProfileScreen() {
       }
 
       setLocation({ latitude, longitude });
+
+      // Preenche cidade e estado no formulário. Só grava no banco quando a pessoa
+      // tocar em "Salvar Alterações", então dá para corrigir antes se vier errado
+      const endereco = await buscarCidadeEstado(latitude, longitude);
+      if (endereco?.cidade) {
+        setValue('city', endereco.cidade, { shouldValidate: true, shouldDirty: true });
+      }
+      if (endereco?.estado) {
+        setValue('state', endereco.estado, { shouldValidate: true, shouldDirty: true });
+      }
+
       Toast.show({
         type: 'success',
         text1: 'Localização atualizada!',
+        text2: endereco
+          ? 'Cidade e estado preenchidos. Confira e toque em Salvar.'
+          : undefined,
       });
     } catch (error: any) {
       Toast.show({
@@ -228,8 +245,9 @@ export default function EditProfileScreen() {
         perfil_telefone: data.cellphone,
         perfil_cidade: data.city,
         perfil_estado: data.state,
-        perfil_latitude: location?.latitude,
-        perfil_longitude: location?.longitude,
+        // Perfis antigos podem ter a coordenada com precisão total: arredonda ao regravar
+        perfil_latitude: location ? arredondarCoordenada(location.latitude) : undefined,
+        perfil_longitude: location ? arredondarCoordenada(location.longitude) : undefined,
         perfil_raio_notificacao_km: raioNotificacao,
       });
       setSaving(false);
