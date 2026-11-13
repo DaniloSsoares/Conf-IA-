@@ -26,7 +26,7 @@
 
 **Depois de 18/11:** apresentação (Fases 4 e 5): nome oficial, README e pitch, roteiro da demo, **vídeo de backup**, slides e ensaio das perguntas da banca.
 
-- [ ] 10–11/11 · Prioridade 1
+- [x] 10–11/11 · Prioridade 1
 - [ ] 12/11 · Prioridade 2
 - [ ] 13/11 · Prioridade 3
 - [ ] 14–15/11 · Prioridade 4
@@ -320,7 +320,7 @@ cidadão reporta → comunidade confirma → vira alerta → vizinhos são notif
 - [x] Rodar o SQL do [Anexo A.10](#a10-alerta-colaborativo-a-partir-de-reporte-validado) no SQL Editor e depois `./scripts/supabase-remote.sh db pull`
 - [x] Testar sem celular, com o bloco de teste do A.10 (simula 3 confirmações e mostra o alerta criado)
 - [x] Mapa ([src/features/Maps/index.tsx](../src/features/Maps/index.tsx), linhas ~296 e ~375): hoje todo alerta aparece como **"Alerta Oficial"** com o escudo. Mostrar "Alerta da comunidade" quando `alerta_origem === 'colaborativo'`. O `AlertaDetails` do ViewHistory já traduz a origem para "Comunidade"
-- [ ] Depois: o trigger de notificações ([Anexo A.8](#a8-gerar-notificações-quando-um-alerta-é-criado), item 3.3) dispara sozinho em cada alerta novo, inclusive nos colaborativos. Com os dois juntos, os vizinhos são avisados no Histórico
+- [x] Depois: o trigger de notificações ([Anexo A.8](#a8-gerar-notificações-quando-um-alerta-é-criado), item 3.3) dispara sozinho em cada alerta novo, inclusive nos colaborativos. Com os dois juntos, os vizinhos são avisados no Histórico
 - [ ] Depois: job para expirar alertas vencidos (`pg_cron`, marcando `expirado` quando passa de `alerta_expira_em`). Hoje um alerta vencido continua aparecendo como ativo
 - [ ] Atualizar os termos ([TermsModal](../src/components/ui/TermsModal/index.tsx), seção 4) e subir `VERSAO_TERMOS` em [termsService.ts](../src/shared/service/termsService.ts)
 - [ ] Testes 23 a 27 do [Anexo B](#anexo-b--testes-manuais-com-duas-contas)
