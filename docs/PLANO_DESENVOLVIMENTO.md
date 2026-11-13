@@ -26,7 +26,7 @@
 
 **Depois de 18/11:** apresentação (Fases 4 e 5): nome oficial, README e pitch, roteiro da demo, **vídeo de backup**, slides e ensaio das perguntas da banca.
 
-- [ ] 10–11/11 · Prioridade 1
+- [x] 10–11/11 · Prioridade 1
 - [ ] 12/11 · Prioridade 2
 - [ ] 13/11 · Prioridade 3
 - [ ] 14–15/11 · Prioridade 4
