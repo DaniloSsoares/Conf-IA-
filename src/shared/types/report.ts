@@ -1,3 +1,5 @@
+import type { NivelRisco } from './notification';
+
 export type ReportCategory =
   | 'alagamento'
   | 'deslizamento'
@@ -66,6 +68,8 @@ export interface ReportCategoryItem {
   id: ReportCategory;
   label: string;
   icon: string;
+  // Reporte não tem coluna de risco no banco: o risco vem da categoria
+  nivelRisco: NivelRisco;
   fullWidth?: boolean;
 }
 
