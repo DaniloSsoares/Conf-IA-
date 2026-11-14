@@ -41,7 +41,7 @@ export function useDenuncia(userId: string, onDenunciado: () => void) {
     if (error?.code === '23505') {
       marcarDenunciado(alvo.id);
       setAlvo(null);
-      Toast.show({ type: 'info', text1: 'Você já denunciou este conteúdo' });
+      Toast.show({ type: 'info', text1: 'You already flagged this content' });
       return;
     }
 
@@ -49,8 +49,8 @@ export function useDenuncia(userId: string, onDenunciado: () => void) {
       console.error('Erro ao enviar denúncia:', error);
       Toast.show({
         type: 'error',
-        text1: 'Não foi possível enviar a denúncia',
-        text2: getErrorMessage(error, 'Tente novamente em instantes.'),
+        text1: 'Could not send the flag',
+        text2: getErrorMessage(error, 'Please try again shortly.'),
       });
       return;
     }
@@ -59,8 +59,8 @@ export function useDenuncia(userId: string, onDenunciado: () => void) {
     setAlvo(null);
     Toast.show({
       type: 'success',
-      text1: 'Denúncia enviada',
-      text2: 'Obrigado por ajudar a manter a comunidade confiável.',
+      text1: 'Flag sent',
+      text2: 'Thanks for helping keep the community trustworthy.',
     });
     onDenunciado();
   };

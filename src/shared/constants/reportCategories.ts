@@ -3,37 +3,37 @@ import { ReportCategoryItem } from "../types/report";
 export const REPORT_CATEGORIES: ReportCategoryItem[] = [
   {
     id: "alagamento",
-    label: "Alagamento",
+    label: "Flooding",
     icon: "water-outline",
   },
   {
     id: "deslizamento",
-    label: "Deslizamento",
+    label: "Landslide",
     icon: "triangle-outline",
   },
   {
     id: "bloqueio_via",
-    label: "Via bloqueada",
+    label: "Blocked road",
     icon: "ban-outline",
   },
   {
     id: "fogo_em_mata",
-    label: "Fogo em mata",
+    label: "Wildfire",
     icon: "flame-outline",
   },
   {
     id: "queda_de_galho",
-    label: "Queda de galho",
+    label: "Fallen branch",
     icon: "leaf-outline",
   },
   {
     id: "falta_de_luz",
-    label: "Falta de luz",
+    label: "Power outage",
     icon: "flash-off-outline",
   },
   {
     id: "outro",
-    label: "Outro",
+    label: "Other",
     icon: "ellipsis-horizontal",
     fullWidth: true,
   },

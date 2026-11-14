@@ -56,8 +56,8 @@ export default function ViewHistoryScreen() {
     return (
       <LinearGradient colors={theme.primaryGradient} style={styles.container}>
         {statusBar}
-        <DetailsHeader title="Detalhes" />
-        <Text style={styles.errorText}>Não foi possível carregar os detalhes.</Text>
+        <DetailsHeader title="Details" />
+        <Text style={styles.errorText}>Could not load the details.</Text>
       </LinearGradient>
     );
   }
@@ -68,7 +68,7 @@ export default function ViewHistoryScreen() {
       {/* Com edgeToEdge (app.json) o Android não redimensiona a tela quando o teclado abre:
           sem isso o teclado cobre o campo de comentário. 'padding' funciona nas duas plataformas */}
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
-        <DetailsHeader title={isAlerta ? 'Detalhes da notificação' : 'Detalhes do reporte'} />
+        <DetailsHeader title={isAlerta ? 'Notification details' : 'Report details'} />
 
         <ScrollView
           ref={scrollRef}

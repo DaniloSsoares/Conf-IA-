@@ -18,33 +18,33 @@ const slides = [
     id: 1,
     iconName: 'tsunami',
     iconFamily: 'MaterialCommunityIcons',
-    title: 'Sua segurança em primeiro lugar.',
+    title: 'Your safety comes first.',
     description:
-      'Receba alertas em tempo real e colabore com sua comunidade para enfrentar desastres climáticos.',
+      'Get real-time alerts and work with your community to face climate disasters.',
   },
   {
     id: 2,
     iconName: 'map-outline',
     iconFamily: 'Ionicons',
-    title: 'Mapa de Riscos',
+    title: 'Risk Map',
     description:
-      'Visualize em tempo real as áreas de risco com classificação por nível de gravidade.',
+      'See risk areas in real time, classified by severity.',
   },
   {
     id: 3,
     iconName: 'megaphone-outline',
     iconFamily: 'Ionicons',
-    title: 'Reporte Comunitário',
+    title: 'Community Reporting',
     description:
-      'Contribua com a comunidade reportando eventos e situações de risco observadas.',
+      'Help your community by reporting events and risk situations you see.',
   },
   {
     id: 4,
     iconName: 'analytics-outline',
     iconFamily: 'Ionicons',
-    title: 'Análise Inteligente',
+    title: 'Smart Analysis',
     description:
-      'IA integrada analisa dados climáticos para prever riscos com antecedência.',
+      'Built-in AI analyzes climate data to predict risks in advance.',
   },
 ];
 
@@ -118,15 +118,15 @@ export default function IntroScreen() {
             activeOpacity={0.8}
           >
             <Text style={styles.nextButtonText}>
-              {currentSlide === slides.length - 1 ? 'Começar Agora' : 'Próximo'}
+              {currentSlide === slides.length - 1 ? 'Get Started' : 'Next'}
             </Text>
             <Ionicons name="arrow-forward" size={22} color={theme.buttonText} />
           </TouchableOpacity>
 
           <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Já possui uma conta? </Text>
+            <Text style={styles.loginText}>Already have an account? </Text>
             <TouchableOpacity onPress={handleLogin}>
-              <Text style={styles.loginLink}>Entrar</Text>
+              <Text style={styles.loginLink}>Sign in</Text>
             </TouchableOpacity>
           </View>
         </View>

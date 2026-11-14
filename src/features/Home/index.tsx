@@ -21,13 +21,14 @@ import { useAppTheme } from '@/src/shared/constants/theme';
 import { router, useFocusEffect } from 'expo-router';
 import styles from './style';
 import { NivelRisco } from '@/src/shared/types/notification';
+import { demoEn } from '@/src/shared/demoEn';
 
 // Valores do enum nivel_risco do banco -> texto exibido na tela
 const RISK_LABEL: Record<NivelRisco, string> = {
-  baixo: 'Baixo',
-  moderado: 'Moderado',
-  alto: 'Alto',
-  critico: 'Crítico',
+  baixo: 'Low',
+  moderado: 'Moderate',
+  alto: 'High',
+  critico: 'Critical',
 };
 
 export default function DashboardScreen({ navigation }: any) {
@@ -37,7 +38,7 @@ export default function DashboardScreen({ navigation }: any) {
   const [loadingWeather, setLoadingWeather] = useState(true);
   
   // Dados do Usuário
-  const [userName, setUserName] = useState('Usuário');
+  const [userName, setUserName] = useState('User');
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [userInitials, setUserInitials] = useState('U');
 
@@ -47,18 +48,18 @@ export default function DashboardScreen({ navigation }: any) {
   // Alertas e Risco
   const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
   const [riskLevel, setRiskLevel] = useState<NivelRisco>('baixo');
-  const [riskDescription, setRiskDescription] = useState('Situação normal. Nenhum risco relevante identificado no momento.');
+  const [riskDescription, setRiskDescription] = useState('All clear. No relevant risk identified right now.');
 
   // Data Formatada
   const getFormattedDate = () => {
     try {
       const now = new Date();
       const optionsDay: Intl.DateTimeFormatOptions = { weekday: 'long' };
-      const dayName = now.toLocaleDateString('pt-BR', optionsDay);
+      const dayName = now.toLocaleDateString('en-US', optionsDay);
       const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-      return `Hoje - ${capitalizedDay}`;
+      return `Today - ${capitalizedDay}`;
     } catch {
-      return 'Hoje';
+      return 'Today';
     }
   };
 
@@ -81,7 +82,7 @@ export default function DashboardScreen({ navigation }: any) {
       const { data: { user } } = await supabaseConfig.auth.getUser();
 
       let profileData: Profile | null = null;
-      let name = 'Usuário';
+      let name = 'User';
       let initials = 'U';
 
       if (user) {
@@ -93,7 +94,7 @@ export default function DashboardScreen({ navigation }: any) {
           }
         }
 
-        if (name === 'Usuário') {
+        if (name === 'User') {
           const metadata = user.user_metadata || {};
           name =
             metadata.nome ||
@@ -101,7 +102,7 @@ export default function DashboardScreen({ navigation }: any) {
             metadata.full_name ||
             metadata.display_name ||
             user.email?.split('@')[0] ||
-            'Usuário';
+            'User';
         }
 
         const nameParts = name.trim().split(' ');
@@ -162,8 +163,8 @@ export default function DashboardScreen({ navigation }: any) {
         setActiveAlerts(
           communityReports.slice(0, 3).map((rep) => ({
             id: rep.id,
-            alerta_titulo: rep.reporte_tipo_ocorrencia || 'Ocorrência Comunitária',
-            alerta_descricao: rep.reporte_descricao || 'Reportado por usuário próximo',
+            alerta_titulo: rep.reporte_tipo_ocorrencia || 'Community report',
+            alerta_descricao: rep.reporte_descricao || 'Reported by a nearby user',
             created_at: rep.created_at,
             alerta_nivel_risco: 'moderado',
           }))
@@ -179,16 +180,16 @@ export default function DashboardScreen({ navigation }: any) {
 
       if (hasCritical) {
         setRiskLevel('critico');
-        setRiskDescription('Alerta crítico na sua região! Siga as orientações de segurança.');
+        setRiskDescription('Critical alert in your area! Follow the safety guidelines.');
       } else if (hasHigh) {
         setRiskLevel('alto');
-        setRiskDescription('Atenção elevada. Risco de chuva forte ou alagamento detectado.');
+        setRiskDescription('High alert. Risk of heavy rain or flooding detected.');
       } else if (totalEvents > 0) {
         setRiskLevel('moderado');
-        setRiskDescription('Risco moderado. Ocorrências ativas registradas na região.');
+        setRiskDescription('Moderate risk. Active incidents reported in the area.');
       } else {
         setRiskLevel('baixo');
-        setRiskDescription('Situação normal. Nenhum risco relevante identificado no momento.');
+        setRiskDescription('All clear. No relevant risk identified right now.');
       }
     } catch (err) {
       console.error('Erro ao buscar alertas ativos:', err);
@@ -370,7 +371,7 @@ export default function DashboardScreen({ navigation }: any) {
                     isDarkMode ? { color: '#C084FC' } : { color: '#7C3AED' },
                   ]}
                 >
-                  {isDarkMode ? 'Modo Escuro' : 'Modo Claro'}
+                  {isDarkMode ? 'Dark Mode' : 'Light Mode'}
                 </Text>
               </View>
             </View>
@@ -437,7 +438,7 @@ export default function DashboardScreen({ navigation }: any) {
                 ? weather.descricao.charAt(0).toUpperCase() + weather.descricao.slice(1)
                 : weather
                 ? '—'
-                : 'Clima indisponível'}
+                : 'Weather unavailable'}
             </Text>
 
             <Text
@@ -447,7 +448,7 @@ export default function DashboardScreen({ navigation }: any) {
               ]}
             >
               {weather?.clima_temperatura_c !== undefined && weather?.clima_temperatura_c !== null
-                ? `${weather.clima_temperatura_c}° Graus`
+                ? `${weather.clima_temperatura_c}°`
                 : '--'}
             </Text>
 
@@ -481,7 +482,7 @@ export default function DashboardScreen({ navigation }: any) {
               isDarkMode && { color: theme.subtext },
             ]}
           >
-            Olá, {userName}
+            Hello, {userName}
           </Text>
 
           <Text
@@ -490,16 +491,16 @@ export default function DashboardScreen({ navigation }: any) {
               isDarkMode && { color: theme.text },
             ]}
           >
-            Como podemos ajudar
+            How can we help
             <Text
               style={[
                 styles.greetingHighlight,
                 isDarkMode && { color: '#60A5FA' },
               ]}
             >
-              {' você '}
+              {' you '}
             </Text>
-            hoje?
+            today?
           </Text>
 
           <View style={styles.greetingLine} />
@@ -512,7 +513,7 @@ export default function DashboardScreen({ navigation }: any) {
           <View style={styles.riskHeader}>
             <View>
               <Text style={[styles.riskLabel, { color: riskColor }]}>
-                Nível de risco atual
+                Current risk level
               </Text>
 
               <Text style={[styles.riskLevel, { color: riskColor }]}>
@@ -550,7 +551,7 @@ export default function DashboardScreen({ navigation }: any) {
               isDarkMode && { color: theme.text },
             ]}
           >
-            Condições Climáticas
+            Weather Conditions
           </Text>
 
           <View
@@ -599,7 +600,7 @@ export default function DashboardScreen({ navigation }: any) {
                     isDarkMode && { color: theme.subtext },
                   ]}
                 >
-                  Umidade
+                  Humidity
                 </Text>
               </View>
             </View>
@@ -648,7 +649,7 @@ export default function DashboardScreen({ navigation }: any) {
                     isDarkMode && { color: theme.subtext },
                   ]}
                 >
-                  Temperatura
+                  Temperature
                 </Text>
               </View>
             </View>
@@ -700,8 +701,8 @@ export default function DashboardScreen({ navigation }: any) {
                   ]}
                 >
                   {weather?.clima_precipitacao_mm !== undefined && weather?.clima_precipitacao_mm > 0
-                    ? 'Chuva'
-                    : 'Vento'}
+                    ? 'Rain'
+                    : 'Wind'}
                 </Text>
               </View>
             </View>
@@ -719,7 +720,7 @@ export default function DashboardScreen({ navigation }: any) {
                 isDarkMode && { color: theme.text },
               ]}
             >
-              Alertas Ativos
+              Active Alerts
             </Text>
 
             <TouchableOpacity
@@ -732,7 +733,7 @@ export default function DashboardScreen({ navigation }: any) {
                   isDarkMode && { color: '#818CF8' },
                 ]}
               >
-                Ver tudo
+                See all
               </Text>
             </TouchableOpacity>
           </View>
@@ -777,7 +778,7 @@ export default function DashboardScreen({ navigation }: any) {
                     ]}
                     numberOfLines={1}
                   >
-                    {alert.alerta_titulo || alert.alerta_tipo_ocorrencia || 'Alerta Meteorológico'}
+                    {demoEn(alert.alerta_titulo) || alert.alerta_tipo_ocorrencia || 'Weather Alert'}
                   </Text>
 
                   <Text
@@ -787,7 +788,7 @@ export default function DashboardScreen({ navigation }: any) {
                     ]}
                     numberOfLines={1}
                   >
-                    {alert.alerta_descricao || 'Monitorado via Defesa Civil / Conf-IA'}
+                    {demoEn(alert.alerta_descricao) || 'Monitored by Civil Defense / Conf-IA'}
                   </Text>
                 </View>
 
@@ -820,7 +821,7 @@ export default function DashboardScreen({ navigation }: any) {
                   isDarkMode && { color: theme.subtext },
                 ]}
               >
-                Nenhum alerta crítico ativo no momento.
+                No critical alerts right now.
               </Text>
             </View>
           )}
@@ -835,7 +836,7 @@ export default function DashboardScreen({ navigation }: any) {
           onPress={() => router.push("/Report")}
         >
           <Ionicons name="add-circle-outline" size={22} color="#FFFFFF" />
-          <Text style={styles.actionButtonText}>Reportar Novo Evento</Text>
+          <Text style={styles.actionButtonText}>Report New Event</Text>
         </TouchableOpacity>
 
         <View style={styles.bottomSpace} />

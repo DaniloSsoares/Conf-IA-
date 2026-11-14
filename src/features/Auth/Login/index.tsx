@@ -57,9 +57,9 @@ export default function LoginScreen() {
       if (error) {
         Toast.show({
           type: "error",
-          text1: "Falha no acesso",
+          text1: "Sign-in failed",
           text2: error.message.includes("Invalid login credentials")
-            ? "E-mail ou senha incorretos."
+            ? "Incorrect email or password."
             : error.message,
         });
         return;
@@ -71,8 +71,8 @@ export default function LoginScreen() {
       setLoading(false);
       Toast.show({
         type: "error",
-        text1: "Erro inesperado",
-        text2: "Tente novamente mais tarde.",
+        text1: "Unexpected error",
+        text2: "Please try again later.",
       });
     }
   }
@@ -85,7 +85,7 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
-      <Load visible={loading} message="Autenticando..." subMessage="Conectando à sua conta" />
+      <Load visible={loading} message="Signing in..." subMessage="Connecting to your account" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -99,9 +99,9 @@ export default function LoginScreen() {
               <Text style={styles.logoText}>Conf</Text>
               <Text style={styles.logoIa}>-U</Text>
             </View>
-            <Text style={styles.title}>Bem-vindo de volta!</Text>
+            <Text style={styles.title}>Welcome back!</Text>
             <Text style={styles.subtitle}>
-              Acesse sua plataforma de prevenção.
+              Access your prevention platform.
             </Text>
           </View>
 
@@ -121,7 +121,7 @@ export default function LoginScreen() {
                     <Ionicons name="mail-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
-                      placeholder="seu.email@exemplo.com"
+                      placeholder="your.email@example.com"
                       placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
@@ -138,7 +138,7 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Senha</Text>
+              <Text style={styles.label}>Password</Text>
               <Controller
                 control={control}
                 name="password"
@@ -152,7 +152,7 @@ export default function LoginScreen() {
                     <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Sua senha"
+                      placeholder="Your password"
                       placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
@@ -179,7 +179,7 @@ export default function LoginScreen() {
 
 
             <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
+              <Text style={styles.forgotPasswordText}>Forgot your password?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -188,20 +188,20 @@ export default function LoginScreen() {
               disabled={loading}
             >
               <Text style={styles.loginButtonText}>
-                {loading ? 'Conectando...' : 'Entrar na Conta'}
+                {loading ? 'Connecting...' : 'Sign In'}
               </Text>
             </TouchableOpacity>
 
             <View style={styles.divider}>
               <View style={styles.line} />
-              <Text style={styles.dividerText}>ou</Text>
+              <Text style={styles.dividerText}>or</Text>
               <View style={styles.line} />
             </View>
 
             <TouchableOpacity style={styles.signupButton} onPress={() => {
               router.push('/(auth)/Register');
             }}>
-              <Text style={styles.signupButtonText}>Criar nova conta</Text>
+              <Text style={styles.signupButtonText}>Create new account</Text>
             </TouchableOpacity>
 
            

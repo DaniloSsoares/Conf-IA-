@@ -1,14 +1,14 @@
 import * as yup from 'yup';
 
 export const loginSchema = yup.object({
-  email: yup.string().email("Email inválido").required("Informe seu email"),
-  password: yup.string().min(6, "Senha deve ter pelo menos 6 caracteres").required("Informe sua senha"),
+  email: yup.string().email("Invalid email").required("Enter your email"),
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Enter your password"),
 });
 
 
 export const registerSchema = yup.object({
-  email: yup.string().email("Email inválido").required("Informe seu email"),
-  password: yup.string().min(6, "Senha deve ter pelo menos 6 caracteres").required("Informe sua senha"),
+  email: yup.string().email("Invalid email").required("Enter your email"),
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Enter your password"),
   confirmPassword: yup.string()
     .oneOf([yup.ref('password')], 'As senhas não coincidem') // Valida se é igual ao password
     .required("Confirme sua senha"),
@@ -22,12 +22,12 @@ export const profileSchema = yup.object({
 });
 
 export const changePassSchema = yup.object({
-  password: yup.string().min(6, "Senha deve ter pelo menos 6 caracteres").required("Informe sua senha"),
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Enter your password"),
   confirmPassword: yup.string()
     .oneOf([yup.ref('password')], 'As senhas não coincidem') 
     .required("Confirme sua senha"),
 });
 
 export const validateComent = yup.object({
-  comentario: yup.string().trim().max(500, "O comentário pode ter no máximo 500 caracteres").default(''),
+  comentario: yup.string().trim().max(500, "Comments can have at most 500 characters").default(''),
 });

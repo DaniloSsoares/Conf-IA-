@@ -16,11 +16,11 @@ type RouteInfo = {
 
 const ROUTE_CONFIG: Record<string, RouteInfo> = {
   'index': { label: 'Home', icon: 'home-outline', activeIcon: 'home', type: 'home' },
-  'Maps/index': { label: 'Mapa', icon: 'map-outline', activeIcon: 'map', type: 'map' },
-  'Alerts/index': { label: 'Mapa', icon: 'map-outline', activeIcon: 'map', type: 'map' },
+  'Maps/index': { label: 'Map', icon: 'map-outline', activeIcon: 'map', type: 'map' },
+  'Alerts/index': { label: 'Map', icon: 'map-outline', activeIcon: 'map', type: 'map' },
   'Report/index': { label: '', icon: 'warning-outline', activeIcon: 'warning', type: 'alert' },
-  'History/index': { label: 'Histórico', icon: 'search-outline', activeIcon: 'search', type: 'history' },
-  'Profile/index': { label: 'Usuário', icon: 'person-outline', activeIcon: 'person', type: 'profile' },
+  'History/index': { label: 'History', icon: 'search-outline', activeIcon: 'search', type: 'history' },
+  'Profile/index': { label: 'Profile', icon: 'person-outline', activeIcon: 'person', type: 'profile' },
 };
 
 const DEFAULT_ROUTE: RouteInfo = {

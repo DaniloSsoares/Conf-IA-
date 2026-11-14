@@ -13,6 +13,7 @@ import { getStyles } from './styles';
 import { getStatusStyle, getRiskStyle, getCategoryMeta, formatRelativeTime } from '@/src/shared/constants/historyStatus';
 import ButtonBack from '@/src/components/ui/ButtonBack';
 import { HelpModal } from '@/src/components/ui';
+import { demoEn } from '@/src/shared/demoEn';
 
 type Tab = 'notificações' | 'reportes';
 export default function HistoryScreen() {
@@ -81,7 +82,7 @@ export default function HistoryScreen() {
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
  <View style={styles.header}>
          <ButtonBack/>
-          <Text style={styles.headerTitle}>Histórico</Text>
+          <Text style={styles.headerTitle}>History</Text>
           <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
             <Ionicons name="help-circle-outline" size={26} color={primaryColor} />
           </TouchableOpacity>
@@ -92,22 +93,22 @@ export default function HistoryScreen() {
           style={[styles.segmentButton, tab === 'notificações' && styles.segmentButtonActive]}
           onPress={() => setTab('notificações')}
         >
-          <Text style={[styles.segmentText, tab === 'notificações' && styles.segmentTextActive]}>Notificações</Text>
+          <Text style={[styles.segmentText, tab === 'notificações' && styles.segmentTextActive]}>Notifications</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.segmentButton, tab === 'reportes' && styles.segmentButtonActive]}
           onPress={() => setTab('reportes')}
         >
-          <Text style={[styles.segmentText, tab === 'reportes' && styles.segmentTextActive]}>Meus reportes</Text>
+          <Text style={[styles.segmentText, tab === 'reportes' && styles.segmentTextActive]}>My reports</Text>
         </TouchableOpacity>
       </View>
 
       <HelpModal
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
-        title='Histórico de alertas'
-        description='Aqui você pode acompanhar todos os alertas que foram enviados e receber notificações de novos alertas na sua região.'
-        buttonText='Entendi'
+        title='Alert history'
+        description='Here you can follow every alert sent and get notified about new alerts in your area.'
+        buttonText='Got it'
       />
 
       {loading ? (
@@ -116,7 +117,7 @@ export default function HistoryScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {tab === 'notificações' ? (
             notifications.length === 0 ? (
-              renderEmpty('Nenhum alerta por aqui ainda.')
+              renderEmpty('No alerts here yet.')
             ) : (
               notifications.map((notification) => {
                 const meta = getCategoryMeta(notification.alertas?.alerta_tipo_ocorrencia);
@@ -140,14 +141,14 @@ export default function HistoryScreen() {
                     </View>
 
                     <Text style={[styles.cardTitle, !notification.notificacao_lida && styles.cardTitleUnread]}>
-                      {notification.alertas?.alerta_titulo || meta.label}
+                      {demoEn(notification.alertas?.alerta_titulo) || meta.label}
                     </Text>
 
                     {notification.alertas?.alerta_descricao ? (
                       <View style={styles.cardLocationRow}>
                         <Ionicons name="information-circle-outline" size={14} color={iconColor} />
                         <Text style={styles.cardLocationText} numberOfLines={1}>
-                          {notification.alertas.alerta_descricao}
+                          {demoEn(notification.alertas.alerta_descricao)}
                         </Text>
                       </View>
                     ) : null}
@@ -161,7 +162,7 @@ export default function HistoryScreen() {
                           ]}
                         />
                         <Text style={styles.statusBadgeText}>
-                          {notification.notificacao_lida ? 'Lida' : 'Nova notificação'}
+                          {notification.notificacao_lida ? 'Read' : 'New notification'}
                         </Text>
                       </View>
                       <Ionicons name="chevron-forward" size={18} color={iconColor} />
@@ -171,7 +172,7 @@ export default function HistoryScreen() {
               })
             )
           ) : reports.length === 0 ? (
-            renderEmpty('Você ainda não fez nenhum reporte.')
+            renderEmpty('You have not submitted any reports yet.')
           ) : (
             reports.map((report) => {
               const meta = getCategoryMeta(report.reporte_tipo_ocorrencia);

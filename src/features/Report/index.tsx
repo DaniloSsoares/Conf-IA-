@@ -53,8 +53,8 @@ export default function ReportScreen() {
       if (status !== 'granted') {
         Toast.show({
           type: 'error',
-          text1: 'Permissão negada',
-          text2: 'Habilite o acesso à localização nas configurações.',
+          text1: 'Permission denied',
+          text2: 'Enable location access in settings.',
         });
         return;
       }
@@ -76,8 +76,8 @@ export default function ReportScreen() {
       if (!currentPosition) {
         Toast.show({
           type: 'error',
-          text1: 'Sinal de GPS indisponível',
-          text2: 'Não foi possível obter sua posição. Verifique se o GPS está ativo.',
+          text1: 'GPS signal unavailable',
+          text2: 'Could not get your position. Check that GPS is on.',
         });
         return;
       }
@@ -113,9 +113,9 @@ export default function ReportScreen() {
       const isRawCoordinates = addressString.startsWith('Lat:');
       Toast.show({
         type: isRawCoordinates ? 'info' : 'success',
-        text1: 'Localização obtida',
+        text1: 'Location captured',
         text2: isRawCoordinates
-          ? 'Endereço indisponível. Coordenadas salvas com sucesso.'
+          ? 'Address unavailable. Coordinates saved.'
           : addressString,
       });
 
@@ -123,8 +123,8 @@ export default function ReportScreen() {
       console.error('Erro na captura de localização:', error);
       Toast.show({
         type: 'error',
-        text1: 'Erro de localização',
-        text2: 'Ocorreu uma falha ao tentar obter a posição.',
+        text1: 'Location error',
+        text2: 'Failed to get your position.',
       });
     } finally {
       setLoadingLocation(false);
@@ -136,8 +136,8 @@ export default function ReportScreen() {
     if (!selectedCategory) {
       Toast.show({
         type: 'info',
-        text1: 'Selecione uma categoria',
-        text2: 'Escolha qual tipo de ocorrência está acontecendo.',
+        text1: 'Select a category',
+        text2: 'Choose what kind of incident is happening.',
       });
       return;
     }
@@ -145,8 +145,8 @@ export default function ReportScreen() {
     if (!location) {
       Toast.show({
         type: 'info',
-        text1: 'Localização necessária',
-        text2: 'Toque em capturar localização para informar onde ocorreu o evento.',
+        text1: 'Location required',
+        text2: 'Tap capture location to tell us where it happened.',
       });
       return;
     }
@@ -171,16 +171,16 @@ export default function ReportScreen() {
         console.error('Erro ao criar reporte:', error);   
         Toast.show({
           type: 'error',
-          text1: 'Erro ao enviar reporte',
-          text2: getErrorMessage(error, 'Ocorreu um erro ao salvar o reporte'),
+          text1: 'Error sending report',
+          text2: getErrorMessage(error, 'An error occurred while saving the report'),
         });
         return;
       }
 
       Toast.show({
         type: 'success',
-        text1: 'Reporte enviado!',
-        text2: 'A ocorrência foi registrada com sucesso.',
+        text1: 'Report sent!',
+        text2: 'The incident was successfully reported.',
       });
 
       // Limpar formulário
@@ -193,8 +193,8 @@ export default function ReportScreen() {
       console.error('Erro ao submeter reporte:', err);
       Toast.show({
         type: 'error',
-        text1: 'Erro inesperado',
-        text2: 'Não foi possível enviar seu reporte. Tente novamente.',
+        text1: 'Unexpected error',
+        text2: 'Could not send your report. Please try again.',
       });
     } finally {
       setSubmitting(false);
@@ -209,7 +209,7 @@ export default function ReportScreen() {
         {/* Header Bar */}
         <View style={styles.header}>
          <ButtonBack/>
-          <Text style={styles.headerTitle}>Reportar ocorrência</Text>
+          <Text style={styles.headerTitle}>Report an incident</Text>
           <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
             <Ionicons name="help-circle-outline" size={26} color={theme.primary} />
           </TouchableOpacity>
@@ -219,8 +219,8 @@ export default function ReportScreen() {
 
           {/* Seção Categoria */}
           <View style={styles.sectionCategory}>
-            <Text style={styles.subtitle}>Nova ocorrência</Text>
-            <Text style={styles.title}>O que está acontecendo?</Text>
+            <Text style={styles.subtitle}>New report</Text>
+            <Text style={styles.title}>What is happening?</Text>
 
             <View style={styles.categoryGrid}>
               {REPORT_CATEGORIES.map((item) => {
@@ -255,7 +255,7 @@ export default function ReportScreen() {
           <View style={styles.sectionContainer}>
             <View style={styles.sectionHeader}>
               <Ionicons name="location" size={20} color={theme.primary} />
-              <Text style={styles.sectionTitle}>Localização</Text>
+              <Text style={styles.sectionTitle}>Location</Text>
             </View>
 
             <TouchableOpacity
@@ -267,14 +267,14 @@ export default function ReportScreen() {
               {loadingLocation ? (
                 <View style={styles.row}>
                   <ActivityIndicator size="small" color={theme.primary} />
-                  <Text style={styles.buttonText}>Obtendo localização atual...</Text>
+                  <Text style={styles.buttonText}>Getting current location...</Text>
                 </View>
               ) : location ? (
                 <View style={styles.capturedContainer}>
                   <View style={styles.capturedInfo}>
                     <Ionicons name="checkmark-circle" size={22} color="#10B981" />
                     <View style={styles.textContainer}>
-                      <Text style={styles.capturedTitle}>Localização capturada</Text>
+                      <Text style={styles.capturedTitle}>Location captured</Text>
                       <Text style={styles.capturedSub} numberOfLines={1}>
                         {location.endereco || `${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}`}
                       </Text>
@@ -287,7 +287,7 @@ export default function ReportScreen() {
               ) : (
                 <View style={styles.row}>
                   <Ionicons name="scan-outline" size={22} color={theme.primary} />
-                  <Text style={styles.buttonText}>Toque para capturar localização atual</Text>
+                  <Text style={styles.buttonText}>Tap to capture current location</Text>
                 </View>
               )}
             </TouchableOpacity>
@@ -296,12 +296,12 @@ export default function ReportScreen() {
           {/* Seção Detalhes Adicionais */}
           <View style={styles.sectionContainer}>
             <View style={styles.headerRow}>
-              <Text style={styles.sectionTitle}>Detalhes adicionais (opcional)</Text>
+              <Text style={styles.sectionTitle}>Additional details (optional)</Text>
               <Text style={styles.counterText}>{description.length}/500</Text>
             </View>
             <TextInput
               style={styles.textArea}
-              placeholder="Descreva a situação em poucas palavras..."
+              placeholder="Describe the situation in a few words..."
               placeholderTextColor={theme.placeholderText}
               multiline
               numberOfLines={4}
@@ -330,7 +330,7 @@ export default function ReportScreen() {
                 activeOpacity={0.7}
               >
                 <Ionicons name="camera-outline" size={22} color={theme.primary} />
-                <Text style={styles.buttonText}>Tirar Foto (opcional)</Text>
+                <Text style={styles.buttonText}>Take Photo (optional)</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -350,7 +350,7 @@ export default function ReportScreen() {
             ) : (
               <View style={styles.row}>
                 <Ionicons name="send-outline" size={20} color={theme.buttonText} style={styles.sendIcon} />
-                <Text style={styles.submitButtonText}>Enviar reporte</Text>
+                <Text style={styles.submitButtonText}>Submit report</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -362,9 +362,9 @@ export default function ReportScreen() {
       <HelpModal
         visible={helpModalVisible}
         onClose={() => setHelpModalVisible(false)}
-        title='Como funciona o reporte?'
-        description={`1. Selecione a categoria da ocorrência.\n2. Capture sua localização precisa via GPS.\n3. Se desejar, adicione uma descrição e foto.\n4. Envie para que outros usuários fiquem alertas em tempo real.`}
-        buttonText='Entendi'
+        title='How does reporting work?'
+        description={`1. Select the incident category.\n2. Capture your precise location via GPS.\n3. Optionally, add a description and photo.\n4. Submit so other users are alerted in real time.`}
+        buttonText='Got it'
       />
     </LinearGradient>
   );

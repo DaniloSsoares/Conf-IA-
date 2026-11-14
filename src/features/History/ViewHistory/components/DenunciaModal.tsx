@@ -11,7 +11,7 @@ export function DenunciaModal({ denuncia }: { denuncia: Denuncia }) {
   const iconColor = theme?.primary || '#0047FF';
 
   const motivos = alvo ? getMotivosPara(alvo.tipo) : [];
-  const titulo = alvo?.tipo === 'comentario' ? 'Denunciar comentário' : 'Denunciar reporte';
+  const titulo = alvo?.tipo === 'comentario' ? 'Report comment' : 'Report content';
 
   return (
     <Modal visible={alvo !== null} transparent animationType="slide" onRequestClose={fechar}>
@@ -20,7 +20,7 @@ export function DenunciaModal({ denuncia }: { denuncia: Denuncia }) {
         <View style={styles.modalContent} onStartShouldSetResponder={() => true}>
           <Text style={styles.modalTitle}>{titulo}</Text>
           <Text style={styles.modalSubtitle}>
-            A denúncia é anônima. Com 3 denúncias, o conteúdo deixa de aparecer para a comunidade.
+            Flags are anonymous. After 3 flags, the content is hidden from the community.
           </Text>
 
           {motivos.map((m) => (
@@ -39,7 +39,7 @@ export function DenunciaModal({ denuncia }: { denuncia: Denuncia }) {
             <ActivityIndicator style={styles.modalCancel} color={iconColor} />
           ) : (
             <TouchableOpacity style={styles.modalCancel} onPress={fechar}>
-              <Text style={styles.modalCancelText}>Cancelar</Text>
+              <Text style={styles.modalCancelText}>Cancel</Text>
             </TouchableOpacity>
           )}
         </View>

@@ -87,14 +87,14 @@ export function useReportVoting(
     setSending(false);
 
     if (error) {
-      Toast.show({ type: 'error', text1: 'Não foi possível registrar seu voto' });
+      Toast.show({ type: 'error', text1: 'Could not register your vote' });
       return;
     }
     Toast.show({
       type: 'success',
       text1: mesmoVoto
-        ? 'Comentário atualizado'
-        : voto === 'confirma' ? 'Ocorrência confirmada' : 'Ocorrência contestada',
+        ? 'Comment updated'
+        : voto === 'confirma' ? 'Incident confirmed' : 'Incident disputed',
     });
     loadVotes();
     onVoted();

@@ -240,8 +240,8 @@ export function useMapData() {
           if (novoReporte.perfil_id === profileId) return;
           Toast.show({
             type: "info",
-            text1: "Novo reporte comunitário!",
-            text2: "Uma nova ocorrência foi registrada próxima a você.",
+            text1: "New community report!",
+            text2: "A new incident was reported near you.",
           });
         },
       )
@@ -302,8 +302,8 @@ export function useMapData() {
             type: "info",
             text1:
               novoAlerta.alerta_origem === "colaborativo"
-                ? "Novo alerta da comunidade!"
-                : "Novo alerta oficial!",
+                ? "New community alert!"
+                : "New official alert!",
             text2: novoAlerta.alerta_titulo,
           });
         },

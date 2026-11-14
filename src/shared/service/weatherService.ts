@@ -41,7 +41,7 @@ export async function getCurrentWeather(
   // 1. Tentar WeatherAPI primeiro se tiver chave
   if (WEATHERAPI_KEY) {
     try {
-      const url = `${WEATHERAPI_BASE_URL}?key=${WEATHERAPI_KEY}&q=${latitude},${longitude}&lang=pt`;
+      const url = `${WEATHERAPI_BASE_URL}?key=${WEATHERAPI_KEY}&q=${latitude},${longitude}&lang=en`;
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
@@ -69,7 +69,7 @@ export async function getCurrentWeather(
   // 2. Tentar OpenWeather se chave estiver disponível
   if (OPENWEATHER_API_KEY) {
     try {
-      const url = `${OPENWEATHER_BASE_URL}?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=pt_br`;
+      const url = `${OPENWEATHER_BASE_URL}?lat=${latitude}&lon=${longitude}&appid=${OPENWEATHER_API_KEY}&units=metric&lang=en`;
       const response = await fetch(url);
 
       if (response.ok) {

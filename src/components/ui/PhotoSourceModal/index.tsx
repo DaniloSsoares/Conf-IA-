@@ -33,7 +33,7 @@ export function PhotoSourceModal({
   visible,
   onClose,
   onPicked,
-  title = 'Adicionar foto',
+  title = 'Add photo',
   pickerOptions,
 }: PhotoSourceModalProps) {
   const { theme } = useAppTheme();
@@ -58,16 +58,16 @@ export function PhotoSourceModal({
 
           <TouchableOpacity style={styles.optionButton} onPress={() => handlePick('camera')}>
             <Ionicons name="camera-outline" size={22} color={iconColor} />
-            <Text style={styles.optionText}>Tirar foto</Text>
+            <Text style={styles.optionText}>Take photo</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.optionButton} onPress={() => handlePick('gallery')}>
             <Ionicons name="images-outline" size={22} color={iconColor} />
-            <Text style={styles.optionText}>Escolher da galeria</Text>
+            <Text style={styles.optionText}>Choose from gallery</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelText}>Cancelar</Text>
+            <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

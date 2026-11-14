@@ -11,6 +11,10 @@ import { Report } from '@/src/shared/types/report';
 import { REPORT_CATEGORIES } from '@/src/shared/constants/reportCategories';
 import getStyles, { darkMapStyle } from './styles';
 import { useMapData } from './useMapData';
+import { demoEn } from '@/src/shared/demoEn';
+
+// DEMO (pitch em inglês): rótulos do enum nivel_risco
+const RISK_EN: Record<string, string> = { baixo: 'Low', moderado: 'Moderate', alto: 'High', critico: 'Critical' };
 
 type FilterType = 'todos' | 'alertas' | 'reportes';
 type IconeIonicons = keyof typeof Ionicons.glyphMap;
@@ -18,9 +22,9 @@ type IconeIonicons = keyof typeof Ionicons.glyphMap;
 
 function getOrigemAlerta(origem?: string | null): { texto: string; icone: IconeIonicons } {
     if (origem === 'colaborativo') {
-        return { texto: 'Alerta da comunidade', icone: 'people' };
+        return { texto: 'Community alert', icone: 'people' };
     }
-    return { texto: 'Alerta Oficial', icone: 'shield-checkmark' };
+    return { texto: 'Official alert', icone: 'shield-checkmark' };
 }
 
 export default function MapScreen() {
@@ -137,7 +141,7 @@ export default function MapScreen() {
             <View style={styles.loadingContainer}>
                 <View style={styles.loadingCard}>
                     <Load />
-                    <Text style={styles.loadingText}>Obtendo sua localização no mapa...</Text>
+                    <Text style={styles.loadingText}>Getting your location...</Text>
                 </View>
             </View>
         );
@@ -150,8 +154,8 @@ export default function MapScreen() {
                     <Ionicons name="location-outline" size={40} color={theme.primary} />
                     <Text style={styles.loadingText}>
                         {permissionDenied
-                            ? 'Permissão de localização negada. Habilite-a nas configurações para visualizar o mapa.'
-                            : 'Não foi possível obter sua localização.'}
+                            ? 'Location permission denied. Enable it in settings to view the map.'
+                            : 'Could not get your location.'}
                     </Text>
                 </View>
             </View>
@@ -169,10 +173,10 @@ export default function MapScreen() {
                     <View style={styles.headerTitleRow}>
                         <View style={styles.headerTitleContainer}>
                             <View style={styles.statusDot} />
-                            <Text style={styles.headerTitle}>Mapa de Monitoramento</Text>
+                            <Text style={styles.headerTitle}>Monitoring Map</Text>
                         </View>
                         <View style={styles.radiusBadge}>
-                            <Text style={styles.radiusBadgeText}>Raio: {raioKm}km</Text>
+                            <Text style={styles.radiusBadgeText}>Radius: {raioKm} km</Text>
                         </View>
                     </View>
 
@@ -211,7 +215,7 @@ export default function MapScreen() {
                         <View style={styles.weatherCard}>
                             <View style={styles.weatherMain}>
                                 <Ionicons name="cloud-offline-outline" size={20} color={theme.subtext} />
-                                <Text style={styles.weatherDescText}>Clima indisponível</Text>
+                                <Text style={styles.weatherDescText}>Weather unavailable</Text>
                             </View>
                         </View>
                     )}
@@ -223,7 +227,7 @@ export default function MapScreen() {
                             activeOpacity={0.8}
                         >
                             <Text style={[styles.filterChipText, filterType === 'todos' && styles.filterChipTextActive]}>
-                                Todos ({filteredAlerts.length + filteredReports.length})
+                                All ({filteredAlerts.length + filteredReports.length})
                             </Text>
                         </TouchableOpacity>
 
@@ -238,7 +242,7 @@ export default function MapScreen() {
                                 color={filterType === 'alertas' ? theme.buttonText : theme.alertRed}
                             />
                             <Text style={[styles.filterChipText, filterType === 'alertas' && styles.filterChipTextActive]}>
-                                Alertas ({filteredAlerts.length})
+                                Alerts ({filteredAlerts.length})
                             </Text>
                         </TouchableOpacity>
 
@@ -253,7 +257,7 @@ export default function MapScreen() {
                                 color={filterType === 'reportes' ? theme.buttonText : theme.primary}
                             />
                             <Text style={[styles.filterChipText, filterType === 'reportes' && styles.filterChipTextActive]}>
-                                Ocorrências ({filteredReports.length})
+                                Reports ({filteredReports.length})
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -285,7 +289,7 @@ export default function MapScreen() {
                
                 <Marker
                     coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-                    title="Você está aqui"
+                    title="You are here"
                 >
                     <View style={styles.userMarkerContainer}>
                         <View style={styles.userMarkerPulse} />
@@ -325,13 +329,13 @@ export default function MapScreen() {
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagAlerta}>{origem.texto}</Text>
                                         <Text style={getRiskBadgeStyle(alerta.alerta_nivel_risco)}>
-                                            {alerta.alerta_nivel_risco || 'Moderado'}
+                                            {RISK_EN[alerta.alerta_nivel_risco] || 'Moderate'}
                                         </Text>
                                     </View>
-                                    <Text style={styles.calloutTitle} numberOfLines={1}>{alerta.alerta_titulo}</Text>
-                                    <Text style={styles.calloutDescription} numberOfLines={2}>{alerta.alerta_descricao}</Text>
+                                    <Text style={styles.calloutTitle} numberOfLines={1}>{demoEn(alerta.alerta_titulo)}</Text>
+                                    <Text style={styles.calloutDescription} numberOfLines={2}>{demoEn(alerta.alerta_descricao)}</Text>
                                     <View style={styles.calloutFooter}>
-                                        <Text style={styles.calloutHint}>Ver detalhes no histórico →</Text>
+                                        <Text style={styles.calloutHint}>View details →</Text>
                                     </View>
                                 </View>
                             </Callout>
@@ -362,17 +366,17 @@ export default function MapScreen() {
                             <Callout tooltip onPress={() => handleOpenReport(report)}>
                                 <View style={styles.calloutContainer}>
                                     <View style={styles.calloutHeader}>
-                                        <Text style={styles.calloutTagReporte}>Ocorrência</Text>
+                                        <Text style={styles.calloutTagReporte}>Report</Text>
                                         <Text style={getRiskBadgeStyle(report.reporte_nivel_risco)}>
-                                            {report.reporte_nivel_risco || 'Moderado'}
+                                            {RISK_EN[report.reporte_nivel_risco] || 'Moderate'}
                                         </Text>
                                     </View>
-                                    <Text style={styles.calloutTitle} numberOfLines={1}>{category?.label || 'Ocorrência'}</Text>
+                                    <Text style={styles.calloutTitle} numberOfLines={1}>{category?.label || 'Report'}</Text>
                                     {report.reporte_descricao ? (
                                         <Text style={styles.calloutDescription} numberOfLines={2}>{report.reporte_descricao}</Text>
                                     ) : null}
                                     <View style={styles.calloutFooter}>
-                                        <Text style={styles.calloutHint}>Ver detalhes no histórico →</Text>
+                                        <Text style={styles.calloutHint}>View details →</Text>
                                     </View>
                                 </View>
                             </Callout>
@@ -402,7 +406,7 @@ export default function MapScreen() {
                                 color={theme.primary} 
                             />
                             <Text style={styles.previewTypeText}>
-                                {selectedItem.type === 'alerta' ? origemSelecionada.texto : 'Ocorrência Comunitária'}
+                                {selectedItem.type === 'alerta' ? origemSelecionada.texto : 'Community report'}
                             </Text>
                         </View>
                         <TouchableOpacity onPress={() => setSelectedItem(null)} style={{ padding: 4 }}>
@@ -411,11 +415,11 @@ export default function MapScreen() {
                     </View>
 
                     <Text style={styles.previewTitle}>
-                        {selectedItem.alerta_titulo || REPORT_CATEGORIES.find(c => c.id === selectedItem.reporte_tipo_ocorrencia)?.label || "Detalhes"}
+                        {demoEn(selectedItem.alerta_titulo) || REPORT_CATEGORIES.find(c => c.id === selectedItem.reporte_tipo_ocorrencia)?.label || "Details"}
                     </Text>
 
                     <Text style={styles.previewDescription} numberOfLines={2}>
-                        {selectedItem.alerta_descricao || selectedItem.reporte_descricao || "Sem descrição disponível."}
+                        {demoEn(selectedItem.alerta_descricao) || selectedItem.reporte_descricao || "No description available."}
                     </Text>
 
                     <View style={styles.previewFooter}>
@@ -424,7 +428,7 @@ export default function MapScreen() {
                             return (
                                 <View style={getRiskBadgeStyle(riskLevelVal)}>
                                     <Text style={getRiskTextStyle(riskLevelVal)}>
-                                        Risco {riskLevelVal.toUpperCase()}
+                                        {(RISK_EN[riskLevelVal] || riskLevelVal).toUpperCase()} RISK
                                     </Text>
                                 </View>
                             );
@@ -437,7 +441,7 @@ export default function MapScreen() {
                                 else handleOpenReport(selectedItem);
                             }}
                         >
-                            <Text style={styles.detailsButtonText}>Ver detalhes</Text>
+                            <Text style={styles.detailsButtonText}>View details</Text>
                             <Ionicons name="arrow-forward" size={16} color="#FFF" />
                         </TouchableOpacity>
                     </View>

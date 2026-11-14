@@ -22,12 +22,12 @@ export function ReportFlag({ jaDenunciado, onPress, compacto = false }: ReportFl
       disabled={jaDenunciado}
       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       accessibilityRole="button"
-      accessibilityLabel={jaDenunciado ? 'Conteúdo já denunciado' : 'Denunciar conteúdo'}
+      accessibilityLabel={jaDenunciado ? 'Content already flagged' : 'Flag content'}
     >
       <Ionicons name={jaDenunciado ? 'flag' : 'flag-outline'} size={compacto ? 14 : 15} color={cor} />
       {!compacto && (
         <Text style={[styles.reportFlagText, { color: cor }]}>
-          {jaDenunciado ? 'Denunciado' : 'Denunciar'}
+          {jaDenunciado ? 'Flagged' : 'Flag'}
         </Text>
       )}
     </TouchableOpacity>

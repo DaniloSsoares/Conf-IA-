@@ -5,11 +5,12 @@ import { getRiskStyle, getCategoryMeta } from '@/src/shared/constants/historySta
 import { Alerta, OrigemAlerta } from '@/src/shared/types/notification';
 import { useViewHistoryStyles } from '../styles';
 import { MetaRow, Divider } from './MetaRow';
+import { demoEn } from '@/src/shared/demoEn';
 
 const ORIGEM_LABEL: Record<OrigemAlerta, string> = {
-  defesa_civil: 'Defesa Civil',
-  colaborativo: 'Comunidade',
-  sistema_ia: 'Sistema',
+  defesa_civil: 'Civil Defense',
+  colaborativo: 'Community',
+  sistema_ia: 'System',
 };
 
 export function AlertaDetails({ alerta }: { alerta: Alerta }) {
@@ -30,28 +31,28 @@ export function AlertaDetails({ alerta }: { alerta: Alerta }) {
           </View>
         </View>
 
-        <Text style={styles.title}>{alerta.alerta_titulo || meta.label}</Text>
+        <Text style={styles.title}>{demoEn(alerta.alerta_titulo) || meta.label}</Text>
         {alerta.alerta_descricao ? (
           <Text style={styles.description}>{alerta.alerta_descricao}</Text>
         ) : null}
       </View>
 
-      <Text style={styles.sectionTitle}>Informações</Text>
+      <Text style={styles.sectionTitle}>Information</Text>
       <View style={styles.metaSection}>
-        <MetaRow label="Tipo de ocorrência" value={meta.label} />
+        <MetaRow label="Incident type" value={meta.label} />
         <Divider />
         <MetaRow
-          label="Origem"
-          value={alerta.alerta_origem ? ORIGEM_LABEL[alerta.alerta_origem] : 'Sistema'}
+          label="Source"
+          value={alerta.alerta_origem ? ORIGEM_LABEL[alerta.alerta_origem] : 'System'}
         />
         <Divider />
-        <MetaRow label="Status do alerta" value={alerta.alerta_status || 'Ativo'} />
+        <MetaRow label="Alert status" value={({ ativo: 'Active', expirado: 'Expired', cancelado: 'Cancelled' } as Record<string, string>)[alerta.alerta_status ?? 'ativo'] ?? 'Active'} />
         {alerta.alerta_expira_em ? (
           <>
             <Divider />
             <MetaRow
-              label="Expira em"
-              value={new Date(alerta.alerta_expira_em).toLocaleString('pt-BR')}
+              label="Expires at"
+              value={new Date(alerta.alerta_expira_em).toLocaleString('en-US')}
             />
           </>
         ) : null}

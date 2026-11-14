@@ -11,14 +11,14 @@ export function VoteSection({ voting }: { voting: ReportVoting }) {
 
   return (
     <>
-      <Text style={[styles.sectionTitle, styles.voteSectionTitle]}>Essa ocorrência é real?</Text>
+      <Text style={[styles.sectionTitle, styles.voteSectionTitle]}>Is this incident real?</Text>
 
       <Input
-        label="Comentário (opcional)"
+        label="Comment (optional)"
         iconName="chatbubble-outline"
         value={comentario}
         onChangeText={setComentario}
-        placeholder="Ex.: água na altura do joelho"
+        placeholder="E.g.: knee-deep water"
         maxLength={500}
         editable={!sending}
         error={comentarioErro}
@@ -31,7 +31,7 @@ export function VoteSection({ voting }: { voting: ReportVoting }) {
           disabled={sending}
         >
           <Ionicons name="checkmark-circle" size={20} color="#10B981" />
-          <Text style={styles.voteText}>Confirmar</Text>
+          <Text style={styles.voteText}>Confirm</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -40,7 +40,7 @@ export function VoteSection({ voting }: { voting: ReportVoting }) {
           disabled={sending}
         >
           <Ionicons name="close-circle" size={20} color="#EF4444" />
-          <Text style={styles.voteText}>Contestar</Text>
+          <Text style={styles.voteText}>Dispute</Text>
         </TouchableOpacity>
       </View>
     </>

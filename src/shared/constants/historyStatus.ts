@@ -22,25 +22,25 @@ export function getStatusStyle(status?: string, theme?: any): StatusStyleConfig 
     pendente: {
       bg: 'rgba(245, 166, 35, 0.18)',
       text: '#F5A623',
-      label: 'Pendente',
+      label: 'Pending',
       border: '#F5A623',
     },
     validado: {
       bg: 'rgba(34, 197, 94, 0.18)',
       text: '#22C55E',
-      label: 'Validado',
+      label: 'Validated',
       border: '#22C55E',
     },
     rejeitado: {
       bg: 'rgba(239, 68, 68, 0.18)',
       text: '#EF4444',
-      label: 'Rejeitado',
+      label: 'Rejected',
       border: '#EF4444',
     },
     resolvido: {
       bg: 'rgba(59, 130, 246, 0.18)',
       text: lightBlue,
-      label: 'Resolvido',
+      label: 'Resolved',
       border: primaryColor,
     },
   };
@@ -55,25 +55,25 @@ export function getRiskStyle(riskKey?: string, theme?: any): RiskStyleConfig {
     critico: {
       bg: '#DC2626',
       text: '#FFFFFF',
-      label: 'ALTO RISCO',
+      label: 'HIGH RISK',
       border: '#DC2626',
     },
     alto: {
       bg: '#EF4444',
       text: '#FFFFFF',
-      label: 'ALTO RISCO',
+      label: 'HIGH RISK',
       border: '#EF4444',
     },
     moderado: {
       bg: '#F97316',
       text: '#FFFFFF',
-      label: 'MÉDIO RISCO',
+      label: 'MEDIUM RISK',
       border: '#F97316',
     },
     baixo: {
       bg: '#CA8A04',
       text: '#FFFFFF',
-      label: 'ATENÇÃO',
+      label: 'CAUTION',
       border: '#EAB308',
     },
   };
@@ -83,7 +83,7 @@ export function getRiskStyle(riskKey?: string, theme?: any): RiskStyleConfig {
     (key && RISK_MAP[key]) || {
       bg: secondColor,
       text: '#FFFFFF',
-      label: 'INFORMATIVO',
+      label: 'INFO',
       border: secondColor,
     }
   );
@@ -91,7 +91,7 @@ export function getRiskStyle(riskKey?: string, theme?: any): RiskStyleConfig {
 
 export function getCategoryMeta(tipo?: string) {
   const found = REPORT_CATEGORIES.find((c) => c.id === tipo);
-  return found || { label: tipo || 'Ocorrência', icon: 'help-circle-outline' };
+  return found || { label: tipo || 'Incident', icon: 'help-circle-outline' };
 }
 
 export function formatRelativeTime(dateString?: string) {
@@ -99,12 +99,12 @@ export function formatRelativeTime(dateString?: string) {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   const diffMin = Math.floor((Date.now() - date.getTime()) / 60000);
-  if (diffMin < 1) return 'agora mesmo';
-  if (diffMin < 60) return `há ${diffMin} min`;
+  if (diffMin < 1) return 'just now';
+  if (diffMin < 60) return `${diffMin} min ago`;
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `há ${diffH} h`;
+  if (diffH < 24) return `${diffH} h ago`;
   const diffD = Math.floor(diffH / 24);
-  if (diffD === 1) return 'ontem';
-  if (diffD < 7) return `${diffD} dias atrás`;
+  if (diffD === 1) return 'yesterday';
+  if (diffD < 7) return `${diffD} days ago`;
   return date.toLocaleDateString('pt-BR');
 }

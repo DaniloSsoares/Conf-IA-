@@ -19,7 +19,7 @@ export function CommentList({ comentarios, currentUserId, denuncia }: CommentLis
 
   return (
     <>
-      <Text style={[styles.sectionTitle, styles.voteSectionTitle]}>Comentários da comunidade</Text>
+      <Text style={[styles.sectionTitle, styles.voteSectionTitle]}>Community comments</Text>
       <View style={styles.metaSection}>
         {comentarios.map((v, index) => (
           <View key={v.id}>
@@ -57,7 +57,7 @@ function CommentItem({ validacao, isMine, denuncia }: CommentItemProps) {
         <Text style={styles.commentText}>{validacao.validacao_comentario}</Text>
         {/* Só o primeiro nome (view perfil_publico, LGPD); sem nome → "Morador da região" */}
         <Text style={styles.commentMeta}>
-          {isMine ? 'Você' : validacao.autor_nome ?? 'Morador da região'} ·{' '}
+          {isMine ? 'You' : validacao.autor_nome ?? 'Local resident'} ·{' '}
           {new Date(validacao.created_at).toLocaleString('pt-BR')}
         </Text>
       </View>

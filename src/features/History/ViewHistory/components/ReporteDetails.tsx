@@ -36,8 +36,8 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
   // Enquanto pendente, mostra quanto falta para o trigger decidir o status
   const votosLabel =
     reporte.reporte_status === 'pendente' && totalVotos < MIN_VOTOS_VALIDACAO
-      ? `${totalVotos} de ${MIN_VOTOS_VALIDACAO} necessários`
-      : `${totalVotos} ${totalVotos === 1 ? 'voto' : 'votos'}`;
+      ? `${totalVotos} of ${MIN_VOTOS_VALIDACAO} required`
+      : `${totalVotos} ${totalVotos === 1 ? 'vote' : 'votes'}`;
 
   const handleEdit = () => {
     router.push({
@@ -55,8 +55,8 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
           <Ionicons name="eye-off-outline" size={20} color="#F5A623" />
           <Text style={styles.hiddenNoticeText}>
             {isOwner
-              ? 'Este reporte foi ocultado para a comunidade após denúncias. Você ainda consegue vê-lo.'
-              : 'Este reporte foi ocultado após denúncias da comunidade.'}
+              ? 'This report was hidden from the community after flags. You can still see it.'
+              : 'This report was hidden after community flags.'}
           </Text>
         </View>
       )}
@@ -80,23 +80,23 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
         {reporte.reporte_descricao ? (
           <Text style={styles.description}>{reporte.reporte_descricao}</Text>
         ) : (
-          <Text style={styles.descriptionMuted}>Sem descrição adicional.</Text>
+          <Text style={styles.descriptionMuted}>No additional description.</Text>
         )}
       </View>
 
-      <Text style={styles.sectionTitle}>Detalhes do Reporte</Text>
+      <Text style={styles.sectionTitle}>Report Details</Text>
       <View style={styles.metaSection}>
         {reporte.reporte_endereco ? (
           <>
-            <MetaRow label="Localização" value={reporte.reporte_endereco} />
+            <MetaRow label="Location" value={reporte.reporte_endereco} />
             <Divider />
           </>
         ) : null}
-        <MetaRow label="Score de confiança" value={`${scorePct}%`} />
+        <MetaRow label="Confidence score" value={`${scorePct}%`} />
         <Divider />
-        <MetaRow label="Votos da comunidade" value={votosLabel} />
+        <MetaRow label="Community votes" value={votosLabel} />
         <Divider />
-        <MetaRow label="Enviado em" value={new Date(reporte.created_at).toLocaleString('pt-BR')} />
+        <MetaRow label="Submitted at" value={new Date(reporte.created_at).toLocaleString('en-US')} />
       </View>
 
       {!isOwner && !oculto && (
@@ -111,7 +111,7 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
       {isOwner && (
         <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
           <Ionicons name="create-outline" size={20} color={theme.primary || '#3AA77A'} />
-          <Text style={styles.editButtonText}>Editar Reporte</Text>
+          <Text style={styles.editButtonText}>Edit Report</Text>
         </TouchableOpacity>
       )}
 
