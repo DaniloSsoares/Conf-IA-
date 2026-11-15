@@ -8,7 +8,9 @@ import { haversineKm } from '@/src/shared/utils/haversine';
 import { useAppTheme } from '@/src/shared/constants/theme';
 import { Load } from '@/src/components/ui';
 import { Report } from '@/src/shared/types/report';
+import { NivelRisco } from '@/src/shared/types/notification';
 import { REPORT_CATEGORIES } from '@/src/shared/constants/reportCategories';
+import { RISK_LABEL, getNivelRiscoReporte } from '@/src/shared/constants/nivelRisco';
 import getStyles, { darkMapStyle } from './styles';
 import { useMapData } from './useMapData';
 
@@ -325,7 +327,7 @@ export default function MapScreen() {
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagAlerta}>{origem.texto}</Text>
                                         <Text style={getRiskBadgeStyle(alerta.alerta_nivel_risco)}>
-                                            {alerta.alerta_nivel_risco || 'Moderado'}
+                                            {RISK_LABEL[alerta.alerta_nivel_risco as NivelRisco] ?? RISK_LABEL.moderado}
                                         </Text>
                                     </View>
                                     <Text style={styles.calloutTitle} numberOfLines={1}>{alerta.alerta_titulo}</Text>
@@ -343,6 +345,8 @@ export default function MapScreen() {
                 {showReports && filteredReports.map((report: any) => {
                     const category = REPORT_CATEGORIES.find(item => item.id === report.reporte_tipo_ocorrencia);
                     const iconName = category?.icon || report.icon || 'alert-circle-outline';
+                    // Reporte não tem coluna de risco: vem da categoria (mesma regra do trigger A.10)
+                    const nivel = getNivelRiscoReporte(report.reporte_tipo_ocorrencia);
                     const lat = Number(report.reporte_latitude);
                     const lng = Number(report.reporte_longitude);
                     if (isNaN(lat) || isNaN(lng)) return null;
@@ -354,7 +358,7 @@ export default function MapScreen() {
                             onPress={() => setSelectedItem({...report, type : 'reporte' })} 
                         >
                             <View style={styles.markerWrapper}>
-                                <View style={getIconStyle(report.reporte_nivel_risco)}>
+                                <View style={getIconStyle(nivel)}>
                                     <Ionicons name={iconName as any} size={22} color={theme.white} />
                                 </View>
                             </View>
@@ -363,8 +367,8 @@ export default function MapScreen() {
                                 <View style={styles.calloutContainer}>
                                     <View style={styles.calloutHeader}>
                                         <Text style={styles.calloutTagReporte}>Ocorrência</Text>
-                                        <Text style={getRiskBadgeStyle(report.reporte_nivel_risco)}>
-                                            {report.reporte_nivel_risco || 'Moderado'}
+                                        <Text style={getRiskBadgeStyle(nivel)}>
+                                            {RISK_LABEL[nivel]}
                                         </Text>
                                     </View>
                                     <Text style={styles.calloutTitle} numberOfLines={1}>{category?.label || 'Ocorrência'}</Text>
@@ -420,11 +424,13 @@ export default function MapScreen() {
 
                     <View style={styles.previewFooter}>
                         {(() => {
-                            const riskLevelVal = selectedItem.alerta_nivel_risco || selectedItem.reporte_nivel_risco || 'moderado';
+                            const riskLevelVal: NivelRisco = selectedItem.type === 'alerta'
+                                ? (selectedItem.alerta_nivel_risco ?? 'moderado')
+                                : getNivelRiscoReporte(selectedItem.reporte_tipo_ocorrencia);
                             return (
                                 <View style={getRiskBadgeStyle(riskLevelVal)}>
                                     <Text style={getRiskTextStyle(riskLevelVal)}>
-                                        Risco {riskLevelVal.toUpperCase()}
+                                        Risco {RISK_LABEL[riskLevelVal].toUpperCase()}
                                     </Text>
                                 </View>
                             );
