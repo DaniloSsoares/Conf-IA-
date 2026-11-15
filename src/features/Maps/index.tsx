@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import MapView, { Callout, Circle, Marker } from 'react-native-maps';
@@ -31,9 +31,13 @@ export default function MapScreen() {
     const mapRef = useRef<MapView>(null);
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [filterType, setFilterType] = useState<FilterType>('todos');
+    // No Android, tracksViewChanges ligado redesenha cada marcador sem parar.
+    // Fica ligado só por 500 ms quando a lista muda (tempo de desenhar), depois congela
+    const [marcadoresProntos, setMarcadoresProntos] = useState(false);
 
     const { theme, isDarkMode } = useAppTheme();
-    const styles = getStyles(theme);
+    // StyleSheet.create só roda de novo quando o tema muda, não a cada render
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     const {
         location,
@@ -133,6 +137,30 @@ export default function MapScreen() {
                 && haversineKm(location.latitude, location.longitude, lat, lng) <= raioKm;
         });
     }, [reports, location, raioKm]);
+    
+    useEffect(() => {
+        setMarcadoresProntos(false);
+        const t = setTimeout(() => setMarcadoresProntos(true), 500);
+        return () => clearTimeout(t);
+    }, [filteredAlerts, filteredReports, filterType]);
+
+    const primeiraPosicao = useRef<typeof location>(null);
+    useEffect(() => {
+        if (!location) return;
+        if (!primeiraPosicao.current) {
+            primeiraPosicao.current = location;
+            return;
+        }
+        if (location !== primeiraPosicao.current) {
+            primeiraPosicao.current = location;
+            mapRef.current?.animateToRegion({
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+            }, 800);
+        }
+    }, [location]);
 
     if (loadingLocation) {
         return (
@@ -288,6 +316,7 @@ export default function MapScreen() {
                 <Marker
                     coordinate={{ latitude: location.latitude, longitude: location.longitude }}
                     title="Você está aqui"
+                    tracksViewChanges={!marcadoresProntos}
                 >
                     <View style={styles.userMarkerContainer}>
                         <View style={styles.userMarkerPulse} />
@@ -310,7 +339,7 @@ export default function MapScreen() {
                             key={`alerta-${alerta.id}`}
                             coordinate={{ latitude: lat, longitude: lng }}
                             onPress={() => setSelectedItem({...alerta, type :'alerta' })}
-                                
+                            tracksViewChanges={!marcadoresProntos}
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={getIconStyle(alerta.alerta_nivel_risco)}>
@@ -355,7 +384,8 @@ export default function MapScreen() {
                         <Marker
                             key={`report-${report.id}`}
                             coordinate={{ latitude: lat, longitude: lng }}
-                            onPress={() => setSelectedItem({...report, type : 'reporte' })} 
+                            onPress={() => setSelectedItem({...report, type : 'reporte' })}
+                            tracksViewChanges={!marcadoresProntos}
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={getIconStyle(nivel)}>

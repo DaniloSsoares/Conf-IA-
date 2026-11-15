@@ -35,6 +35,8 @@ export function useMapData() {
   const isFirstSubscription = useRef(true);
 
   useEffect(() => {
+    let ativo = true; // evita atualizar o estado depois que a tela fechou
+
     const getLocation = async () => {
       try {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -42,18 +44,41 @@ export function useMapData() {
           setPermissionDenied(true);
           return;
         }
-        let currentPosition = await Location.getCurrentPositionAsync({});
-        setLocation({
-          latitude: currentPosition.coords.latitude,
-          longitude: currentPosition.coords.longitude,
+
+        // 1. Última posição conhecida: vem do cache do celular, quase instantânea.
+        //    O mapa já abre com ela (até 5 min de idade), sem esperar o GPS
+        const ultima = await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 });
+        if (ultima && ativo) {
+          setLocation({ latitude: ultima.coords.latitude, longitude: ultima.coords.longitude });
+          setLoadingLocation(false);
+        }
+
+        // 2. Posição atual, em segundo plano (o GPS pode levar alguns segundos)
+        const atual = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
         });
+        if (!ativo) return;
+        const nova = { latitude: atual.coords.latitude, longitude: atual.coords.longitude };
+
+        // Mudou menos de 100 m: mantém o mesmo objeto. Um objeto novo mudaria o `bounds`
+        // e refaria as buscas de reportes, alertas e clima à toa
+        setLocation((anterior) =>
+          anterior &&
+          haversineKm(anterior.latitude, anterior.longitude, nova.latitude, nova.longitude) < 0.1
+            ? anterior
+            : nova,
+        );
       } catch (error) {
         console.error("Erro ao obter localização:", error);
       } finally {
-        setLoadingLocation(false);
+        if (ativo) setLoadingLocation(false);
       }
     };
+
     getLocation();
+    return () => {
+      ativo = false;
+    };
   }, []);
 
   useEffect(() => {
