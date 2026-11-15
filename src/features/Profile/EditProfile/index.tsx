@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,30 +9,42 @@ import {
   StatusBar,
   Image,
   ActivityIndicator,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { decode } from 'base64-arraybuffer';
-import { useAppTheme } from '@/src/shared/constants/theme';
-import { LinearGradient } from 'expo-linear-gradient';
-import Input from '@/src/components/ui/Input';
-import { getStyles } from './style';
-import * as yup from 'yup';
-import { profileSchema } from '@/src/shared/yup';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useAppTheme } from "@/src/shared/constants/theme";
+import { LinearGradient } from "expo-linear-gradient";
+import Input from "@/src/components/ui/Input";
+import { getStyles } from "./style";
+import * as yup from "yup";
+import { profileSchema } from "@/src/shared/yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Controller, useForm } from 'react-hook-form';
-import { supabaseConfig } from '@/src/config/supabase';
-import Toast from 'react-native-toast-message';
-import { router } from 'expo-router';
-import Slider from '@react-native-community/slider';
-import * as Location from 'expo-location';
-import { updateProfile, getProfile, uploadAvatar } from '@/src/shared/service/profileService';
-import { Load } from '@/src/components/ui/Load';
-import { arredondarCoordenada, buscarCidadeEstado } from '@/src/shared/utils/endereco';
+import { Controller, useForm } from "react-hook-form";
+import { supabaseConfig } from "@/src/config/supabase";
+import Toast from "react-native-toast-message";
+import { router } from "expo-router";
+import Slider from "@react-native-community/slider";
+import * as Location from "expo-location";
+import {
+  updateProfile,
+  getProfile,
+  uploadAvatar,
+} from "@/src/shared/service/profileService";
+import { Load } from "@/src/components/ui/Load";
+import {
+  arredondarCoordenada,
+  buscarCidadeEstado,
+} from "@/src/shared/utils/endereco";
 
 export default function EditProfileScreen() {
   type FormData = yup.InferType<typeof profileSchema>;
-  const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
     resolver: yupResolver(profileSchema),
   });
 
@@ -42,54 +54,94 @@ export default function EditProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [location, setLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [gettingLocation, setGettingLocation] = useState(false);
   const [raioNotificacao, setRaioNotificacao] = useState(5);
 
   const iconColor = isDarkMode ? "#FFFFFF" : "#2C2B30";
 
+  const formatarTelefoneBR = (valor: string) => {
+    if (!valor) return "";
+
+    const apenasNumeros = valor.replace(/\D/g, "").slice(0, 11);
+
+    if (apenasNumeros.length === 0) return "";
+    if (apenasNumeros.length <= 2) return `(${apenasNumeros}`;
+    if (apenasNumeros.length <= 6) {
+      return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2)}`;
+    }
+    if (apenasNumeros.length <= 10) {
+      return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2, 6)}-${apenasNumeros.slice(6)}`;
+    }
+    return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2, 7)}-${apenasNumeros.slice(7, 11)}`;
+  };
+
   useEffect(() => {
     const loadProfileData = async () => {
       try {
-        const { data: { user } } = await supabaseConfig.auth.getUser();
+        const {
+          data: { user },
+        } = await supabaseConfig.auth.getUser();
         if (!user) {
           Toast.show({
-            type: 'error',
-            text1: 'Erro',
-            text2: 'Usuário não autenticado',
+            type: "error",
+            text1: "Erro",
+            text2: "Usuário não autenticado",
           });
           return;
         }
+
         const profileData = await getProfile(user.id);
-        if (profileData) {
-          reset({
-            name: profileData.perfil_nome_completo || '',
-            cellphone: profileData.perfil_telefone || '',
-            city: profileData.perfil_cidade || '',
-            state: profileData.perfil_estado || '',
-          });
-          setAvatarUrl(profileData.perfil_avatar_url || null);
-          if (profileData.perfil_latitude && profileData.perfil_longitude) {
-            setLocation({
-              latitude: profileData.perfil_latitude,
-              longitude: profileData.perfil_longitude,
-            });
-          }
-          if (profileData.perfil_raio_notificacao_km) {
-            setRaioNotificacao(profileData.perfil_raio_notificacao_km);
-          }
-        } else {
-          reset({
-            name: '',
-            cellphone: '',
-            city: '',
-            state: '',
-          });
+
+        setAvatarUrl(profileData?.perfil_avatar_url || null);
+
+        if (profileData?.perfil_raio_notificacao_km) {
+          setRaioNotificacao(profileData.perfil_raio_notificacao_km);
         }
+
+        let cidadeInicial = profileData?.perfil_cidade || "";
+        let estadoInicial = profileData?.perfil_estado || "";
+
+        // Coordenadas do banco ou fallback do GPS do celular (se já tiver permissão)
+        let lat = profileData?.perfil_latitude;
+        let lng = profileData?.perfil_longitude;
+
+        if (!lat || !lng) {
+          const { status } = await Location.getForegroundPermissionsAsync();
+          if (status === "granted") {
+            const pos = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+            lat = arredondarCoordenada(pos.coords.latitude);
+            lng = arredondarCoordenada(pos.coords.longitude);
+          }
+        }
+
+        if (lat && lng) {
+          setLocation({ latitude: lat, longitude: lng });
+
+          if (!cidadeInicial || !estadoInicial) {
+            const endereco = await buscarCidadeEstado(lat, lng);
+            if (!cidadeInicial && endereco?.cidade)
+              cidadeInicial = endereco.cidade;
+            if (!estadoInicial && endereco?.estado)
+              estadoInicial = endereco.estado;
+          }
+        }
+
+        reset({
+          name: profileData?.perfil_nome_completo || "",
+          cellphone: formatarTelefoneBR(profileData?.perfil_telefone || ""),
+          city: cidadeInicial,
+          state: estadoInicial,
+        });
       } catch (error: any) {
         Toast.show({
-          type: 'error',
-          text1: 'Erro ao carregar perfil',
+          type: "error",
+          text1: "Erro ao carregar perfil",
           text2: error.message,
         });
       }
@@ -99,28 +151,28 @@ export default function EditProfileScreen() {
   }, [reset]);
 
   const handleGetLocation = async () => {
-
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
+      if (status !== "granted") {
         Toast.show({
-          type: 'error',
-          text1: 'Erro',
-          text2: 'Permissão de localização negada',
+          type: "error",
+          text1: "Erro",
+          text2: "Permissão de localização negada",
         });
         return;
       }
       setGettingLocation(true);
       const position = await Location.getCurrentPositionAsync({});
-      // Arredonda antes de salvar, igual ao Mapa (LGPD)
       const latitude = arredondarCoordenada(position.coords.latitude);
       const longitude = arredondarCoordenada(position.coords.longitude);
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+      const {
+        data: { user },
+      } = await supabaseConfig.auth.getUser();
       if (!user) {
         Toast.show({
-          type: 'error',
-          text1: 'Erro',
-          text2: 'Usuário não autenticado',
+          type: "error",
+          text1: "Erro",
+          text2: "Usuário não autenticado",
         });
         return;
       }
@@ -132,8 +184,8 @@ export default function EditProfileScreen() {
 
       if (error) {
         Toast.show({
-          type: 'error',
-          text1: 'Erro ao salvar localização',
+          type: "error",
+          text1: "Erro ao salvar localização",
           text2: error.message,
         });
         return;
@@ -141,48 +193,54 @@ export default function EditProfileScreen() {
 
       setLocation({ latitude, longitude });
 
-      // Preenche cidade e estado no formulário. Só grava no banco quando a pessoa
-      // tocar em "Salvar Alterações", então dá para corrigir antes se vier errado
       const endereco = await buscarCidadeEstado(latitude, longitude);
       if (endereco?.cidade) {
-        setValue('city', endereco.cidade, { shouldValidate: true, shouldDirty: true });
+        setValue("city", endereco.cidade, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
       }
       if (endereco?.estado) {
-        setValue('state', endereco.estado, { shouldValidate: true, shouldDirty: true });
+        setValue("state", endereco.estado, {
+          shouldValidate: true,
+          shouldDirty: true,
+        });
       }
 
       Toast.show({
-        type: 'success',
-        text1: 'Localização atualizada!',
+        type: "success",
+        text1: "Localização atualizada!",
         text2: endereco
-          ? 'Cidade e estado preenchidos. Confira e toque em Salvar.'
+          ? "Cidade e estado preenchidos. Confira e toque em Salvar."
           : undefined,
       });
     } catch (error: any) {
       Toast.show({
-        type: 'error',
-        text1: 'Erro ao obter localização',
+        type: "error",
+        text1: "Erro ao obter localização",
         text2: error.message,
       });
     } finally {
       setGettingLocation(false);
     }
-  }
+  };
 
   const handleSelectAndUploadAvatar = async () => {
     try {
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+      const {
+        data: { user },
+      } = await supabaseConfig.auth.getUser();
       if (!user) {
         Toast.show({
-          type: 'error',
-          text1: 'Erro',
-          text2: 'Usuário não autenticado',
+          type: "error",
+          text1: "Erro",
+          text2: "Usuário não autenticado",
         });
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: 'images',
+        mediaTypes: "images",
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
@@ -196,35 +254,35 @@ export default function EditProfileScreen() {
       const file = result.assets[0];
       if (!file.base64) {
         Toast.show({
-          type: 'error',
-          text1: 'Erro',
-          text2: 'Não foi possível carregar a imagem selecionada.',
+          type: "error",
+          text1: "Erro",
+          text2: "Não foi possível carregar a imagem selecionada.",
         });
         return;
       }
 
       setUploading(true);
-      const fileExt = file.uri.split('.').pop() || 'jpeg';
+      const fileExt = file.uri.split(".").pop() || "jpeg";
       const publicUrl = await uploadAvatar(user.id, file.base64, fileExt);
 
       if (publicUrl) {
         setAvatarUrl(publicUrl);
         Toast.show({
-          type: 'success',
-          text1: 'Sucesso',
-          text2: 'Foto de perfil atualizada!',
+          type: "success",
+          text1: "Sucesso",
+          text2: "Foto de perfil atualizada!",
         });
       } else {
         Toast.show({
-          type: 'error',
-          text1: 'Erro',
-          text2: 'Não foi possível fazer o upload da foto.',
+          type: "error",
+          text1: "Erro",
+          text2: "Não foi possível fazer o upload da foto.",
         });
       }
     } catch (error: any) {
       Toast.show({
-        type: 'error',
-        text1: 'Erro no upload',
+        type: "error",
+        text1: "Erro no upload",
         text2: error.message,
       });
     } finally {
@@ -235,24 +293,33 @@ export default function EditProfileScreen() {
   const handleSave = async (data: FormData) => {
     try {
       setSaving(true);
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+      const {
+        data: { user },
+      } = await supabaseConfig.auth.getUser();
       if (!user) {
         setSaving(false);
         return;
       }
       const { error } = await updateProfile(user.id, {
         perfil_nome_completo: data.name,
-        perfil_telefone: data.cellphone,
+        perfil_telefone: data.cellphone.replace(/\D/g, ""),
         perfil_cidade: data.city,
         perfil_estado: data.state,
-        // Perfis antigos podem ter a coordenada com precisão total: arredonda ao regravar
-        perfil_latitude: location ? arredondarCoordenada(location.latitude) : undefined,
-        perfil_longitude: location ? arredondarCoordenada(location.longitude) : undefined,
+        perfil_latitude: location
+          ? arredondarCoordenada(location.latitude)
+          : undefined,
+        perfil_longitude: location
+          ? arredondarCoordenada(location.longitude)
+          : undefined,
         perfil_raio_notificacao_km: raioNotificacao,
       });
       setSaving(false);
       if (error) {
-        Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
+        Toast.show({
+          type: "error",
+          text1: "Erro ao salvar",
+          text2: error.message,
+        });
         return;
       }
 
@@ -260,7 +327,11 @@ export default function EditProfileScreen() {
       router.back();
     } catch (error: any) {
       setSaving(false);
-      Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
+      Toast.show({
+        type: "error",
+        text1: "Erro ao salvar",
+        text2: error.message,
+      });
     }
   };
 
@@ -270,14 +341,18 @@ export default function EditProfileScreen() {
 
   return (
     <LinearGradient colors={theme.primaryGradient} style={styles.container}>
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+      <StatusBar
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
       <Load
         visible={saving || uploading}
         message={saving ? "Salvando perfil..." : "Enviando foto..."}
         subMessage="Por favor, aguarde"
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <View style={styles.header}>
@@ -288,23 +363,47 @@ export default function EditProfileScreen() {
           <View style={{ width: 40 }} />
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.avatarContainer}>
-            <TouchableOpacity onPress={handleSelectAndUploadAvatar} activeOpacity={0.8}>
+            <TouchableOpacity
+              onPress={handleSelectAndUploadAvatar}
+              activeOpacity={0.8}
+            >
               <View style={styles.avatar}>
                 {avatarUrl ? (
-                  <Image source={{ uri: avatarUrl }} style={{ width: '100%', height: '100%', borderRadius: 48 }} />
+                  <Image
+                    source={{ uri: avatarUrl }}
+                    style={{ width: "100%", height: "100%", borderRadius: 48 }}
+                  />
                 ) : (
                   <Ionicons name="person" size={54} color={iconColor} />
                 )}
                 {uploading && (
-                  <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', borderRadius: 48 }}>
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: "rgba(0,0,0,0.5)",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderRadius: 48,
+                    }}
+                  >
                     <ActivityIndicator color="#FFFFFF" />
                   </View>
                 )}
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.editAvatarButton} onPress={handleSelectAndUploadAvatar}>
+            <TouchableOpacity
+              style={styles.editAvatarButton}
+              onPress={handleSelectAndUploadAvatar}
+            >
               <Ionicons name="camera" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
@@ -334,14 +433,16 @@ export default function EditProfileScreen() {
                   label="Telefone"
                   iconName="call-outline"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(text) => onChange(formatarTelefoneBR(text))}
                   onBlur={onBlur}
-                  placeholder="(00) 0 0000-0000"
+                  placeholder="(11) 92834-2846"
                   keyboardType="phone-pad"
+                  maxLength={15}
                   error={errors.cellphone?.message}
                 />
               )}
             />
+
             <Controller
               control={control}
               name="city"
@@ -381,20 +482,23 @@ export default function EditProfileScreen() {
               activeOpacity={0.8}
             >
               {gettingLocation ? (
-                <ActivityIndicator color={theme.primary || "#0047FF"} size="small" />
+                <ActivityIndicator
+                  color={theme.primary || "#0047FF"}
+                  size="small"
+                />
               ) : (
                 <Ionicons
-                  name={location ? 'checkmark-circle' : 'locate'}
+                  name={location ? "checkmark-circle" : "locate"}
                   size={18}
-                  color={location ? '#10B981' : iconColor}
+                  color={location ? "#10B981" : iconColor}
                 />
               )}
               <Text style={styles.locationButtonText}>
                 {gettingLocation
-                  ? 'Obtendo localização...'
+                  ? "Obtendo localização..."
                   : location
-                    ? 'Localização capturada'
-                    : 'Usar minha localização atual'}
+                    ? "Localização capturada"
+                    : "Usar minha localização atual"}
               </Text>
             </TouchableOpacity>
 
@@ -403,14 +507,16 @@ export default function EditProfileScreen() {
                 Raio de notificação: {raioNotificacao} km
               </Text>
               <Slider
-                style={{ width: '100%', height: 40 }}
+                style={{ width: "100%", height: 40 }}
                 minimumValue={1}
                 maximumValue={50}
                 step={1}
                 value={raioNotificacao}
                 onValueChange={setRaioNotificacao}
                 minimumTrackTintColor={theme.primary || "#0047FF"}
-                maximumTrackTintColor={isDarkMode ? "rgba(255, 255, 255, 0.2)" : "#E2E8F0"}
+                maximumTrackTintColor={
+                  isDarkMode ? "rgba(255, 255, 255, 0.2)" : "#E2E8F0"
+                }
                 thumbTintColor={theme.primary || "#0047FF"}
               />
               <View style={styles.sliderRange}>
@@ -418,7 +524,10 @@ export default function EditProfileScreen() {
                 <Text style={styles.sliderRangeText}>50 km</Text>
               </View>
             </View>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(handleSave)}>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSubmit(handleSave)}
+            >
               <Text style={styles.saveButtonText}>Salvar Alterações</Text>
             </TouchableOpacity>
           </View>
