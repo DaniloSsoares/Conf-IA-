@@ -1,21 +1,21 @@
 import { StyleSheet } from "react-native";
 
-
-export const getStyles = (theme: any) => {
-  const isDark = theme?.isDark;
+export const getStyles = (theme: any, isDarkMode: boolean) => {
   return StyleSheet.create({
     modalOverlay: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      backgroundColor: isDarkMode ? "rgba(0, 0, 0, 0.75)" : "rgba(0, 0, 0, 0.5)",
     },
     modalContainer: {
-      backgroundColor: "white",
+      backgroundColor: isDarkMode ? "#1E1E24" : "#FFFFFF",
       borderRadius: 20,
       padding: 24,
       width: "90%",
       maxWidth: 400,
+      borderWidth: isDarkMode ? 1 : 0,
+      borderColor: theme.inputBorder || "rgba(255, 255, 255, 0.12)",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.25,
@@ -31,29 +31,29 @@ export const getStyles = (theme: any) => {
     modalTitle: {
       fontSize: 24,
       fontWeight: "bold",
-      color: theme.primary || "#333",
+      color: isDarkMode ? "#FFFFFF" : (theme.primary || "#333333"),
     },
     subtitle: {
       fontSize: 14,
-      color: "#666",
+      color: isDarkMode ? "#A1A1AA" : "#666666",
       marginBottom: 20,
     },
     inputWrapper: {
       flexDirection: "row",
       alignItems: "center",
       borderWidth: 1,
-      borderColor: theme.primaryBorder || "#ddd",
+      borderColor: theme.inputBorder || (isDarkMode ? "#333" : "#ddd"),
       borderRadius: 12,
       paddingHorizontal: 12,
       marginBottom: 16,
-      backgroundColor: theme.primaryInput || "#f9f9f9",
+      backgroundColor: isDarkMode ? "#2A2A32" : "#f9f9f9",
     },
     input: {
       flex: 1,
       height: 50,
       paddingLeft: 12,
       fontSize: 16,
-      color: theme.primaryText || "#333",
+      color: isDarkMode ? "#FFFFFF" : "#333333",
     },
     button: {
       backgroundColor: theme.primary || "#3AA77A",
@@ -63,7 +63,7 @@ export const getStyles = (theme: any) => {
       marginTop: 10,
     },
     saveButtonText: {
-      color: "white",
+      color: theme.white || "#FFFFFF",
       fontSize: 18,
       fontWeight: "bold",
     },

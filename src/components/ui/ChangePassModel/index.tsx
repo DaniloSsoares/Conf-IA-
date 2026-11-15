@@ -1,7 +1,6 @@
-
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Ionicons } from "@expo/vector-icons";
-import { Control, Controller, useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from 'yup';
 import { useAppTheme } from "@/src/shared/constants/theme";
 import { getStyles } from "./style";
@@ -9,9 +8,8 @@ import { changePassSchema } from "@/src/shared/yup";
 import { useState } from "react";
 import { supabaseConfig } from "@/src/config/supabase";
 import Toast from "react-native-toast-message";
-import { Button, Modal, View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator } from "react-native";
+import { Modal, View, Text, KeyboardAvoidingView, Platform, TouchableOpacity, ActivityIndicator } from "react-native";
 import Input from "../Input";
-
 
 type FormData = yup.InferType<typeof changePassSchema>;
 
@@ -22,7 +20,7 @@ export interface ChangePassModelProps {
 
 export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
     const { theme, isDarkMode } = useAppTheme();
-    const styles = getStyles(theme);
+    const styles = getStyles(theme, isDarkMode);
     const [loading, setLoading] = useState(false);
 
     const { control, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
@@ -55,7 +53,6 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
         } finally {
             setLoading(false);
         }
-
     };
 
     return (
@@ -64,12 +61,15 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.modalOverlay}
             >
-
                 <View style={styles.modalContainer}>
                     <View style={styles.header}>
                         <Text style={styles.modalTitle}>Alterar Senha</Text>
                         <TouchableOpacity onPress={onClose}>
-                            <Ionicons name="close" size={24} color="#333" />
+                            <Ionicons
+                                name="close"
+                                size={24}
+                                color={isDarkMode ? "#FFFFFF" : "#333333"}
+                            />
                         </TouchableOpacity>
                     </View>
 
@@ -78,17 +78,16 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                     <Controller
                         control={control}
                         name="password"
-                        render={
-                            ({ field: { onChange, onBlur, value } }) => (
-                                <Input
-                                    placeholder="Digite sua senha"
-                                    onBlur={onBlur}
-                                    onChangeText={onChange}
-                                    value={value}
-                                    error={errors.password?.message}
-                                />
-                            )
-                        }
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <Input
+                                placeholder="Digite sua senha"
+                                secureTextEntry
+                                onBlur={onBlur}
+                                onChangeText={onChange}
+                                value={value}
+                                error={errors.password?.message}
+                            />
+                        )}
                     />
                     <Controller
                         control={control}
@@ -96,6 +95,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                         render={({ field: { onChange, onBlur, value } }) => (
                             <Input
                                 placeholder="Confirme sua senha"
+                                secureTextEntry
                                 onBlur={onBlur}
                                 onChangeText={onChange}
                                 value={value}
@@ -115,10 +115,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                         )}
                     </TouchableOpacity>
                 </View>
-
             </KeyboardAvoidingView>
-
-
         </Modal>
     );
 }
