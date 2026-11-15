@@ -38,7 +38,7 @@ export default function Index() {
           <Text style={[styles.logoIa, { color: iaColor }]}>-U</Text>
         </View>
 
-        <Text style={[styles.subtitle, { color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#616A78' }]}>Prevenção de Desastres Climáticos</Text>
+        <Text style={[styles.subtitle, { color: isDarkMode ? 'rgba(255, 255, 255, 0.9)' : '#616A78' }]}>Climate Disaster Prevention</Text>
       </View>
 
       <ActivityIndicator size="large" color={theme.primary || "#3AA77A"} style={styles.loader} />

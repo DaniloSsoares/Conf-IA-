@@ -55,7 +55,7 @@ export default function EditReportScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={iconColor} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Editar Reporte</Text>
+        <Text style={styles.headerTitle}>Edit Report</Text>
         <TouchableOpacity onPress={handleDeleteConfirm} style={styles.backButton}>
           {deleting ? (
             <ActivityIndicator size="small" color={theme.alertRed || "#D74247"} />
@@ -66,12 +66,12 @@ export default function EditReportScreen() {
       </View>
 
       <Text style={styles.headerSubtitle}>
-        Atualize as informações sobre a ocorrência para manter o sistema preciso.
+        Update the incident details to keep the system accurate.
       </Text>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Tipo de Ocorrência</Text>
+          <Text style={styles.cardTitle}>Incident Type</Text>
           <TouchableOpacity
             style={styles.selectInput}
             onPress={() => setCategoryModalVisible(true)}
@@ -79,19 +79,19 @@ export default function EditReportScreen() {
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
               <Ionicons name={(selectedCategoryMeta?.icon || "water-outline") as any} size={20} color={theme.primary || "#0047FF"} />
-              <Text style={styles.selectInputText}>{selectedCategoryMeta?.label || "Selecione o tipo"}</Text>
+              <Text style={styles.selectInputText}>{selectedCategoryMeta?.label || "Select the type"}</Text>
             </View>
             <Ionicons name="chevron-down" size={20} color={isDarkMode ? "rgba(255,255,255,0.6)" : "#858D99"} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Descrição Adicional</Text>
+          <Text style={styles.cardTitle}>Additional Description</Text>
           <TextInput
             style={styles.textArea}
             multiline
             numberOfLines={4}
-            placeholder="Descreva detalhes sobre o que está acontecendo..."
+            placeholder="Describe what is happening..."
             placeholderTextColor={isDarkMode ? "rgba(255,255,255,0.4)" : "#858D99"}
             value={description}
             onChangeText={setDescription}
@@ -100,13 +100,13 @@ export default function EditReportScreen() {
 
         {/* Card 3: Localização */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Localização</Text>
+          <Text style={styles.cardTitle}>Location</Text>
           <View style={styles.locationBox}>
             <View style={styles.locationIconContainer}>
               <Ionicons name="location-sharp" size={20} color={theme.primary || "#0047FF"} />
             </View>
             <Text style={styles.locationText} numberOfLines={2}>
-              {address || "Localização salva no registro"}
+              {address || "Location saved with the report"}
             </Text>
             <TouchableOpacity
               style={styles.locationEditBtn}
@@ -122,14 +122,14 @@ export default function EditReportScreen() {
           </View>
         </View>
 
-        {/* Card 4: Evidência Fotográfica */}
+        {/* Card 4: Photo Evidence */}
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
-            <Text style={[styles.cardTitle, { marginBottom: 0 }]}>Evidência Fotográfica</Text>
+            <Text style={[styles.cardTitle, { marginBottom: 0 }]}>Photo Evidence</Text>
             {currentPhotoUri ? (
               <TouchableOpacity style={styles.removePhotoButton} onPress={handleRemovePhoto}>
                 <Ionicons name="trash-outline" size={16} color={theme.alertRed || "#D74247"} />
-                <Text style={styles.removePhotoText}>Remover</Text>
+                <Text style={styles.removePhotoText}>Remove</Text>
               </TouchableOpacity>
             ) : null}
           </View>
@@ -142,7 +142,7 @@ export default function EditReportScreen() {
                 onPress={() => setPhotoModalVisible(true)}
               >
                 <Ionicons name="camera-outline" size={14} color="#FFFFFF" />
-                <Text style={styles.changePhotoText}>Alterar Foto</Text>
+                <Text style={styles.changePhotoText}>Change Photo</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -152,7 +152,7 @@ export default function EditReportScreen() {
               activeOpacity={0.8}
             >
               <Ionicons name="camera-outline" size={32} color={theme.primary || "#0047FF"} />
-              <Text style={styles.addPhotoText}>Adicionar Foto</Text>
+              <Text style={styles.addPhotoText}>Add Photo</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -165,7 +165,7 @@ export default function EditReportScreen() {
           onPress={() => router.back()}
           disabled={saving || deleting}
         >
-          <Text style={styles.cancelButtonText}>Cancelar</Text>
+          <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -176,7 +176,7 @@ export default function EditReportScreen() {
           {saving ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
-            <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+            <Text style={styles.saveButtonText}>Save Changes</Text>
           )}
         </TouchableOpacity>
       </View>

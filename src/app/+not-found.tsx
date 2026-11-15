@@ -28,7 +28,7 @@ export default function NotFoundScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Página não encontrada', headerShown: false }} />
+      <Stack.Screen options={{ title: 'Page not found', headerShown: false }} />
       <LinearGradient
         colors={theme.primaryGradient || (isDarkMode ? ['#0A1931', '#112240', '#050D1A'] : ['#FFFFFF', '#F8F9FA', '#FFFFFF'])}
         style={[
@@ -52,9 +52,9 @@ export default function NotFoundScreen() {
           <View style={styles.errorBadge}>
             <Text style={styles.errorCode}>404</Text>
           </View>
-          <Text style={styles.title}>Página Não Encontrada</Text>
+          <Text style={styles.title}>Page Not Found</Text>
           <Text style={styles.description}>
-            Ops! A rota que você tentou acessar não existe ou foi movida no sistema de navegação do Conf-IA.
+            Oops! The page you tried to open does not exist or was moved in Conf-IA.
           </Text>
 
           <View style={styles.actionsContainer}>
@@ -70,7 +70,7 @@ export default function NotFoundScreen() {
                 style={styles.buttonGradient}
               >
                 <Ionicons name="home-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-                <Text style={styles.primaryButtonText}>Voltar para o Início</Text>
+                <Text style={styles.primaryButtonText}>Back to Home</Text>
               </LinearGradient>
             </TouchableOpacity>
 
@@ -86,7 +86,7 @@ export default function NotFoundScreen() {
               }}
             >
               <Ionicons name="arrow-back" size={20} color={theme.text || (isDarkMode ? "#FFFFFF" : "#2C2B30")} style={{ marginRight: 8 }} />
-              <Text style={styles.secondaryButtonText}>Voltar à tela anterior</Text>
+              <Text style={styles.secondaryButtonText}>Back to previous screen</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -94,7 +94,7 @@ export default function NotFoundScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Ionicons name="location-outline" size={14} color={styles.footerText.color} style={{ marginRight: 4 }} />
-          <Text style={styles.footerText}>Sistema de Alertas e Prevenção Climática</Text>
+          <Text style={styles.footerText}>Climate Alert and Prevention System</Text>
         </View>
       </LinearGradient>
     </>

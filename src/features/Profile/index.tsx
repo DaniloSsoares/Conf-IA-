@@ -47,8 +47,8 @@ export default function ProfileScreen() {
       if (!user) {
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: 'Usuário não autenticado',
+          text1: 'Error',
+          text2: 'User not authenticated',
         });
         return;
       }
@@ -57,8 +57,8 @@ export default function ProfileScreen() {
       if (!profileData) {
         Toast.show({
           type: 'info',
-          text1: 'Perfil Incompleto',
-          text2: 'Por favor, preencha seus dados de perfil.',
+          text1: 'Incomplete Profile',
+          text2: 'Please fill in your profile details.',
         });
         router.push('/(screens)/EditProfile');
         return;
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'Erro ao carregar perfil',
+        text1: 'Error loading profile',
         text2: error.message,
       });
     } finally {
@@ -94,15 +94,15 @@ export default function ProfileScreen() {
     if (error) {
       Toast.show({
         type: 'error',
-        text1: 'Erro',
-        text2: 'Erro ao sair',
+        text1: 'Error',
+        text2: 'Error signing out',
       });
       return;
     }
     Toast.show({
       type: 'success',
       text1: 'Logout',
-      text2: 'Você saiu da aplicação',
+      text2: 'You have signed out',
     });
     router.replace('/Login');
   };
@@ -114,8 +114,8 @@ export default function ProfileScreen() {
     if (hasAccepted) {
       Toast.show({
         type: 'info',
-        text1: 'Termos de Serviço',
-        text2: 'Você já aceitou os Termos de Serviço.',
+        text1: 'Terms of Service',
+        text2: 'You have already accepted the Terms of Service.',
       });
     } else {
       setIsTermsModalVisible(true);
@@ -125,8 +125,8 @@ export default function ProfileScreen() {
   const handleDeleteAccount = () => {
     Toast.show({
       type: 'error',
-      text1: 'Excluir Conta',
-      text2: 'Tem certeza? Esta ação não pode ser desfeita.'
+      text1: 'Delete Account',
+      text2: 'Are you sure? This action cannot be undone.'
     });
   };
   const handleTogglePreference = async (key: keyof AlertPreferences) => {
@@ -140,8 +140,8 @@ export default function ProfileScreen() {
     if (error) {
       Toast.show({
         type: 'error',
-        text1: 'Erro',
-        text2: 'Erro ao atualizar preferências',
+        text1: 'Error',
+        text2: 'Error updating preferences',
       });
       setPreferences(previous);
       return;
@@ -172,20 +172,20 @@ export default function ProfileScreen() {
               <Ionicons name="camera" size={16} color={theme.white} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>{profile?.perfil_nome_completo || 'Sem Nome'}</Text>
-          <Text style={styles.userEmail}>{email || 'Sem Email'}</Text>
+          <Text style={styles.userName}>{profile?.perfil_nome_completo || 'No Name'}</Text>
+          <Text style={styles.userEmail}>{email || 'No Email'}</Text>
         </View>
 
-        {/* Informações Pessoais */}
+        {/* Personal Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Informações Pessoais</Text>
+          <Text style={styles.sectionTitle}>Personal Information</Text>
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
               <View style={styles.iconBg}><Ionicons name="call" size={18} color={theme.iconPrimary} /></View>
-              <Text style={styles.infoTitle}>Telefone</Text>
+              <Text style={styles.infoTitle}>Phone</Text>
             </View>
-            <Text style={styles.infoValue}>{profile?.perfil_telefone || 'Não informado'}</Text>
+            <Text style={styles.infoValue}>{profile?.perfil_telefone || 'Not provided'}</Text>
           </View>
 
           <View style={styles.divider} />
@@ -193,12 +193,12 @@ export default function ProfileScreen() {
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
               <View style={styles.iconBg}><Ionicons name="location" size={18} color={theme.iconPrimary} /></View>
-              <Text style={styles.infoTitle}>Localização</Text>
+              <Text style={styles.infoTitle}>Location</Text>
             </View>
             <Text style={styles.infoValue}>
               {profile?.perfil_cidade && profile?.perfil_estado
                 ? `${profile.perfil_cidade}, ${profile.perfil_estado}`
-                : profile?.perfil_cidade || profile?.perfil_estado || 'Não informado'}
+                : profile?.perfil_cidade || profile?.perfil_estado || 'Not provided'}
             </Text>
           </View>
           <View style={styles.divider} />
@@ -206,16 +206,16 @@ export default function ProfileScreen() {
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
               <View style={styles.iconBg}><Ionicons name="calendar" size={18} color={theme.iconPrimary} /></View>
-              <Text style={styles.infoTitle}>Membro desde</Text>
+              <Text style={styles.infoTitle}>Member since</Text>
             </View>
-            <Text style={styles.infoValue}>{profile?.created_at ? formatDate(profile.created_at) : 'Não disponível'}</Text>
+            <Text style={styles.infoValue}>{profile?.created_at ? formatDate(profile.created_at) : 'Not available'}</Text>
           </View>
 
           <View style={styles.divider} />
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
               <View style={styles.iconBg}><Ionicons name="shield-checkmark" size={18} color={theme.iconPrimary} /></View>
-              <Text style={styles.infoTitle}>Reputação</Text>
+              <Text style={styles.infoTitle}>Reputation</Text>
             </View>
             <Text style={styles.infoValue}>{profile?.perfil_trust_score ?? 0} pontos</Text>
           </View>
@@ -223,13 +223,13 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.editButton}
             onPress={() => router.push('/EditProfile')}>
             <Ionicons name="pencil" size={16} color={theme.linkText} />
-            <Text style={styles.editButtonText}>Editar Informações</Text>
+            <Text style={styles.editButtonText}>Edit Information</Text>
           </TouchableOpacity>
         </View>
 
         {/* Notificações */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tipos de Alerta</Text>
+          <Text style={styles.sectionTitle}>Alert Types</Text>
 
           {ALERT_CATEGORIES.map((category, index) => (
             <React.Fragment key={category.key}>
@@ -254,12 +254,12 @@ export default function ProfileScreen() {
 
         {/* Privacidade e Segurança */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Segurança e Termos</Text>
+          <Text style={styles.sectionTitle}>Security and Terms</Text>
 
           <TouchableOpacity style={styles.menuItem} onPress={() => setIsModalVisible(true)}>
             <View style={styles.menuLabel}>
               <View style={styles.iconBg}><Ionicons name="lock-closed" size={18} color={theme.iconPrimary} /></View>
-              <Text style={styles.menuTitle}>Trocar Senha</Text>
+              <Text style={styles.menuTitle}>Change Password</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
           </TouchableOpacity>
@@ -268,13 +268,13 @@ export default function ProfileScreen() {
           {hasAcceptedTerms ? (
             <View style={styles.acceptedContainer}>
               <Ionicons name="checkmark-circle" size={20} color="#4BB543" />
-              <Text style={styles.acceptedText}>Você já aceitou estes termos.</Text>
+              <Text style={styles.acceptedText}>You have already accepted these terms.</Text>
             </View>
           ) : (
             <TouchableOpacity style={styles.menuItem} onPress={handleAcceptTerms}>
               <View style={styles.menuLabel}>
                 <View style={styles.iconBg}><Ionicons name="document-text" size={18} color={theme.iconPrimary} /></View>
-                <Text style={styles.menuTitle}>Termos de Serviço</Text>
+                <Text style={styles.menuTitle}>Terms of Service</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
             </TouchableOpacity>
@@ -285,11 +285,11 @@ export default function ProfileScreen() {
         <View style={styles.dangerSection}>
           <TouchableOpacity style={styles.dangerButton} onPress={handleLogout}>
             <Ionicons name="log-out" size={22} color="#FF6B6B" />
-            <Text style={styles.dangerButtonText}>Sair da Conta</Text>
+            <Text style={styles.dangerButtonText}>Sign Out</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
-            <Text style={styles.deleteButtonText}>Excluir Minha Conta</Text>
+            <Text style={styles.deleteButtonText}>Delete My Account</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -307,8 +307,8 @@ export default function ProfileScreen() {
           setHasAcceptedTerms(true);
           Toast.show({
             type: 'success',
-            text1: 'Sucesso',
-            text2: 'Termos de serviço aceitos com sucesso!',
+            text1: 'Success',
+            text2: 'Terms of service accepted successfully!',
           });
         }}
       />

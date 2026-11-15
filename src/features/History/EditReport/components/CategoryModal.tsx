@@ -32,7 +32,7 @@ export function CategoryModal({
       >
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Tipo de Ocorrência</Text>
+            <Text style={styles.modalTitle}>Incident Type</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={iconColor} />
             </TouchableOpacity>

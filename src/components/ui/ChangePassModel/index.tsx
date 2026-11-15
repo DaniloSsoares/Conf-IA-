@@ -42,7 +42,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
             if (error) throw error;
             Toast.show({
                 type: 'success',
-                text1: 'Senha atualizada com sucesso!',
+                text1: 'Password updated successfully!',
             });
             reset();
             onClose();
@@ -50,7 +50,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
             console.log(error);
             Toast.show({
                 type: 'error',
-                text1: 'Erro ao atualizar senha',
+                text1: 'Error updating password',
             });
         } finally {
             setLoading(false);
@@ -67,13 +67,13 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
 
                 <View style={styles.modalContainer}>
                     <View style={styles.header}>
-                        <Text style={styles.modalTitle}>Alterar Senha</Text>
+                        <Text style={styles.modalTitle}>Change Password</Text>
                         <TouchableOpacity onPress={onClose}>
                             <Ionicons name="close" size={24} color="#333" />
                         </TouchableOpacity>
                     </View>
 
-                    <Text style={styles.subtitle}>Digite sua nova senha abaixo.</Text>
+                    <Text style={styles.subtitle}>Enter your new password below.</Text>
 
                     <Controller
                         control={control}
@@ -81,7 +81,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                         render={
                             ({ field: { onChange, onBlur, value } }) => (
                                 <Input
-                                    placeholder="Digite sua senha"
+                                    placeholder="Enter your password"
                                     onBlur={onBlur}
                                     onChangeText={onChange}
                                     value={value}
@@ -95,7 +95,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                         name="confirmPassword"
                         render={({ field: { onChange, onBlur, value } }) => (
                             <Input
-                                placeholder="Confirme sua senha"
+                                placeholder="Confirm your password"
                                 onBlur={onBlur}
                                 onChangeText={onChange}
                                 value={value}
@@ -111,7 +111,7 @@ export function ChangePassModel({ visible, onClose }: ChangePassModelProps) {
                         {loading ? (
                             <ActivityIndicator color="#FFF" />
                         ) : (
-                            <Text style={styles.saveButtonText}>Atualizar Senha</Text>
+                            <Text style={styles.saveButtonText}>Update Password</Text>
                         )}
                     </TouchableOpacity>
                 </View>

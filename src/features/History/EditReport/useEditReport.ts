@@ -70,8 +70,8 @@ export function useEditReport() {
         if (status !== "granted") {
           Toast.show({
             type: "error",
-            text1: "Permissão negada",
-            text2: "Precisamos de acesso à câmera para tirar a foto.",
+            text1: "Permission denied",
+            text2: "We need camera access to take the photo.",
           });
           return;
         }
@@ -97,8 +97,8 @@ export function useEditReport() {
         if (status !== "granted") {
           Toast.show({
             type: "error",
-            text1: "Permissão negada",
-            text2: "Precisamos de acesso à galeria para selecionar a foto.",
+            text1: "Permission denied",
+            text2: "We need gallery access to select the photo.",
           });
           return;
         }
@@ -124,8 +124,8 @@ export function useEditReport() {
       console.error("Erro ao selecionar foto:", error);
       Toast.show({
         type: "error",
-        text1: "Erro na imagem",
-        text2: "Não foi possível selecionar a imagem.",
+        text1: "Image error",
+        text2: "Could not select the image.",
       });
     }
   };
@@ -138,8 +138,8 @@ export function useEditReport() {
       if (status !== "granted") {
         Toast.show({
           type: "error",
-          text1: "Permissão negada",
-          text2: "Acesso à localização é necessário.",
+          text1: "Permission denied",
+          text2: "Location access is required.",
         });
         return;
       }
@@ -164,15 +164,15 @@ export function useEditReport() {
 
       Toast.show({
         type: "success",
-        text1: "Localização Atualizada",
-        text2: "Sua localização atual foi atribuída ao reporte.",
+        text1: "Location Updated",
+        text2: "Your current location was assigned to the report.",
       });
     } catch (error) {
       console.error("Erro ao atualizar localização:", error);
       Toast.show({
         type: "error",
-        text1: "Erro de Localização",
-        text2: "Não foi possível obter sua localização atual.",
+        text1: "Location Error",
+        text2: "Could not get your current location.",
       });
     } finally {
       setUpdatingLocation(false);
@@ -183,8 +183,8 @@ export function useEditReport() {
     if (!reportId) {
       Toast.show({
         type: "error",
-        text1: "Erro no reporte",
-        text2: "Identificador do reporte não encontrado.",
+        text1: "Report error",
+        text2: "Report identifier not found.",
       });
       return;
     }
@@ -198,8 +198,8 @@ export function useEditReport() {
       if (!userId) {
         Toast.show({
           type: "error",
-          text1: "Erro de Autenticação",
-          text2: "Usuário não autenticado.",
+          text1: "Authentication Error",
+          text2: "User not authenticated.",
         });
         return;
       }
@@ -219,16 +219,16 @@ export function useEditReport() {
         console.error("Erro ao atualizar reporte:", updateErr);
         Toast.show({
           type: "error",
-          text1: "Falha ao salvar",
-          text2: "Ocorreu um erro ao atualizar os dados do reporte.",
+          text1: "Save failed",
+          text2: "An error occurred while updating the report.",
         });
         return;
       }
 
       Toast.show({
         type: "success",
-        text1: "Reporte Atualizado!",
-        text2: "As alterações foram salvas com sucesso.",
+        text1: "Report Updated!",
+        text2: "Your changes were saved successfully.",
       });
 
       router.back();
@@ -236,8 +236,8 @@ export function useEditReport() {
       console.error("Erro no submit do reporte:", error);
       Toast.show({
         type: "error",
-        text1: "Erro Inesperado",
-        text2: "Não foi possível salvar as alterações.",
+        text1: "Unexpected Error",
+        text2: "Could not save the changes.",
       });
     } finally {
       setSaving(false);
@@ -246,12 +246,12 @@ export function useEditReport() {
 
   const handleDeleteConfirm = () => {
     Alert.alert(
-      "Excluir Reporte",
-      "Tem certeza que deseja excluir este reporte permanentemente?",
+      "Delete Report",
+      "Are you sure you want to permanently delete this report?",
       [
-        { text: "Cancelar", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         {
-          text: "Excluir",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             if (!reportId) return;
@@ -262,16 +262,16 @@ export function useEditReport() {
               if (!success || delErr) {
                 Toast.show({
                   type: "error",
-                  text1: "Erro ao excluir",
-                  text2: "Não foi possível deletar o reporte.",
+                  text1: "Error deleting",
+                  text2: "Could not delete the report.",
                 });
                 return;
               }
 
               Toast.show({
                 type: "success",
-                text1: "Reporte Excluído",
-                text2: "O reporte foi removido com sucesso.",
+                text1: "Report Deleted",
+                text2: "The report was removed successfully.",
               });
 
               router.back();

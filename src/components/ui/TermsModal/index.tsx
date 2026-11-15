@@ -13,67 +13,67 @@ interface SecaoTermos {
 
 const SECOES: SecaoTermos[] = [
   {
-    titulo: '1. Aceitação dos Termos',
+    titulo: '1. Acceptance of Terms',
     paragrafos: [
-      'Ao criar uma conta ou utilizar o Conf-IA, você concorda com estes Termos de Uso, incluindo as regras de privacidade descritas na seção 6.',
+      'By creating an account or using Conf-IA, you agree to these Terms of Use, including the privacy rules described in section 6.',
     ],
   },
   {
-    titulo: '2. Propósito do Aplicativo',
+    titulo: '2. Purpose of the App',
     paragrafos: [
-      'O Conf-IA é uma ferramenta colaborativa para que moradores reportem e validem ocorrências na sua região (como alagamentos, deslizamentos, bloqueios de via, quedas de galho, falta de luz e fogo em mata) e acompanhem alertas próximos.',
-      'As informações têm caráter informativo e preventivo e não substituem os órgãos oficiais. Em caso de emergência, ligue para a Defesa Civil (199) ou para o Corpo de Bombeiros (193).',
+      'Conf-IA is a collaborative tool that lets residents report and validate incidents in their area (such as flooding, landslides, blocked roads, fallen branches, power outages and wildfires) and follow nearby alerts.',
+      'The information is informative and preventive and does not replace official agencies. In an emergency, call the Civil Defense (199) or the Fire Department (193).',
     ],
   },
   {
-    titulo: '3. Regras de Conduta',
-    paragrafos: ['Ao enviar reportes, fotos e comentários, é proibido:'],
+    titulo: '3. Code of Conduct',
+    paragrafos: ['When sending reports, photos and comments, it is forbidden to:'],
     itens: [
-      'Enviar relatos falsos, enganosos ou de teste.',
-      'Enviar fotos que exponham pessoas, placas de veículos ou o interior de residências.',
-      'Publicar conteúdo ofensivo, discriminatório, difamatório ou que incite violência.',
-      'Divulgar dados pessoais de outras pessoas, como telefone ou endereço.',
-      'Enviar spam, propaganda ou o mesmo conteúdo repetidas vezes.',
+      'Send false, misleading or test reports.',
+      'Send photos that expose people, vehicle license plates or the inside of homes.',
+      'Post offensive, discriminatory or defamatory content, or content that incites violence.',
+      "Share other people's personal data, such as phone numbers or addresses.",
+      'Send spam, advertising or the same content repeatedly.',
     ],
   },
   {
-    titulo: '4. Validação e Moderação pela Comunidade',
+    titulo: '4. Community Validation and Moderation',
     paragrafos: [
-      'Os reportes são validados pelos próprios moradores, e o conteúdo inadequado é moderado de forma automática:',
-    ],
-    itens: [
-      'Outros usuários podem confirmar ou contestar cada reporte. A partir de 3 votos, um reporte com 70% ou mais de confirmações passa a "Validado", e um reporte com menos de 30% passa a "Rejeitado" e deixa de aparecer no mapa.',
-      'Qualquer usuário pode denunciar um reporte ou comentário. A sua identidade não é mostrada aos outros usuários. Quando um conteúdo recebe 3 denúncias de pessoas diferentes, ele é ocultado automaticamente para a comunidade; o autor continua vendo o conteúdo no próprio histórico.',
-      'Cada usuário pode enviar até 5 reportes por hora.',
-      'A foto de um novo reporte deve ser tirada com a câmera no momento do envio, como registro da ocorrência.',
-      'Comentários têm no máximo 500 caracteres.',
-      'A equipe responsável pelo projeto pode remover conteúdos ou contas que violem estes termos.',
-      'Quando um reporte é validado, ele vira automaticamente um alerta da comunidade, visível para os moradores próximos. O alerta é encerrado se o reporte deixar de ser válido.'
-    ],
-  },
-  {
-    titulo: '5. Responsabilidade pelas Informações',
-    paragrafos: [
-      'Você é responsável pelo conteúdo que envia. As informações publicadas pela comunidade podem conter erros ou estar desatualizadas: confira a situação no local e as orientações dos órgãos oficiais antes de tomar decisões.',
-    ],
-  },
-  {
-    titulo: '6. Privacidade e Dados Pessoais (LGPD)',
-    paragrafos: [
-      'Tratamos os seus dados de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018):',
+      'Reports are validated by the residents themselves, and inappropriate content is moderated automatically:',
     ],
     itens: [
-      'Coletamos os dados do seu perfil (nome, e-mail e, se você informar, telefone e cidade), a localização no momento de cada reporte e as fotos e comentários que você envia.',
-      'A sua localização é usada para registrar onde a ocorrência aconteceu e para mostrar o que está próximo de você no mapa.',
-      'Outros usuários veem o reporte (categoria, descrição, foto, local e data) e, nos comentários, apenas o seu primeiro nome. O seu e-mail e o seu telefone não são exibidos no aplicativo.',
-      'Seus dados não são vendidos nem compartilhados com terceiros para fins comerciais.',
-      'Você pode corrigir os dados do seu perfil a qualquer momento e pode solicitar à equipe responsável pelo projeto o acesso ou a exclusão dos seus dados.',
+      'Other users can confirm or dispute each report. From 3 votes on, a report with 70% or more confirmations becomes "Validated", and a report with less than 30% becomes "Rejected" and no longer appears on the map.',
+      'Any user can flag a report or comment. Your identity is not shown to other users. When content receives 3 flags from different people, it is automatically hidden from the community; the author can still see it in their own history.',
+      'Each user can send up to 5 reports per hour.',
+      'The photo of a new report must be taken with the camera at the time of sending, as a record of the incident.',
+      'Comments have a maximum of 500 characters.',
+      'The project team may remove content or accounts that violate these terms.',
+      'When a report is validated, it automatically becomes a community alert, visible to nearby residents. The alert ends if the report is no longer valid.',
     ],
   },
   {
-    titulo: '7. Alterações destes Termos',
+    titulo: '5. Responsibility for Information',
     paragrafos: [
-      'Estes termos podem ser atualizados para refletir mudanças no aplicativo ou exigências legais. Quando houver uma alteração, o aplicativo pedirá que você leia e aceite a nova versão.',
+      'You are responsible for the content you send. Information published by the community may contain errors or be outdated: check the situation on site and the guidance from official agencies before making decisions.',
+    ],
+  },
+  {
+    titulo: '6. Privacy and Personal Data (LGPD)',
+    paragrafos: [
+      "We process your data in accordance with Brazil's General Data Protection Law (Law No. 13,709/2018):",
+    ],
+    itens: [
+      'We collect your profile data (name, email and, if you provide them, phone and city), your location at the time of each report, and the photos and comments you send.',
+      'Your location is used to record where the incident happened and to show what is near you on the map.',
+      'Other users see the report (category, description, photo, place and date) and, in comments, only your first name. Your email and phone are not shown in the app.',
+      'Your data is not sold or shared with third parties for commercial purposes.',
+      'You can correct your profile data at any time and can ask the project team for access to or deletion of your data.',
+    ],
+  },
+  {
+    titulo: '7. Changes to These Terms',
+    paragrafos: [
+      'These terms may be updated to reflect changes in the app or legal requirements. When there is a change, the app will ask you to read and accept the new version.',
     ],
   },
 ];
@@ -93,7 +93,7 @@ export function TermsModal({
   obrigatorio,
   onRecusar,
   onAccept,
-  buttonText = "Li e Concordo",
+  buttonText = "I Have Read and Agree",
 }: TermsModalProps) {
  const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
@@ -123,7 +123,7 @@ export function TermsModal({
           <View style={styles.header}>
             <View style={styles.headerTitleContainer}>
               <Ionicons name="document-text" size={24} color={iconColor} />
-              <Text style={styles.modalTitle}>Termos de Serviço</Text>
+              <Text style={styles.modalTitle}>Terms of Service</Text>
             </View>
             {!obrigatorio && (
               <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -138,7 +138,7 @@ export function TermsModal({
             contentContainerStyle={styles.scrollContent}
           >
             <Text style={styles.lastUpdated}>
-              Última atualização: {DATA_TERMOS} · Versão {VERSAO_TERMOS}
+              Last updated: {DATA_TERMOS} · Version {VERSAO_TERMOS}
             </Text>
 
             {SECOES.map((secao) => (
@@ -160,7 +160,7 @@ export function TermsModal({
             </TouchableOpacity>
             {obrigatorio && (
               <TouchableOpacity style={styles.recusarButton} onPress={onRecusar}>
-                <Text style={styles.recusarText}>Recusar e sair</Text>
+                <Text style={styles.recusarText}>Decline and sign out</Text>
               </TouchableOpacity>
             )}
           </View>

@@ -26,16 +26,16 @@ export default function TabLayout() {
     if (error) {
       Toast.show({
         type: 'error',
-        text1: 'Erro',
-        text2: 'Erro ao sair',
+        text1: 'Error',
+        text2: 'Error signing out',
       });
       return;
     }
     setPrecisaAceitar(false);
     Toast.show({
       type: 'info',
-      text1: 'Termos não aceitos',
-      text2: 'Para usar o app, é preciso aceitar os termos de uso.',
+      text1: 'Terms not accepted',
+      text2: 'To use the app, you need to accept the terms of use.',
     });
     router.replace('/Login');
   };
@@ -57,28 +57,28 @@ export default function TabLayout() {
       <Tabs.Screen
         name="Maps/index"
         options={{
-          title: 'Mapa',
+          title: 'Map',
         }}
       />
 
       <Tabs.Screen
         name="Report/index"
         options={{
-          title: 'Alertas',
+          title: 'Alerts',
         }}
       />
 
       <Tabs.Screen
         name="History/index"
         options={{
-          title: 'Histórico',
+          title: 'History',
         }}
       />
 
       <Tabs.Screen
         name="Profile/index"
         options={{
-          title: 'Usuário',
+          title: 'Profile',
         }}
       />
     </Tabs>

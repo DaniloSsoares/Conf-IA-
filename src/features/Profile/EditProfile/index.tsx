@@ -55,8 +55,8 @@ export default function EditProfileScreen() {
         if (!user) {
           Toast.show({
             type: 'error',
-            text1: 'Erro',
-            text2: 'Usuário não autenticado',
+            text1: 'Error',
+            text2: 'User not authenticated',
           });
           return;
         }
@@ -89,7 +89,7 @@ export default function EditProfileScreen() {
       } catch (error: any) {
         Toast.show({
           type: 'error',
-          text1: 'Erro ao carregar perfil',
+          text1: 'Error loading profile',
           text2: error.message,
         });
       }
@@ -105,8 +105,8 @@ export default function EditProfileScreen() {
       if (status !== 'granted') {
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: 'Permissão de localização negada',
+          text1: 'Error',
+          text2: 'Location permission denied',
         });
         return;
       }
@@ -119,8 +119,8 @@ export default function EditProfileScreen() {
       if (!user) {
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: 'Usuário não autenticado',
+          text1: 'Error',
+          text2: 'User not authenticated',
         });
         return;
       }
@@ -133,7 +133,7 @@ export default function EditProfileScreen() {
       if (error) {
         Toast.show({
           type: 'error',
-          text1: 'Erro ao salvar localização',
+          text1: 'Error saving location',
           text2: error.message,
         });
         return;
@@ -142,7 +142,7 @@ export default function EditProfileScreen() {
       setLocation({ latitude, longitude });
 
       // Preenche cidade e estado no formulário. Só grava no banco quando a pessoa
-      // tocar em "Salvar Alterações", então dá para corrigir antes se vier errado
+      // tocar em "Save Changes", então dá para corrigir antes se vier errado
       const endereco = await buscarCidadeEstado(latitude, longitude);
       if (endereco?.cidade) {
         setValue('city', endereco.cidade, { shouldValidate: true, shouldDirty: true });
@@ -153,15 +153,15 @@ export default function EditProfileScreen() {
 
       Toast.show({
         type: 'success',
-        text1: 'Localização atualizada!',
+        text1: 'Location updated!',
         text2: endereco
-          ? 'Cidade e estado preenchidos. Confira e toque em Salvar.'
+          ? 'City and state filled in. Check them and tap Save.'
           : undefined,
       });
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'Erro ao obter localização',
+        text1: 'Error getting location',
         text2: error.message,
       });
     } finally {
@@ -175,8 +175,8 @@ export default function EditProfileScreen() {
       if (!user) {
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: 'Usuário não autenticado',
+          text1: 'Error',
+          text2: 'User not authenticated',
         });
         return;
       }
@@ -197,8 +197,8 @@ export default function EditProfileScreen() {
       if (!file.base64) {
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: 'Não foi possível carregar a imagem selecionada.',
+          text1: 'Error',
+          text2: 'Could not load the selected image.',
         });
         return;
       }
@@ -211,20 +211,20 @@ export default function EditProfileScreen() {
         setAvatarUrl(publicUrl);
         Toast.show({
           type: 'success',
-          text1: 'Sucesso',
-          text2: 'Foto de perfil atualizada!',
+          text1: 'Success',
+          text2: 'Profile photo updated!',
         });
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Erro',
-          text2: 'Não foi possível fazer o upload da foto.',
+          text1: 'Error',
+          text2: 'Could not upload the photo.',
         });
       }
     } catch (error: any) {
       Toast.show({
         type: 'error',
-        text1: 'Erro no upload',
+        text1: 'Upload error',
         text2: error.message,
       });
     } finally {
@@ -252,15 +252,15 @@ export default function EditProfileScreen() {
       });
       setSaving(false);
       if (error) {
-        Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
+        Toast.show({ type: "error", text1: "Error saving", text2: error.message });
         return;
       }
 
-      Toast.show({ type: "success", text1: "Perfil atualizado!" });
+      Toast.show({ type: "success", text1: "Profile updated!" });
       router.back();
     } catch (error: any) {
       setSaving(false);
-      Toast.show({ type: "error", text1: "Erro ao salvar", text2: error.message });
+      Toast.show({ type: "error", text1: "Error saving", text2: error.message });
     }
   };
 
@@ -273,8 +273,8 @@ export default function EditProfileScreen() {
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
       <Load
         visible={saving || uploading}
-        message={saving ? "Salvando perfil..." : "Enviando foto..."}
-        subMessage="Por favor, aguarde"
+        message={saving ? "Saving profile..." : "Uploading photo..."}
+        subMessage="Please wait"
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -284,7 +284,7 @@ export default function EditProfileScreen() {
           <TouchableOpacity onPress={handleBack} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={iconColor} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Editar Informações</Text>
+          <Text style={styles.headerTitle}>Edit Information</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -315,12 +315,12 @@ export default function EditProfileScreen() {
               name="name"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="Nome Completo"
+                  label="Full Name"
                   iconName="person-outline"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  placeholder="Seu nome"
+                  placeholder="Your name"
                   error={errors.name?.message}
                 />
               )}
@@ -331,7 +331,7 @@ export default function EditProfileScreen() {
               name="cellphone"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="Telefone"
+                  label="Phone"
                   iconName="call-outline"
                   value={value}
                   onChangeText={onChange}
@@ -347,12 +347,12 @@ export default function EditProfileScreen() {
               name="city"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="Localização"
+                  label="Location"
                   iconName="location-outline"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  placeholder="Sua cidade"
+                  placeholder="Your city"
                   error={errors.city?.message}
                 />
               )}
@@ -363,12 +363,12 @@ export default function EditProfileScreen() {
               name="state"
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
-                  label="Estado"
+                  label="State"
                   iconName="location-outline"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  placeholder="Seu estado"
+                  placeholder="Your state"
                   error={errors.state?.message}
                 />
               )}
@@ -391,16 +391,16 @@ export default function EditProfileScreen() {
               )}
               <Text style={styles.locationButtonText}>
                 {gettingLocation
-                  ? 'Obtendo localização...'
+                  ? 'Getting location...'
                   : location
-                    ? 'Localização capturada'
-                    : 'Usar minha localização atual'}
+                    ? 'Location captured'
+                    : 'Use my current location'}
               </Text>
             </TouchableOpacity>
 
             <View style={styles.sliderContainer}>
               <Text style={styles.sliderLabel}>
-                Raio de notificação: {raioNotificacao} km
+                Notification radius: {raioNotificacao} km
               </Text>
               <Slider
                 style={{ width: '100%', height: 40 }}
@@ -419,7 +419,7 @@ export default function EditProfileScreen() {
               </View>
             </View>
             <TouchableOpacity style={styles.saveButton} onPress={handleSubmit(handleSave)}>
-              <Text style={styles.saveButtonText}>Salvar Alterações</Text>
+              <Text style={styles.saveButtonText}>Save Changes</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

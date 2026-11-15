@@ -28,7 +28,7 @@ export function PhotoModal({
       >
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Adicionar Evidência</Text>
+            <Text style={styles.modalTitle}>Add Evidence</Text>
             <TouchableOpacity onPress={onClose}>
               <Ionicons name="close" size={24} color={iconColor} />
             </TouchableOpacity>
@@ -36,12 +36,12 @@ export function PhotoModal({
 
           <TouchableOpacity style={styles.photoOptionBtn} onPress={() => onPickImage(true)}>
             <Ionicons name="camera-outline" size={24} color={theme.primary || "#0047FF"} />
-            <Text style={styles.photoOptionText}>Tirar Foto</Text>
+            <Text style={styles.photoOptionText}>Take Photo</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.photoOptionBtn} onPress={() => onPickImage(false)}>
             <Ionicons name="images-outline" size={24} color={theme.primary || "#0047FF"} />
-            <Text style={styles.photoOptionText}>Escolher da Galeria</Text>
+            <Text style={styles.photoOptionText}>Choose from Gallery</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

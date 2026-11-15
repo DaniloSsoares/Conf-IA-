@@ -22,7 +22,7 @@ export interface LoadProps {
 }
 
 export function Load({
-  message = "Carregando...",
+  message = "Loading...",
   subMessage,
   visible = true,
   overlay = true,

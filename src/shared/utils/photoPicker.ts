@@ -14,8 +14,8 @@ export async function takePhoto(options: PhotoPickerOptions = {}): Promise<Selec
     if (status !== 'granted') {
       Toast.show({
         type: 'error',
-        text1: 'Permissão necessária',
-        text2: 'É preciso permitir o acesso à câmera para tirar uma foto.',
+        text1: 'Permission required',
+        text2: 'You need to allow camera access to take a photo.',
       });
       return null;
     }
@@ -24,7 +24,7 @@ export async function takePhoto(options: PhotoPickerOptions = {}): Promise<Selec
     return toSelectedPhoto(result);
   } catch (error) {
     console.error('Erro ao tirar foto:', error);
-    Toast.show({ type: 'error', text1: 'Erro', text2: 'Não foi possível capturar a foto.' });
+    Toast.show({ type: 'error', text1: 'Error', text2: 'Could not capture the photo.' });
     return null;
   }
 }
@@ -35,8 +35,8 @@ export async function pickFromGallery(options: PhotoPickerOptions = {}): Promise
     if (status !== 'granted') {
       Toast.show({
         type: 'error',
-        text1: 'Permissão necessária',
-        text2: 'É preciso permitir o acesso à galeria para escolher uma foto.',
+        text1: 'Permission required',
+        text2: 'You need to allow gallery access to choose a photo.',
       });
       return null;
     }
@@ -45,7 +45,7 @@ export async function pickFromGallery(options: PhotoPickerOptions = {}): Promise
     return toSelectedPhoto(result);
   } catch (error) {
     console.error('Erro ao escolher foto da galeria:', error);
-    Toast.show({ type: 'error', text1: 'Erro', text2: 'Não foi possível selecionar a imagem.' });
+    Toast.show({ type: 'error', text1: 'Error', text2: 'Could not select the image.' });
     return null;
   }
 }

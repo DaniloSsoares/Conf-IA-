@@ -106,5 +106,5 @@ export function formatRelativeTime(dateString?: string) {
   const diffD = Math.floor(diffH / 24);
   if (diffD === 1) return 'yesterday';
   if (diffD < 7) return `${diffD} days ago`;
-  return date.toLocaleDateString('pt-BR');
+  return date.toLocaleDateString('en-US');
 }

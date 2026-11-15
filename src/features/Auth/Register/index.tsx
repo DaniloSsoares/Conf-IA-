@@ -56,7 +56,7 @@ export default function RegisterScreen() {
         setLoading(false);
         Toast.show({
           type: "error",
-          text1: "Erro no cadastro",
+          text1: "Sign-up error",
           text2: error.message,
         });
         console.log(error);
@@ -69,7 +69,7 @@ export default function RegisterScreen() {
       setLoading(false);
       Toast.show({
         type: "success",
-        text1: "Conta criada com sucesso!",
+        text1: "Account created successfully!",
       });
       router.replace("/(tabs)");
     } catch (error) {
@@ -77,8 +77,8 @@ export default function RegisterScreen() {
       setLoading(false);
       Toast.show({
         type: "error",
-        text1: "Erro inesperado",
-        text2: "Tente novamente mais tarde.",
+        text1: "Unexpected error",
+        text2: "Please try again later.",
       });
     }
   };
@@ -89,8 +89,8 @@ export default function RegisterScreen() {
       setIsTermsModalVisible(true);
       Toast.show({
         type: "info",
-        text1: "Termos de Serviço",
-        text2: "Por favor, leia e aceite os termos para concluir seu cadastro.",
+        text1: "Terms of Service",
+        text2: "Please read and accept the terms to complete your sign-up.",
       });
       return;
     }
@@ -113,7 +113,7 @@ export default function RegisterScreen() {
       style={styles.container}
     >
       <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
-      <Load visible={loading} message="Criando sua conta..." subMessage="Por favor, aguarde" />
+      <Load visible={loading} message="Creating your account..." subMessage="Please wait" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -134,7 +134,7 @@ export default function RegisterScreen() {
               <Text style={styles.logoText}>Conf</Text>
               <Text style={styles.logoIa}>-U</Text>
             </View>
-            <Text style={styles.title}>Crie sua conta</Text>
+            <Text style={styles.title}>Create your account</Text>
           </View>
 
           <View style={styles.formContainer}>
@@ -153,7 +153,7 @@ export default function RegisterScreen() {
                     <Ionicons name="mail-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
-                      placeholder="seu.email@exemplo.com"
+                      placeholder="your.email@example.com"
                       placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
@@ -170,7 +170,7 @@ export default function RegisterScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Senha</Text>
+              <Text style={styles.label}>Password</Text>
               <Controller
                 control={control}
                 name="password"
@@ -184,7 +184,7 @@ export default function RegisterScreen() {
                     <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Sua senha"
+                      placeholder="Your password"
                       placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
@@ -210,7 +210,7 @@ export default function RegisterScreen() {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Confirme sua senha</Text>
+              <Text style={styles.label}>Confirm your password</Text>
               <Controller
                 control={control}
                 name="confirmPassword"
@@ -224,7 +224,7 @@ export default function RegisterScreen() {
                     <Ionicons name="lock-closed-outline" size={20} color={theme.iconColor} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Confirme sua senha"
+                      placeholder="Confirm your password"
                       placeholderTextColor={theme.placeholderText}
                       value={value}
                       onChangeText={onChange}
@@ -252,12 +252,12 @@ export default function RegisterScreen() {
 
             <View style={styles.footer}>
               <Text style={styles.footerText}>
-                Ao continuar, você concorda com nossos{' '}
+                By continuing, you agree to our{' '}
                 <Text
                   style={styles.footerLink}
                   onPress={() => setIsTermsModalVisible(true)}
                 >
-                  Termos
+                  Terms
                 </Text>
               </Text>
             </View>
@@ -268,7 +268,7 @@ export default function RegisterScreen() {
               disabled={loading}
             >
               <Text style={styles.loginButtonText}>
-                {loading ? 'Cadastrando...' : 'Cadastrar'}
+                {loading ? 'Signing up...' : 'Sign Up'}
               </Text>
             </TouchableOpacity>
 

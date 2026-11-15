@@ -5,12 +5,12 @@ export const ALERT_CATEGORIES: {
   label: string;
   icon: keyof typeof import('@expo/vector-icons').Ionicons.glyphMap;
 }[] = [
-    { key: 'alagamento', label: 'Alagamento', icon: 'water' },
-    { key: 'deslizamento', label: 'Deslizamento', icon: 'warning' },
-    { key: 'bloqueio_via', label: 'Bloqueio de via', icon: 'car' },
-    { key: 'fogo_em_mata', label: 'Fogo em mata', icon: 'flame' },
-    { key: 'queda_de_galho', label: 'Queda de galho', icon: 'leaf' },
-    { key: 'falta_de_luz', label: 'Falta de luz', icon: 'flash-off' },
+    { key: 'alagamento', label: 'Flooding', icon: 'water' },
+    { key: 'deslizamento', label: 'Landslide', icon: 'warning' },
+    { key: 'bloqueio_via', label: 'Blocked road', icon: 'car' },
+    { key: 'fogo_em_mata', label: 'Wildfire', icon: 'flame' },
+    { key: 'queda_de_galho', label: 'Fallen branch', icon: 'leaf' },
+    { key: 'falta_de_luz', label: 'Power outage', icon: 'flash-off' },
     { key: 'outro', label: 'Outros', icon: 'ellipsis-horizontal' },
   ];
 

@@ -24,7 +24,7 @@ export default function SplashScreen() {
           <Text style={styles.logoText}>Conf</Text>
           <Text style={styles.logoIa}>-U</Text>
         </View>
-        <Text style={styles.subtitle}>Prevenção de Desastres Climáticos</Text>
+        <Text style={styles.subtitle}>Climate Disaster Prevention</Text>
       </View>
       <ActivityIndicator size="large" color="#FFFFFF" style={styles.loader} />
     </View>

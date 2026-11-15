@@ -58,7 +58,7 @@ function CommentItem({ validacao, isMine, denuncia }: CommentItemProps) {
         {/* Só o primeiro nome (view perfil_publico, LGPD); sem nome → "Morador da região" */}
         <Text style={styles.commentMeta}>
           {isMine ? 'You' : validacao.autor_nome ?? 'Local resident'} ·{' '}
-          {new Date(validacao.created_at).toLocaleString('pt-BR')}
+          {new Date(validacao.created_at).toLocaleString('en-US')}
         </Text>
       </View>
 

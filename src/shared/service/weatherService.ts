@@ -45,7 +45,7 @@ export async function getCurrentWeather(
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        const desc = data.current.condition?.text || 'Ensolarado';
+        const desc = data.current.condition?.text || 'Sunny';
         const isDay = data.current.is_day !== 0;
         return {
           clima_latitude: latitude,
@@ -74,7 +74,7 @@ export async function getCurrentWeather(
 
       if (response.ok) {
         const data = await response.json();
-        const desc = data.weather[0]?.description || 'Ensolarado';
+        const desc = data.weather[0]?.description || 'Sunny';
         // OpenWeather speed é em m/s -> converter para km/h (* 3.6)
         const windKmh = data.wind?.speed ? Math.round(data.wind.speed * 3.6) : 0;
         const rainMm = data.rain?.['1h'] || data.rain?.['3h'] || 0;
