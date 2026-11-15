@@ -9,11 +9,44 @@
 
 ## ⏱️ Cronograma até 18/11 (código congelado)
 
-> Definido em 10/11/2026. Critério: **o que a banca precisa ver funcionando**, as promessas do TCC e dos termos, e o custo (vários itens já têm o SQL pronto).
+> Definido em 10/11/2026 e **atualizado em 15/11**. Critério: **o que a banca precisa ver funcionando**, as promessas do TCC e dos termos, e o custo (vários itens já têm o SQL pronto).
 > **Regra:** fechar cada dia com um PR aceito na `main`. Assim a `main` do dia anterior sempre está pronta para a demo.
 
-| Dia | Prioridade | O que fazer | Itens do plano |
+| Prioridade | O que fazer | Itens do plano | Status |
 |---|---|---|---|
+| 🔴 1. Ciclo central do TCC | Alerta colaborativo + notificações + salvar a localização do usuário ao abrir o Mapa | [2.6](#26-alerta-colaborativo-a-partir-da-validação-comunitária), [3.3](#33-notificações) (A.8) | ✅ PRs #4 e #5 |
+| 🔴 2. Segurança e LGPD | Leitura pública de `perfil` removida (A.5), leitura só para logados (A.6), `perfil` fora do Realtime, nome deixou de ser único, aceite **obrigatório** dos termos ao entrar | [3.4](#34-lgpd-e-limpeza-das-policies), [1.8](#18-moderação-de-fotos-e-comentários-pergunta-dos-professores) | ✅ PRs #6 e #7 |
+| 🎬 Pitch (extra, 14/11) | Gravação do pitch em inglês na branch `demo/pitch-en` (**nunca mergear**) | [Decisões da semana](#decisões-e-lições-da-semana-1011-a-1511) | ✅ |
+| 🟡 3. Demo sem lixo | Nível de risco dos reportes; validade **mínima** (só filtro na consulta, sem job) | [2.4](#24-ajustes-visuais-no-mapa), [2.7](#27-validade-dos-reportes-expirar-em-vez-de-excluir) | ✅ 2.4 (PR #8) · 🔄 2.7 (`feat/validade-reportes`) |
+| ✂️ 4. Visual | Áreas de risco oficiais do **GeoSampa**. **Cortado em 15/11**: vira trabalho futuro | [2.5](#25-áreas-de-risco-areas_risco--polygon) | ✂️ |
+| 🔴 5. APK da demo (16/11) | Chave do Google Maps + secrets no GitHub, gerar e **instalar** o APK, popular o banco com dados de demo | [CI_CD.md](CI_CD.md) | ⏳ |
+| Margem (17/11) | Corrigir o que aparecer no APK; marcador "cortado" no Mapa; testes com duas contas; se sobrar tempo, a versão completa da 2.7 (A.11) | [Anexo B](#anexo-b--testes-manuais-com-duas-contas) | ⏳ |
+| 🧊 Congelar (18/11) | Último PR, `git tag v1.0.0`, Release com o APK. **Nada de feature nova depois disso** | | ⏳ |
+
+**Fora do escopo até 18/11** (vira "trabalho futuro" na apresentação): áreas de risco do GeoSampa (2.5), validade completa com `pg_cron` (A.11), push notifications, `sistema_ia`, alertas automáticos do INMET, app bilíngue (i18n), Jest, refatoração da Home, tipos gerados do banco, PostGIS, atualizar o Supabase CLI para a v3.
+
+**Depois de 18/11:** apresentação (Fases 4 e 5): nome oficial, README e pitch, roteiro da demo, **vídeo de backup**, slides e ensaio das perguntas da banca.
+
+- [x] Prioridade 1 · Ciclo central
+- [x] Prioridade 2 · Segurança e LGPD
+- [ ] Prioridade 3 · Demo sem lixo (falta o merge da 2.7)
+- [x] ~~Prioridade 4 · Áreas de risco~~ (cortada)
+- [ ] 16/11 · Prioridade 5 · APK
+- [ ] 17/11 · Margem
+- [ ] 18/11 · Código congelado + `v1.0.0`
+
+### Decisões e lições da semana (10/11 a 15/11)
+
+- **Branch `demo/pitch-en`:** o app inteiro em inglês, só para gravar o pitch e mostrar à professora. **Nunca vai para a `main`**: os textos estão fixos no código, sem i18n. Para regravar, `git checkout demo/pitch-en`
+- **Nome completo deixou de ser único:** a constraint `perfil_perfil_usuario_key` (herdada de quando a coluna era um "nome de usuário") impedia homônimos de editar o perfil e **de se cadastrar** (o trigger `handle_new_user` grava o nome). Também permitia descobrir quem usa o app pelo nome (LGPD)
+- **Para achar "o meu perfil" no SQL, use o email (`auth.users`) ou o `id`, nunca o nome**
+- **Migration já registrada no banco não se apaga só com `git rm`:** antes, `./scripts/supabase-remote.sh migration repair --status reverted <versão>`. Senão o próximo `db pull` falha
+- **O `db pull` não captura** mudanças de publicação do Realtime nem jobs do `pg_cron`: acrescentar à mão no fim da migration
+- **Localização sempre arredondada para 3 casas (~110 m)**, no Mapa e no Editar Perfil (LGPD). O Editar Perfil também preenche cidade e estado pelo geocoder do celular
+- **Notificações são in-app** (aba Histórico), não push. Push fica como trabalho futuro: a coluna `notificacao_canal` já prevê outro canal
+- **Marcador "cortado" no Mapa (pendente, 17/11):** suspeita de sobreposição (reporte, alerta colaborativo e "você está aqui" no mesmo ponto). Testar com o filtro "Reports". Há também um bug conhecido do `react-native-maps` 1.20.1 com a Nova Arquitetura no Android. Marcadores em PNG foram testados e **descartados** (decisão: manter a estilização com `View`)
+
+---|---|---|---|
 | **10–11/11** | 🔴 1. Ciclo central do TCC | Alerta colaborativo + notificações + salvar a localização do usuário ao abrir o Mapa (só 3 de 7 perfis têm localização, e sem ela a notificação não chega) | [2.6](#26-alerta-colaborativo-a-partir-da-validação-comunitária), [3.3](#33-notificações) (A.8) |
 | **12/11** | 🔴 2. Segurança e LGPD | Remover a leitura pública de `perfil` (A.5 parte 1), leitura só para logados (A.6), tirar `perfil` do Realtime, aceite dos termos no login | [3.4](#34-lgpd-e-limpeza-das-policies), [1.8](#18-moderação-de-fotos-e-comentários-pergunta-dos-professores) |
 | **13/11** | 🟡 3. Demo sem lixo | Nível de risco dos reportes; validade **mínima** (só filtro na consulta, sem job) | [2.4](#24-ajustes-visuais-no-mapa), [2.7](#27-validade-dos-reportes-expirar-em-vez-de-excluir) |
@@ -236,7 +269,7 @@ O app envia `via_bloqueada`, mas o enum do banco é `bloqueio_via`, então o INS
 - [x] Botão "Denunciar" no `ViewHistory` (reporte e cada comentário), com motivo: foto inadequada, comentário ofensivo, informação falsa, spam, outro
 - [x] Filtrar reporte oculto: `getActiveReports` com `.eq('reporte_oculto', false)` e o Realtime do Mapa (`useMapData`, evento UPDATE) removendo o reporte quando `reporte_oculto` for true
 - [x] Atualizar o texto dos termos (camada 2): versão 1.1.0, só com o que está implementado. Removidas as promessas de "suspensão de conta" e do trust score
-- [ ] Pedir o aceite da nova versão no **login**: hoje só a tela de Perfil confere (`getTerms` está importado no Login, mas não é usado), então quem não abre o Perfil nunca vê os termos novos
+- [x] Pedir o aceite da nova versão ao **entrar no app**: o layout das abas (`src/app/(tabs)/_layout.tsx`) confere o aceite da versão atual e mostra o `TermsModal` em modo **obrigatório** (sem fechar; só "Li e Concordo" ou "Recusar e sair"). Também corrigido: o texto dos termos não rolava no Android (Touchable envolvendo o `ScrollView`)
 - [ ] Incluir nos termos um **canal de contato** (e-mail da equipe) para pedidos de acesso ou exclusão de dados (LGPD)
 
 **Para a defesa:** mostrar a tabela acima como "modelo de moderação em camadas", dizer o que está implementado (1 a 5) e apresentar 6 a 8 como trabalho futuro.
@@ -280,15 +313,17 @@ Hoje o app baixa **todos** os reportes e alertas do banco e só filtra no client
 
 - [x] Usar `weather.icone_ionicon` no lugar do ícone fixo `partly-sunny-outline` ([Maps/index.tsx:170](../src/features/Maps/index.tsx))
 - [x] **Filtro de alertas pelo raio do alerta:** `alertas` tem `alerta_raio_km`, e o filtro atual só considera o centro do alerta. Um alerta de 10 km com centro a 7 km do usuário não aparece, mesmo cobrindo a posição dele. Trocar por `haversineKm(...) <= raioKm + Number(a.alerta_raio_km ?? 0)`
-- [ ] `reporte_nivel_risco` é usado no Mapa, mas **não existe** no banco (confirmado no diagrama). Hoje todo reporte aparece igual. Decidir entre:
-  - (a) derivar da categoria (ex.: deslizamento = alto, falta de luz = baixo), ou
-  - (b) derivar do score de confiança, ou
-  - (c) criar a coluna e o campo no formulário de reporte
-- [ ] Confirmar se a **Home** já usa o clima real (o checkup anterior diz que sim, a lista de pendências diz que não)
+- [x] `reporte_nivel_risco` era usado no Mapa, mas **não existe** no banco, e todo reporte aparecia igual. **Decisão (a): derivar da categoria** (PR #8), com a **mesma regra do trigger do alerta colaborativo (A.10)**: alagamento, deslizamento e fogo em mata = alto; falta de luz = baixo; o resto = moderado. Assim o reporte e o alerta que nasce dele mostram o mesmo risco
+  - `nivelRisco` obrigatório em cada categoria ([reportCategories.ts](../src/shared/constants/reportCategories.ts)); se mudar lá, mudar também o CASE do A.10
+  - `RISK_LABEL` e `getNivelRiscoReporte` num lugar só ([constants/nivelRisco.ts](../src/shared/constants/nivelRisco.ts)), usados no Mapa e na Home
+  - Descartadas: (b) o score mede confiança, não perigo; (c) coluna nova + campo no formulário exigiria que o cidadão avaliasse o risco
+- [x] A **Home** usa o clima real (`getCurrentWeather`), sem valores inventados (resolvido no 2.3)
 
 ### 2.5 🟡 Áreas de risco (`areas_risco` + `Polygon`)
 
 Fecha a promessa do pitch ("Risk Mapping").
+
+> ✂️ **Cortado do cronograma em 15/11** (atraso de ~2 dias por causa da gravação do pitch). Vira **trabalho futuro** na apresentação. O caminho já está definido: importar as camadas `geoportal:area_risco_geologico` e `geoportal:risco_hidrologico` do WFS do GeoSampa (grau R1–R4 → baixo/moderado/alto/crítico), com um script de importação. Ajustar o bullet "Risk Mapping" do pitch (Fase 4)
 
 **Estado atual:** a tabela existe, está **vazia** e já tem a policy `areas_risco_select_all`. Colunas: `area_nome`, `area_tipo_risco` (enum `tipo_ocorrencia`), `area_nivel_risco` (enum `nivel_risco`), `area_poligono` (jsonb), `area_municipio`, `area_estado`, `area_fonte`. Ela se liga a `alertas.alerta_area_id`.
 
@@ -318,8 +353,10 @@ cidadão reporta → comunidade confirma → vira alerta → vizinhos são notif
 
 **Fazer:**
 - [x] Rodar o SQL do [Anexo A.10](#a10-alerta-colaborativo-a-partir-de-reporte-validado) no SQL Editor e depois `./scripts/supabase-remote.sh db pull`
-- [x] Testar sem celular, com o bloco de teste do A.10 (simula 3 confirmações e mostra o alerta criado)x- [ ] Depois: job para expirar alertas vencidos (`pg_cron`, marcando `expirado` quando passa de `alerta_expira_em`). Hoje um alerta vencido continua aparecendo como ativo
-- [ ] Atualizar os termos ([TermsModal](../src/components/ui/TermsModal/index.tsx), seção 4) e subir `VERSAO_TERMOS` em [termsService.ts](../src/shared/service/termsService.ts)
+- [x] Testar sem celular, com o bloco de teste do A.10 (simula 3 confirmações e mostra o alerta criado)
+- [x] Mapa diferencia "Alerta da comunidade" (ícone `people`) de "Alerta Oficial" (`shield-checkmark`) com `getOrigemAlerta`
+- [x] Atualizar os termos (seção 4) e subir `VERSAO_TERMOS` para 1.2.0
+- [x] Alerta vencido: o Mapa e a Home filtram `alerta_expira_em` na consulta (2.7 mínimo). O job que muda o status para `expirado` fica para a versão completa (A.11)
 - [ ] Testes 23 a 27 do [Anexo B](#anexo-b--testes-manuais-com-duas-contas)
 
 **Para a defesa:** este é o fluxo para demonstrar ao vivo. 3 contas confirmam um reporte e o alerta aparece no Mapa de todo mundo.
@@ -336,8 +373,8 @@ cidadão reporta → comunidade confirma → vira alerta → vizinhos são notif
    | Categoria | Validade | Por quê |
    |---|---|---|
    | Bloqueio de via | 4 h | Costuma ser liberado rápido |
-   | Alagamento | 6 h | A água baixa em horas depois da chuva |
-   | Falta de luz | 8 h | Prazo típico de restabelecimento |
+   | Alagamento | 8 h | A água baixa em horas depois da chuva (ajustado em 15/11; antes 6 h) |
+   | Falta de luz | 12 h | Prazo típico de restabelecimento (ajustado em 15/11; antes 8 h) |
    | Queda de galho / Fogo em mata | 12 h | Exigem remoção ou combate |
    | Deslizamento | 24 h | Risco que persiste |
    | Outro | 6 h | Padrão |
@@ -351,16 +388,27 @@ cidadão reporta → comunidade confirma → vira alerta → vizinhos são notif
 - **O trigger de score "ressuscitaria" um reporte expirado:** um voto atrasado recalcularia o status para pendente ou validado. Ele precisa preservar `expirado`, como já preserva `resolvido`
 - **A proteção de colunas (A.4) bloquearia o próprio job:** ela usa `pg_trigger_depth() = 1` para reconhecer "veio do cliente", mas o UPDATE do job também tem profundidade 1. A proteção passa a ser **pelo papel** (`authenticated`/`anon`, que é quem chama pela API), e não pela profundidade. Também passa a proteger `reporte_expira_em`, para o dono não "esticar" a validade
 
+**✅ Versão mínima (15/11, `feat/validade-reportes`), para a demo:** sem mudar o banco. Mesmo resultado visível: o reporte vencido sai do Mapa e da Home e continua no Histórico do dono.
+- [x] `validadeHoras` obrigatório em cada categoria ([reportCategories.ts](../src/shared/constants/reportCategories.ts)), com os valores da tabela acima
+- [x] [constants/validade.ts](../src/shared/constants/validade.ts): `VALIDADE_MAXIMA_HORAS` (a maior entre as categorias, calculada) e `reporteAindaValido(tipo, criadoEm)` (padrão 6 h)
+- [x] `getActiveReports` em duas etapas: o banco filtra `created_at` dentro da maior validade e só `pendente`/`validado` (antes, `resolvido` continuava no Mapa); o app refina pela validade de cada categoria
+- [x] Alertas: Mapa e Home filtram `alerta_expira_em` com `.or(is.null, gt.agora)`; o `is.null` mantém os alertas oficiais sem validade
+- [ ] Testar: reporte de "Via bloqueada" envelhecido 5 h some do Mapa e continua em "Meus reportes"; "Deslizamento" com 5 h continua
+- [ ] Limite conhecido: os valores ficam no app, não no banco. A versão completa abaixo leva a regra para o banco
+
+**Versão completa (A.11): depois do APK, se sobrar tempo no dia 17, ou trabalho futuro.** Leva cerca de um dia. O mais arriscado é o bloco 4 (proteção de colunas pelo papel), que todo o resto usa.
+
 **Fazer (banco):**
 - [ ] Rodar o [Anexo A.11](#a11-validade-dos-reportes), **bloco por bloco, na ordem**. O bloco 1 (novo valor do enum) precisa rodar **sozinho**
 - [ ] ⚠️ Antes do bloco de preenchimento, decidir o que fazer com os reportes antigos: com a validade nova, **todos os reportes criados há mais de 24 h expiram na hora** e o Mapa fica vazio. Para a demo, recriar reportes de teste no dia da apresentação
 - [ ] Refazer os testes de proteção (A.4/A.9): os testes com `DO $$` rodam como `postgres`, que agora **passa** pela proteção de propósito. Usar `SET LOCAL ROLE authenticated` para simular o app (bloco de teste no A.11)
-- [ ] `./scripts/supabase-remote.sh db pull` no final
+- [ ] Bloquear o voto em reporte expirado **também no banco**: na policy `validacoes_insert_own`, exigir o reporte `pendente` ou `validado` (esconder o botão no app não impede uma chamada direta à API)
+- [ ] `./scripts/supabase-remote.sh db pull` no final. O pull **não captura** os jobs do `pg_cron` (schema `cron`): acrescentar os dois `cron.schedule(...)` à mão no fim da migration
 
 **Fazer (app):**
 - [ ] `ReportStatus` com `'expirado'` ([types/report.ts](../src/shared/types/report.ts)) e `reporte_expira_em?: string` no tipo `Report`
 - [ ] `getStatusStyle` ([historyStatus.ts](../src/shared/constants/historyStatus.ts)) com o selo "Expirado" (cinza)
-- [ ] `getActiveReports`: trocar `.neq("reporte_status", "rejeitado")` por `.in("reporte_status", ["pendente", "validado"])` e acrescentar `.gt("reporte_expira_em", new Date().toISOString())`
+- [ ] `getActiveReports`: o `.in("reporte_status", ["pendente", "validado"])` já foi feito na versão mínima; falta trocar o filtro por `created_at` + `reporteAindaValido` por `.gt("reporte_expira_em", new Date().toISOString())`
 - [ ] Realtime do Mapa ([useMapData.ts](../src/features/Maps/useMapData.ts)): remover também quando o status for `expirado`. A regra fica melhor como "manter só pendente/validado, não oculto", em vez de listar o que sai
 - [ ] ViewHistory: aviso "Este reporte expirou" e votação desabilitada, como já é feito para o oculto
 - [ ] Histórico do dono: mostrar há quanto tempo expira ("expira em 3 h") nos reportes ativos
@@ -401,8 +449,9 @@ Seguir o roteiro do [Anexo B](#anexo-b--testes-manuais-com-duas-contas):
 
 - [ ] O nome certo é `alerta_notificacoes` (confirmado no banco). Remover o fallback para `alertas_notificacoes`
 - [ ] `markNotificationAsRead`: o `catch {}` vazio esconde erros. Pelo menos registrar com `console.warn` e retornar `{ error }`
-- [ ] 🔴 **Nada gera notificações hoje.** Não existe trigger nem policy de INSERT em `alerta_notificacoes`. Quando um alerta é criado, nenhum usuário é notificado, e a aba de notificações só mostra o que foi inserido manualmente. Criar o trigger `gerar_notificacoes_alerta` ([Anexo A.8](#a8-gerar-notificações-quando-um-alerta-é-criado)): ele notifica quem está dentro do raio e tem a categoria ativa nas preferências
-- [ ] Pré-requisito do trigger: `perfil_latitude`/`perfil_longitude` precisam estar preenchidos. Conferir se o app atualiza esses campos com a localização do usuário. Se não atualizar, salvar ao abrir o Mapa ou a Home
+- [x] 🔴 Gerar notificações (PR #5): trigger `gerar_notificacoes_alerta` ([Anexo A.8](#a8-gerar-notificações-quando-um-alerta-é-criado)) notifica quem está no raio e tem a categoria ativa nas preferências. Testado de ponta a ponta: voto → validado → alerta → notificação no Histórico
+- [x] Pré-requisito do trigger: o app salva `perfil_latitude`/`perfil_longitude` ao abrir o Mapa (`useMapData`), **arredondados para 3 casas** (LGPD). Os perfis antigos com precisão total foram arredondados no banco
+- [ ] Push notifications (app fechado): fora do escopo, ver Pós-MVP
 
 ### 3.4 🔴 LGPD e limpeza das policies
 
@@ -412,10 +461,12 @@ Seguir o roteiro do [Anexo B](#anexo-b--testes-manuais-com-duas-contas):
 - `perfil` tem policies duplicadas (2 de SELECT próprio, 2 de UPDATE)
 
 **Fazer:**
-- [ ] Remover "Qualquer um pode ver perfis" e criar a view `perfil_publico` (só `id`, nome e avatar) para quando o app precisar mostrar outros usuários ([Anexo A.5](#a5-lgpd-perfil-visível-para-todos))
-- [ ] Antes de remover: procurar no código se alguma tela lê o perfil de **outro** usuário (`.from('perfil')`)
-- [ ] Remover as policies duplicadas de `perfil`
-- [ ] Restringir as policies de leitura a `authenticated` ([Anexo A.6](#a6-restringir-leitura-a-usuários-logados))
+- [x] Remover "Qualquer um pode ver perfis" e criar a view `perfil_publico` (só `id`, nome e avatar) para quando o app precisar mostrar outros usuários ([Anexo A.5](#a5-lgpd-perfil-visível-para-todos))
+- [x] Antes de remover: conferido que nenhuma tela lê o perfil de **outro** usuário (o `getProfile` é sempre chamado com o próprio `user.id`; os nomes nos comentários vêm da `perfil_publico`)
+- [x] Remover as policies duplicadas de `perfil`
+- [x] Restringir as policies de leitura a `authenticated` ([Anexo A.6](#a6-restringir-leitura-a-usuários-logados))
+- [x] Tirar `perfil` da publicação do Realtime (`ALTER PUBLICATION supabase_realtime DROP TABLE public.perfil`), acrescentado à mão na migration
+- [x] Remover a constraint `perfil_perfil_usuario_key` (nome completo único): impedia homônimos de se cadastrar
 - [ ] Documentar no README/TCC: que dados de localização são guardados, quem vê e por quê
 
 ### 3.5 🟡 Tipagem
@@ -1022,8 +1073,8 @@ LANGUAGE sql IMMUTABLE
 AS $$
   SELECT CASE p_tipo
     WHEN 'bloqueio_via'   THEN INTERVAL '4 hours'
-    WHEN 'alagamento'     THEN INTERVAL '6 hours'
-    WHEN 'falta_de_luz'   THEN INTERVAL '8 hours'
+    WHEN 'alagamento'     THEN INTERVAL '8 hours'
+    WHEN 'falta_de_luz'   THEN INTERVAL '12 hours'
     WHEN 'queda_de_galho' THEN INTERVAL '12 hours'
     WHEN 'fogo_em_mata'   THEN INTERVAL '12 hours'
     WHEN 'deslizamento'   THEN INTERVAL '24 hours'

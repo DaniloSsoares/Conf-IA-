@@ -156,6 +156,8 @@ export function useMapData() {
       .from("alertas")
       .select("*")
       .eq("alerta_status", "ativo")
+      // Alerta da comunidade vence em 6 h; o oficial pode não ter validade (null)
+      .or(`alerta_expira_em.is.null,alerta_expira_em.gt.${new Date().toISOString()}`)
       .in("alerta_tipo_ocorrencia", categoriasAtivas)
       .gte("alerta_latitude", boundsAlertas.minLat)
       .lte("alerta_latitude", boundsAlertas.maxLat)
