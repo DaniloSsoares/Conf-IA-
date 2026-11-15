@@ -88,9 +88,7 @@ export default function ProfileScreen() {
 
       let cidade = profileData.perfil_cidade;
       let estado = profileData.perfil_estado;
-
-      // Se cidade ou estado ainda não estiverem salvos no banco,
-      // tenta resolver pelas coordenadas do banco ou pelo GPS do celular
+      
       if (!cidade || !estado) {
         let lat = profileData.perfil_latitude;
         let lng = profileData.perfil_longitude;
