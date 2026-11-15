@@ -22,14 +22,9 @@ import { router, useFocusEffect } from 'expo-router';
 import styles from './style';
 import { NivelRisco } from '@/src/shared/types/notification';
 import { demoEn } from '@/src/shared/demoEn';
+import { RISK_LABEL, getNivelRiscoReporte } from '@/src/shared/constants/nivelRisco';
+import { getCategoryMeta } from '@/src/shared/constants/historyStatus';
 
-// Valores do enum nivel_risco do banco -> texto exibido na tela
-const RISK_LABEL: Record<NivelRisco, string> = {
-  baixo: 'Low',
-  moderado: 'Moderate',
-  alto: 'High',
-  critico: 'Critical',
-};
 
 export default function DashboardScreen({ navigation }: any) {
   const { isDarkMode, theme } = useAppTheme();
@@ -163,10 +158,10 @@ export default function DashboardScreen({ navigation }: any) {
         setActiveAlerts(
           communityReports.slice(0, 3).map((rep) => ({
             id: rep.id,
-            alerta_titulo: rep.reporte_tipo_ocorrencia || 'Community report',
+            alerta_titulo: getCategoryMeta(rep.reporte_tipo_ocorrencia).label,
             alerta_descricao: rep.reporte_descricao || 'Reported by a nearby user',
             created_at: rep.created_at,
-            alerta_nivel_risco: 'moderado',
+            alerta_nivel_risco: getNivelRiscoReporte(rep.reporte_tipo_ocorrencia),
           }))
         );
       } else {
