@@ -71,6 +71,8 @@ export interface ReportCategoryItem {
   // Reporte não tem coluna de risco no banco: o risco vem da categoria
   nivelRisco: NivelRisco;
   fullWidth?: boolean;
+  // Por quantas horas o reporte aparece no Mapa depois de criado (item 2.7)
+  validadeHoras: number;
 }
 
 export type TipoValidacao = 'confirma'|'contesta';

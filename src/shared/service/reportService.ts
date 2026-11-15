@@ -9,6 +9,7 @@ import {
   UpdateReportInput,
 } from "../types/report";
 import { BoundingBox } from "../utils/haversine";
+import { VALIDADE_MAXIMA_HORAS, reporteAindaValido } from '@/src/shared/constants/validade';
 
 
 export async function uploadReportPhoto(
@@ -223,11 +224,15 @@ export async function getUserReports(userId: string): Promise<Report[]> {
 export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
   try {
 
+    // Só busca o que pode estar válido: criado dentro da maior validade entre as categorias
+    const desde = new Date(Date.now() - VALIDADE_MAXIMA_HORAS * 60 * 60 * 1000).toISOString();
     let query = supabaseConfig
     .from('reportes')
     .select("*")
-    .neq("reporte_status", "rejeitado")
-    .eq("reporte_oculto", false);
+    // Só o que ainda está "em andamento": rejeitado e resolvido não aparecem no Mapa
+    .in("reporte_status", ["pendente", "validado"])
+    .eq("reporte_oculto", false)
+    .gte("created_at", desde);
 
     if(bounds){ 
      query = query
@@ -237,10 +242,13 @@ export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
      .lte("reporte_longitude", bounds.maxLng)
     }
     const {data, error} = await query;
-
-    
     if (error) throw error;
-    return (data as Report[]) || [];
+
+    // Refina pela validade de cada categoria (via bloqueada 4 h, deslizamento 24 h...).
+    // O reporte vencido não é apagado: continua no Histórico do dono
+    return ((data as Report[]) || []).filter((r) =>
+      reporteAindaValido(r.reporte_tipo_ocorrencia, r.created_at),
+    );
 
   } catch (error) {
     console.error("Erro ao buscar reportes ativos:", error);

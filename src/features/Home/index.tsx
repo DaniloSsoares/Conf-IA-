@@ -144,6 +144,8 @@ export default function DashboardScreen({ navigation }: any) {
         .from('alertas')
         .select('*')
         .eq('alerta_status', 'ativo')
+        // Alerta da comunidade vence em 6 h; o oficial pode não ter validade (null)
+        .or(`alerta_expira_em.is.null,alerta_expira_em.gt.${new Date().toISOString()}`)
         .order('created_at', { ascending: false });
 
       let list = dbAlerts || [];
