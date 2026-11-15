@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,71 +9,124 @@ import {
   Alert,
   StatusBar,
   Image,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import {
+  arredondarCoordenada,
+  buscarCidadeEstado,
+} from "@/src/shared/utils/endereco";
 import { getStyles } from "./style";
-import { useAppTheme } from '@/src/shared/constants/theme';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter, useFocusEffect } from 'expo-router';
-import Toast from 'react-native-toast-message';
-import { supabaseConfig } from '@/src/config/supabase';
-import { getProfile, updateProfile } from '@/src/shared/service/profileService';
-import { Profile } from '@/src/shared/types/profile';
-import { formatDate } from '@/src/shared/utils/dateMember'
-import { ALERT_CATEGORIES, DEFAULT_ALERT_PREFERENCES, normalizeAlertPreferences } from '@/src/shared/constants/alertCategories';
-import { AlertPreferences } from '@/src/shared/types/profile';
-import { ChangePassModel } from '@/src/components/ui/ChangePassModel';
-import { TermsModal } from '@/src/components/ui/TermsModal';
-import { getTerms } from '@/src/shared/service/termsService';
-
+import { useAppTheme } from "@/src/shared/constants/theme";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter, useFocusEffect } from "expo-router";
+import Toast from "react-native-toast-message";
+import { supabaseConfig } from "@/src/config/supabase";
+import { getProfile, updateProfile } from "@/src/shared/service/profileService";
+import { Profile } from "@/src/shared/types/profile";
+import { formatDate } from "@/src/shared/utils/dateMember";
+import {
+  ALERT_CATEGORIES,
+  DEFAULT_ALERT_PREFERENCES,
+  normalizeAlertPreferences,
+} from "@/src/shared/constants/alertCategories";
+import { AlertPreferences } from "@/src/shared/types/profile";
+import { ChangePassModel } from "@/src/components/ui/ChangePassModel";
+import { TermsModal } from "@/src/components/ui/TermsModal";
+import { getTerms } from "@/src/shared/service/termsService";
 
 export default function ProfileScreen() {
   const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
   const router = useRouter();
 
-  const [preferences, setPreferences] = useState<AlertPreferences>(DEFAULT_ALERT_PREFERENCES);
+  const [preferences, setPreferences] = useState<AlertPreferences>(
+    DEFAULT_ALERT_PREFERENCES,
+  );
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [email, setEmail] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
 
+  const formatarTelefoneBR = (valor?: string | null) => {
+    if (!valor) return "Não informado";
+    const d = valor.replace(/\D/g, "");
+    if (d.length === 11)
+      return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    if (d.length === 10)
+      return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return valor;
+  };
+
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+      const {
+        data: { user },
+      } = await supabaseConfig.auth.getUser();
       if (!user) {
         Toast.show({
-          type: 'error',
-          text1: 'Erro',
-          text2: 'Usuário não autenticado',
+          type: "error",
+          text1: "Erro",
+          text2: "Usuário não autenticado",
         });
         return;
       }
-      setEmail(user.email || '');
+      setEmail(user.email || "");
       const profileData = await getProfile(user.id);
       if (!profileData) {
         Toast.show({
-          type: 'info',
-          text1: 'Perfil Incompleto',
-          text2: 'Por favor, preencha seus dados de perfil.',
+          type: "info",
+          text1: "Perfil Incompleto",
+          text2: "Por favor, preencha seus dados de perfil.",
         });
-        router.push('/(screens)/EditProfile');
+        router.push("/(screens)/EditProfile");
         return;
       }
-      setProfile(profileData);
-      // Só as categorias oficiais: assim, ao trocar uma preferência, o que é salvo de
-      // volta no banco já vai sem as chaves antigas (ex.: "chuva")
-      setPreferences(normalizeAlertPreferences(profileData.perfil_preferencias_alertas));
+
+      let cidade = profileData.perfil_cidade;
+      let estado = profileData.perfil_estado;
+      
+      if (!cidade || !estado) {
+        let lat = profileData.perfil_latitude;
+        let lng = profileData.perfil_longitude;
+
+        if (!lat || !lng) {
+          const { status } = await Location.getForegroundPermissionsAsync();
+          if (status === "granted") {
+            const pos = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+            lat = arredondarCoordenada(pos.coords.latitude);
+            lng = arredondarCoordenada(pos.coords.longitude);
+          }
+        }
+
+        if (lat && lng) {
+          const endereco = await buscarCidadeEstado(lat, lng);
+          if (!cidade && endereco?.cidade) cidade = endereco.cidade;
+          if (!estado && endereco?.estado) estado = endereco.estado;
+        }
+      }
+
+      setProfile({
+        ...profileData,
+        perfil_cidade: cidade,
+        perfil_estado: estado,
+      });
+
+      setPreferences(
+        normalizeAlertPreferences(profileData.perfil_preferencias_alertas),
+      );
 
       const accepted = await getTerms(user.id);
       setHasAcceptedTerms(accepted);
     } catch (error: any) {
       Toast.show({
-        type: 'error',
-        text1: 'Erro ao carregar perfil',
+        type: "error",
+        text1: "Erro ao carregar perfil",
         text2: error.message,
       });
     } finally {
@@ -84,38 +137,38 @@ export default function ProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       loadProfile();
-    }, [loadProfile])
+    }, [loadProfile]),
   );
-
-
 
   const handleLogout = async () => {
     const { error } = await supabaseConfig.auth.signOut();
     if (error) {
       Toast.show({
-        type: 'error',
-        text1: 'Erro',
-        text2: 'Erro ao sair',
+        type: "error",
+        text1: "Erro",
+        text2: "Erro ao sair",
       });
       return;
     }
     Toast.show({
-      type: 'success',
-      text1: 'Logout',
-      text2: 'Você saiu da aplicação',
+      type: "success",
+      text1: "Logout",
+      text2: "Você saiu da aplicação",
     });
-    router.replace('/Login');
+    router.replace("/Login");
   };
 
   const handleAcceptTerms = async () => {
-    const { data: { user } } = await supabaseConfig.auth.getUser();
+    const {
+      data: { user },
+    } = await supabaseConfig.auth.getUser();
     if (!user) return;
     const hasAccepted = await getTerms(user.id);
     if (hasAccepted) {
       Toast.show({
-        type: 'info',
-        text1: 'Termos de Serviço',
-        text2: 'Você já aceitou os Termos de Serviço.',
+        type: "info",
+        text1: "Termos de Serviço",
+        text2: "Você já aceitou os Termos de Serviço.",
       });
     } else {
       setIsTermsModalVisible(true);
@@ -124,9 +177,9 @@ export default function ProfileScreen() {
 
   const handleDeleteAccount = () => {
     Toast.show({
-      type: 'error',
-      text1: 'Excluir Conta',
-      text2: 'Tem certeza? Esta ação não pode ser desfeita.'
+      type: "error",
+      text1: "Excluir Conta",
+      text2: "Tem certeza? Esta ação não pode ser desfeita.",
     });
   };
   const handleTogglePreference = async (key: keyof AlertPreferences) => {
@@ -134,26 +187,30 @@ export default function ProfileScreen() {
     const updated = { ...preferences, [key]: !preferences[key] };
     setPreferences(updated);
 
-    const { data: { user } } = await supabaseConfig.auth.getUser();
+    const {
+      data: { user },
+    } = await supabaseConfig.auth.getUser();
     if (!user) return;
-    const { error } = await updateProfile(user.id, { perfil_preferencias_alertas: updated });
+    const { error } = await updateProfile(user.id, {
+      perfil_preferencias_alertas: updated,
+    });
     if (error) {
       Toast.show({
-        type: 'error',
-        text1: 'Erro',
-        text2: 'Erro ao atualizar preferências',
+        type: "error",
+        text1: "Erro",
+        text2: "Erro ao atualizar preferências",
       });
       setPreferences(previous);
       return;
     }
-
-  }
+  };
   return (
-    <LinearGradient
-      colors={theme.primaryGradient}
-      style={styles.container}
-    >
-      <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+    <LinearGradient colors={theme.primaryGradient} style={styles.container}>
+      <StatusBar
+        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        backgroundColor="transparent"
+        translucent
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -163,17 +220,25 @@ export default function ProfileScreen() {
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               {profile?.perfil_avatar_url ? (
-                <Image source={{ uri: profile.perfil_avatar_url }} style={{ width: '100%', height: '100%', borderRadius: 48 }} />
+                <Image
+                  source={{ uri: profile.perfil_avatar_url }}
+                  style={{ width: "100%", height: "100%", borderRadius: 48 }}
+                />
               ) : (
                 <Ionicons name="person" size={54} color={theme.iconPrimary} />
               )}
             </View>
-            <TouchableOpacity style={styles.editAvatarButton} onPress={() => router.push('/EditProfile')}>
+            <TouchableOpacity
+              style={styles.editAvatarButton}
+              onPress={() => router.push("/EditProfile")}
+            >
               <Ionicons name="camera" size={16} color={theme.white} />
             </TouchableOpacity>
           </View>
-          <Text style={styles.userName}>{profile?.perfil_nome_completo || 'Sem Nome'}</Text>
-          <Text style={styles.userEmail}>{email || 'Sem Email'}</Text>
+          <Text style={styles.userName}>
+            {profile?.perfil_nome_completo || "Sem Nome"}
+          </Text>
+          <Text style={styles.userEmail}>{email || "Sem Email"}</Text>
         </View>
 
         {/* Informações Pessoais */}
@@ -182,46 +247,70 @@ export default function ProfileScreen() {
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="call" size={18} color={theme.iconPrimary} /></View>
+              <View style={styles.iconBg}>
+                <Ionicons name="call" size={18} color={theme.iconPrimary} />
+              </View>
               <Text style={styles.infoTitle}>Telefone</Text>
             </View>
-            <Text style={styles.infoValue}>{profile?.perfil_telefone || 'Não informado'}</Text>
+            <Text style={styles.infoValue}>
+              {formatarTelefoneBR(profile?.perfil_telefone)}
+            </Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="location" size={18} color={theme.iconPrimary} /></View>
+              <View style={styles.iconBg}>
+                <Ionicons name="location" size={18} color={theme.iconPrimary} />
+              </View>
               <Text style={styles.infoTitle}>Localização</Text>
             </View>
             <Text style={styles.infoValue}>
               {profile?.perfil_cidade && profile?.perfil_estado
                 ? `${profile.perfil_cidade}, ${profile.perfil_estado}`
-                : profile?.perfil_cidade || profile?.perfil_estado || 'Não informado'}
+                : profile?.perfil_cidade ||
+                  profile?.perfil_estado ||
+                  "Não informado"}
             </Text>
           </View>
           <View style={styles.divider} />
 
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="calendar" size={18} color={theme.iconPrimary} /></View>
+              <View style={styles.iconBg}>
+                <Ionicons name="calendar" size={18} color={theme.iconPrimary} />
+              </View>
               <Text style={styles.infoTitle}>Membro desde</Text>
             </View>
-            <Text style={styles.infoValue}>{profile?.created_at ? formatDate(profile.created_at) : 'Não disponível'}</Text>
+            <Text style={styles.infoValue}>
+              {profile?.created_at
+                ? formatDate(profile.created_at)
+                : "Não disponível"}
+            </Text>
           </View>
 
           <View style={styles.divider} />
           <View style={styles.infoItem}>
             <View style={styles.infoLabel}>
-              <View style={styles.iconBg}><Ionicons name="shield-checkmark" size={18} color={theme.iconPrimary} /></View>
+              <View style={styles.iconBg}>
+                <Ionicons
+                  name="shield-checkmark"
+                  size={18}
+                  color={theme.iconPrimary}
+                />
+              </View>
               <Text style={styles.infoTitle}>Reputação</Text>
             </View>
-            <Text style={styles.infoValue}>{profile?.perfil_trust_score ?? 0} pontos</Text>
+            <Text style={styles.infoValue}>
+              {profile?.perfil_trust_score ?? 0} pontos
+            </Text>
           </View>
 
-          <TouchableOpacity style={styles.editButton}
-            onPress={() => router.push('/EditProfile')}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => router.push("/EditProfile")}
+          >
             <Ionicons name="pencil" size={16} color={theme.linkText} />
             <Text style={styles.editButtonText}>Editar Informações</Text>
           </TouchableOpacity>
@@ -237,7 +326,11 @@ export default function ProfileScreen() {
               <View style={styles.notificationItem}>
                 <View style={styles.notificationLabel}>
                   <View style={styles.iconBg}>
-                    <Ionicons name={category.icon} size={18} color={theme.iconPrimary} />
+                    <Ionicons
+                      name={category.icon}
+                      size={18}
+                      color={theme.iconPrimary}
+                    />
                   </View>
                   <Text style={styles.notificationTitle}>{category.label}</Text>
                 </View>
@@ -256,31 +349,58 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Segurança e Termos</Text>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => setIsModalVisible(true)}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => setIsModalVisible(true)}
+          >
             <View style={styles.menuLabel}>
-              <View style={styles.iconBg}><Ionicons name="lock-closed" size={18} color={theme.iconPrimary} /></View>
+              <View style={styles.iconBg}>
+                <Ionicons
+                  name="lock-closed"
+                  size={18}
+                  color={theme.iconPrimary}
+                />
+              </View>
               <Text style={styles.menuTitle}>Trocar Senha</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.iconColor}
+            />
           </TouchableOpacity>
           <View style={styles.divider} />
 
           {hasAcceptedTerms ? (
             <View style={styles.acceptedContainer}>
               <Ionicons name="checkmark-circle" size={20} color="#4BB543" />
-              <Text style={styles.acceptedText}>Você já aceitou estes termos.</Text>
+              <Text style={styles.acceptedText}>
+                Você já aceitou estes termos.
+              </Text>
             </View>
           ) : (
-            <TouchableOpacity style={styles.menuItem} onPress={handleAcceptTerms}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleAcceptTerms}
+            >
               <View style={styles.menuLabel}>
-                <View style={styles.iconBg}><Ionicons name="document-text" size={18} color={theme.iconPrimary} /></View>
+                <View style={styles.iconBg}>
+                  <Ionicons
+                    name="document-text"
+                    size={18}
+                    color={theme.iconPrimary}
+                  />
+                </View>
                 <Text style={styles.menuTitle}>Termos de Serviço</Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color={theme.iconColor} />
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={theme.iconColor}
+              />
             </TouchableOpacity>
           )}
         </View>
-
 
         <View style={styles.dangerSection}>
           <TouchableOpacity style={styles.dangerButton} onPress={handleLogout}>
@@ -288,7 +408,10 @@ export default function ProfileScreen() {
             <Text style={styles.dangerButtonText}>Sair da Conta</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeleteAccount}
+          >
             <Text style={styles.deleteButtonText}>Excluir Minha Conta</Text>
           </TouchableOpacity>
         </View>
@@ -306,15 +429,12 @@ export default function ProfileScreen() {
           setIsTermsModalVisible(false);
           setHasAcceptedTerms(true);
           Toast.show({
-            type: 'success',
-            text1: 'Sucesso',
-            text2: 'Termos de serviço aceitos com sucesso!',
+            type: "success",
+            text1: "Sucesso",
+            text2: "Termos de serviço aceitos com sucesso!",
           });
         }}
       />
-
     </LinearGradient>
-
-
   );
 }
