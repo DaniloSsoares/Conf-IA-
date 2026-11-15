@@ -53,6 +53,7 @@ export const profileSchema = yup.object({
         return true;
       },
     ),
+    
   city: yup.string().required("Informe sua cidade"),
   state: yup.string().required("Informe seu estado"),
 });

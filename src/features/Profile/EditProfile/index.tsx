@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { decode } from "base64-arraybuffer";
 import { useAppTheme } from "@/src/shared/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
 import Input from "@/src/components/ui/Input";
@@ -66,6 +67,7 @@ export default function EditProfileScreen() {
   const formatarTelefoneBR = (valor: string) => {
     if (!valor) return "";
 
+    // Remove tudo que não for dígito e limita a no máximo 11 números (DDD + 9 dígitos)
     const apenasNumeros = valor.replace(/\D/g, "").slice(0, 11);
 
     if (apenasNumeros.length === 0) return "";
@@ -74,8 +76,10 @@ export default function EditProfileScreen() {
       return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2)}`;
     }
     if (apenasNumeros.length <= 10) {
+      // Formato fixo: (11) 2834-2846
       return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2, 6)}-${apenasNumeros.slice(6)}`;
     }
+    // Formato celular: (11) 92834-2846
     return `(${apenasNumeros.slice(0, 2)}) ${apenasNumeros.slice(2, 7)}-${apenasNumeros.slice(7, 11)}`;
   };
 
@@ -95,11 +99,30 @@ export default function EditProfileScreen() {
         }
 
         const profileData = await getProfile(user.id);
-
-        setAvatarUrl(profileData?.perfil_avatar_url || null);
-
-        if (profileData?.perfil_raio_notificacao_km) {
-          setRaioNotificacao(profileData.perfil_raio_notificacao_km);
+        if (profileData) {
+          reset({
+            name: profileData.perfil_nome_completo || "",
+            cellphone: formatarTelefoneBR(profileData.perfil_telefone || ""),
+            city: profileData.perfil_cidade || "",
+            state: profileData.perfil_estado || "",
+          });
+          setAvatarUrl(profileData.perfil_avatar_url || null);
+          if (profileData.perfil_latitude && profileData.perfil_longitude) {
+            setLocation({
+              latitude: profileData.perfil_latitude,
+              longitude: profileData.perfil_longitude,
+            });
+          }
+          if (profileData.perfil_raio_notificacao_km) {
+            setRaioNotificacao(profileData.perfil_raio_notificacao_km);
+          }
+        } else {
+          reset({
+            name: "",
+            cellphone: "",
+            city: "",
+            state: "",
+          });
         }
 
         let cidadeInicial = profileData?.perfil_cidade || "";
@@ -302,9 +325,10 @@ export default function EditProfileScreen() {
       }
       const { error } = await updateProfile(user.id, {
         perfil_nome_completo: data.name,
-        perfil_telefone: data.cellphone.replace(/\D/g, ""),
+        perfil_telefone: data.cellphone.replace(/\D/g, ''),
         perfil_cidade: data.city,
         perfil_estado: data.state,
+        // Perfis antigos podem ter a coordenada com precisão total: arredonda ao regravar
         perfil_latitude: location
           ? arredondarCoordenada(location.latitude)
           : undefined,
