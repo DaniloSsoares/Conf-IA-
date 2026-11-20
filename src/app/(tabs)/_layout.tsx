@@ -5,10 +5,12 @@ import { supabaseConfig } from '@/src/config/supabase';
 import { getTerms } from '@/src/shared/service/termsService';
 import Toast from 'react-native-toast-message';
 import { TermsModal } from '@/src/components/ui';
+import { useNotificacoesRealtime } from '@/src/shared/hooks/useNotificacoesRealtime';
 
 export default function TabLayout() {
   const [precisaAceitar, setPrecisaAceitar] = useState(false);
-
+  useNotificacoesRealtime();
+  
   useEffect(() => {
     const verificarTermos = async () => {
       const { data: { user } } = await supabaseConfig.auth.getUser();
