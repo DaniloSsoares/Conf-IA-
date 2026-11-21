@@ -69,6 +69,17 @@ export async function markNotificationAsRead(notificationId: string): Promise<vo
     }
   } catch (error) {
   }
+}
+export async function contarNaoLidas(userId: string): Promise<number> {
+  const { count, error } = await supabaseConfig
+    .from("alerta_notificacoes")
+    .select("id", { count: "exact", head: true })
+    .eq("perfil_id", userId)
+    .eq("notificacao_lida", false);
 
- 
+  if (error) {
+    console.warn("Erro ao contar notificações não lidas:", error.message);
+    return 0;
+  }
+  return count ?? 0;
 }

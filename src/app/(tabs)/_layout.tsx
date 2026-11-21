@@ -5,10 +5,12 @@ import { supabaseConfig } from '@/src/config/supabase';
 import { getTerms } from '@/src/shared/service/termsService';
 import Toast from 'react-native-toast-message';
 import { TermsModal } from '@/src/components/ui';
+import { useNotificacoesRealtime } from '@/src/shared/hooks/useNotificacoesRealtime';
 
 export default function TabLayout() {
   const [precisaAceitar, setPrecisaAceitar] = useState(false);
-
+  const naoLidas = useNotificacoesRealtime();
+  
   useEffect(() => {
     const verificarTermos = async () => {
       const { data: { user } } = await supabaseConfig.auth.getUser();
@@ -42,7 +44,7 @@ export default function TabLayout() {
   return (
     <>
     <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={(props) => <CustomTabBar {...props} naoLidas={naoLidas} />}
       screenOptions={{
         headerShown: false,
       }}

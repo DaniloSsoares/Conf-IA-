@@ -325,14 +325,6 @@ export function useMapData() {
           setAlerts((current) =>
             current.some((a) => a.id === novoAlerta.id) ? current : [...current, novoAlerta],
           );
-          Toast.show({
-            type: "info",
-            text1:
-              novoAlerta.alerta_origem === "colaborativo"
-                ? "Novo alerta da comunidade!"
-                : "Novo alerta oficial!",
-            text2: novoAlerta.alerta_titulo,
-          });
         },
       )
       .on(

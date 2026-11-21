@@ -30,7 +30,7 @@ const DEFAULT_ROUTE: RouteInfo = {
   type: 'default',
 };
 
-export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+export default function CustomTabBar({ state, navigation, naoLidas = 0 }: BottomTabBarProps & { naoLidas?: number }) {
   const insets = useSafeAreaInsets();
   const { theme, isDarkMode } = useAppTheme();
   const styles = getStyles(theme);
@@ -178,11 +178,19 @@ export default function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                   </Animated.View>
                 ) : (
                   <>
-                    <Ionicons
-                      name={focused ? info.activeIcon : info.icon}
-                      size={18}
-                      color={focused ? theme.buttonText : inactiveColor}
-                    />
+                    <View>
+                      <Ionicons
+                        name={focused ? info.activeIcon : info.icon}
+                        size={18}
+                        color={focused ? theme.buttonText : inactiveColor}
+                      />
+                      {/* Notificações não lidas (useNotificacoesRealtime) */}
+                      {route.name === 'History/index' && naoLidas > 0 && (
+                        <View style={styles.badge}>
+                          <Text style={styles.badgeText}>{naoLidas > 9 ? '9+' : naoLidas}</Text>
+                        </View>
+                      )}
+                    </View>
                     <Text style={[styles.label, { color: focused ? theme.buttonText : inactiveColor }]}>
                       {info.label}
                     </Text>

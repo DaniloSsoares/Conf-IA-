@@ -7,33 +7,45 @@
 
 ---
 
-## ⏱️ Cronograma até 18/11 (código congelado)
+## ⏱️ Cronograma até 26/11 (entrega)
 
-> Definido em 10/11/2026 e **atualizado em 15/11**. Critério: **o que a banca precisa ver funcionando**, as promessas do TCC e dos termos, e o custo (vários itens já têm o SQL pronto).
+> Definido em 10/11/2026 e **atualizado em 20/11** (a entrega passou de 18/11 para **26/11**). Critério: **o que a banca precisa ver funcionando**, as promessas do TCC e dos termos, e o custo.
 > **Regra:** fechar cada dia com um PR aceito na `main`. Assim a `main` do dia anterior sempre está pronta para a demo.
 
-| Prioridade | O que fazer | Itens do plano | Status |
+### Feito até 17/11
+
+| Prioridade | O que foi feito | Itens do plano | Status |
 |---|---|---|---|
-| 🔴 1. Ciclo central do TCC | Alerta colaborativo + notificações + salvar a localização do usuário ao abrir o Mapa | [2.6](#26-alerta-colaborativo-a-partir-da-validação-comunitária), [3.3](#33-notificações) (A.8) | ✅ PRs #4 e #5 |
+| 🔴 1. Ciclo central do TCC | Alerta colaborativo + notificações + localização do usuário salva ao abrir o Mapa | [2.6](#26-alerta-colaborativo-a-partir-da-validação-comunitária), [3.3](#33-notificações) (A.8) | ✅ PRs #4 e #5 |
 | 🔴 2. Segurança e LGPD | Leitura pública de `perfil` removida (A.5), leitura só para logados (A.6), `perfil` fora do Realtime, nome deixou de ser único, aceite **obrigatório** dos termos ao entrar | [3.4](#34-lgpd-e-limpeza-das-policies), [1.8](#18-moderação-de-fotos-e-comentários-pergunta-dos-professores) | ✅ PRs #6 e #7 |
-| 🎬 Pitch (extra, 14/11) | Gravação do pitch em inglês na branch `demo/pitch-en` (**nunca mergear**) | [Decisões da semana](#decisões-e-lições-da-semana-1011-a-1511) | ✅ |
-| 🟡 3. Demo sem lixo | Nível de risco dos reportes; validade **mínima** (só filtro na consulta, sem job) | [2.4](#24-ajustes-visuais-no-mapa), [2.7](#27-validade-dos-reportes-expirar-em-vez-de-excluir) | ✅ 2.4 (PR #8) · 🔄 2.7 (`feat/validade-reportes`) |
+| 🎬 Pitch (14/11) | Gravação do pitch em inglês na branch `demo/pitch-en` (**nunca mergear**) | [Decisões da semana](#decisões-e-lições-da-semana-1011-a-1511) | ✅ |
+| 🟡 3. Demo sem lixo | Nível de risco pela categoria; validade **mínima** dos reportes | [2.4](#24-ajustes-visuais-no-mapa), [2.7](#27-validade-dos-reportes-expirar-em-vez-de-excluir) | ✅ PRs #8 e #9 |
+| 🟡 Perfil (colega) | Máscara e validação de telefone; cidade/estado automáticos; modo escuro e senha oculta na troca de senha | — | ✅ PRs #10, #11 e #13 |
+| 🟡 Desempenho do Mapa | Abre com a última posição conhecida; câmera acompanha a posição exata; marcadores param de redesenhar | — | ✅ PR #12 |
 | ✂️ 4. Visual | Áreas de risco oficiais do **GeoSampa**. **Cortado em 15/11**: vira trabalho futuro | [2.5](#25-áreas-de-risco-areas_risco--polygon) | ✂️ |
-| 🔴 5. APK da demo (16/11) | Chave do Google Maps + secrets no GitHub, gerar e **instalar** o APK, popular o banco com dados de demo | [CI_CD.md](CI_CD.md) | ⏳ |
-| Margem (17/11) | Corrigir o que aparecer no APK; marcador "cortado" no Mapa; testes com duas contas; se sobrar tempo, a versão completa da 2.7 (A.11) | [Anexo B](#anexo-b--testes-manuais-com-duas-contas) | ⏳ |
-| 🧊 Congelar (18/11) | Último PR, `git tag v1.0.0`, Release com o APK. **Nada de feature nova depois disso** | | ⏳ |
 
-**Fora do escopo até 18/11** (vira "trabalho futuro" na apresentação): áreas de risco do GeoSampa (2.5), validade completa com `pg_cron` (A.11), push notifications, `sistema_ia`, alertas automáticos do INMET, app bilíngue (i18n), Jest, refatoração da Home, tipos gerados do banco, PostGIS, atualizar o Supabase CLI para a v3.
+### Daqui até a entrega
 
-**Depois de 18/11:** apresentação (Fases 4 e 5): nome oficial, README e pitch, roteiro da demo, **vídeo de backup**, slides e ensaio das perguntas da banca.
+| Dia | O que fazer | Itens do plano |
+|---|---|---|
+| **20/11 (sex)** | Notificações em tempo real, parte 1 (aviso em qualquer tela, commit) e parte 2 (notificação local na barra do Android) | [3.3](#33-notificações) |
+| **21/11 (sáb)** | Notificações, parte 3 (número de não lidas na aba Histórico) + PR. Começar os testes: configurar o Jest | [3.3](#33-notificações), [3.9](#39-testes-de-software-artigo) |
+| **22/11 (dom)** | 📝 **Testes de software para o artigo:** testes unitários automatizados (Jest) + execução dos casos de teste funcionais do Anexo B, com os resultados registrados | [3.9](#39-testes-de-software-artigo), [Anexo B](#anexo-b--testes-manuais-com-duas-contas) |
+| **23/11 (seg)** | 🔴 **APK:** Google Cloud (faturamento → Maps SDK for Android → chave restrita), os 4 secrets no GitHub, gerar e **instalar** no celular | [CI_CD.md](CI_CD.md) |
+| **24/11 (ter)** | Testar o APK com duas contas e corrigir; popular os dados da demo. 🧊 **Fim do dia: congelar** (`git tag v1.0.0`, Release com o APK). Nada de feature nova depois disso | |
+| **25/11 (qua)** | README, atualizar este plano, **vídeo de backup** da demo, slides, ensaio das perguntas da banca | Fases 4 e 5 |
+| **26/11 (qui)** | 🎓 Entrega | |
 
-- [x] Prioridade 1 · Ciclo central
-- [x] Prioridade 2 · Segurança e LGPD
-- [ ] Prioridade 3 · Demo sem lixo (falta o merge da 2.7)
+**Fora do escopo** (vira "trabalho futuro" na apresentação): push com o app **fechado** (FCM), áreas de risco do GeoSampa (2.5), validade completa com `pg_cron` (A.11), `sistema_ia`, alertas automáticos do INMET, app bilíngue (i18n), refatoração da Home, tipos gerados do banco, PostGIS, atualizar o Supabase CLI para a v3.
+
+- [x] Prioridades 1, 2 e 3 · Ciclo central, LGPD, demo sem lixo
 - [x] ~~Prioridade 4 · Áreas de risco~~ (cortada)
-- [ ] 16/11 · Prioridade 5 · APK
-- [ ] 17/11 · Margem
-- [ ] 18/11 · Código congelado + `v1.0.0`
+- [ ] 20–21/11 · Notificações em tempo real (partes 1, 2 e 3)
+- [ ] 22/11 · Testes de software (artigo)
+- [ ] 23/11 · APK
+- [ ] 24/11 · Testes no APK + código congelado + `v1.0.0`
+- [ ] 25/11 · Apresentação (README, vídeo, slides)
+- [ ] 26/11 · Entrega
 
 ### Decisões e lições da semana (10/11 a 15/11)
 
@@ -46,32 +58,11 @@
 - **Notificações são in-app** (aba Histórico), não push. Push fica como trabalho futuro: a coluna `notificacao_canal` já prevê outro canal
 - **Marcador "cortado" no Mapa (pendente, 17/11):** suspeita de sobreposição (reporte, alerta colaborativo e "você está aqui" no mesmo ponto). Testar com o filtro "Reports". Há também um bug conhecido do `react-native-maps` 1.20.1 com a Nova Arquitetura no Android. Marcadores em PNG foram testados e **descartados** (decisão: manter a estilização com `View`)
 
----|---|---|---|
-| **10–11/11** | 🔴 1. Ciclo central do TCC | Alerta colaborativo + notificações + salvar a localização do usuário ao abrir o Mapa (só 3 de 7 perfis têm localização, e sem ela a notificação não chega) | [2.6](#26-alerta-colaborativo-a-partir-da-validação-comunitária), [3.3](#33-notificações) (A.8) |
-| **12/11** | 🔴 2. Segurança e LGPD | Remover a leitura pública de `perfil` (A.5 parte 1), leitura só para logados (A.6), tirar `perfil` do Realtime, aceite dos termos no login | [3.4](#34-lgpd-e-limpeza-das-policies), [1.8](#18-moderação-de-fotos-e-comentários-pergunta-dos-professores) |
-| **13/11** | 🟡 3. Demo sem lixo | Nível de risco dos reportes; validade **mínima** (só filtro na consulta, sem job) | [2.4](#24-ajustes-visuais-no-mapa), [2.7](#27-validade-dos-reportes-expirar-em-vez-de-excluir) |
-| **14–15/11** | 🟡 4. Visual | Áreas de risco oficiais do **GeoSampa** (script de importação + `Polygon`). Se apertar: só uma região, sem filtro por caixa | [2.5](#25-áreas-de-risco-areas_risco--polygon) |
-| **16/11** | 🔴 5. APK da demo | Chave do Google Maps + secrets no GitHub, gerar e **instalar** o APK, popular o banco com dados de demo | [CI_CD.md](CI_CD.md) |
-| **17/11** | Margem | Corrigir o que aparecer no teste do APK; testes principais com duas contas | [Anexo B](#anexo-b--testes-manuais-com-duas-contas) |
-| **18/11** | 🧊 Congelar | Último PR, `git tag v1.0.0`, Release com o APK. **Nada de feature nova depois disso** | |
-
-**Fora do escopo até 18/11** (vira "trabalho futuro" na apresentação): push notifications, `sistema_ia`, alertas automáticos do INMET, Jest, refatoração da Home, tipos gerados do banco, PostGIS, atualizar o Supabase CLI para a v3.
-
-**Depois de 18/11:** apresentação (Fases 4 e 5): nome oficial, README e pitch, roteiro da demo, **vídeo de backup**, slides e ensaio das perguntas da banca.
-
-- [ ] 10–11/11 · Prioridade 1
-- [ ] 12/11 · Prioridade 2
-- [ ] 13/11 · Prioridade 3
-- [ ] 14–15/11 · Prioridade 4
-- [ ] 16/11 · Prioridade 5
-- [ ] 17/11 · Margem
-- [ ] 18/11 · Código congelado + `v1.0.0`
-
 ---
 
 ## Sumário
 
-- [⏱️ Cronograma até 18/11](#️-cronograma-até-1811-código-congelado)
+- [⏱️ Cronograma até 26/11](#️-cronograma-até-2611-entrega)
 - [Fase 0 — Estabilizar (hoje)](#fase-0--estabilizar-hoje)
 - [Fase 1 — Validação comunitária (27/10 a 01/11)](#fase-1--validação-comunitária-2710-a-0111)
 - [Fase 2 — Mapa e clima (02/11 a 08/11)](#fase-2--mapa-e-clima-0211-a-0811)
@@ -451,6 +442,11 @@ Seguir o roteiro do [Anexo B](#anexo-b--testes-manuais-com-duas-contas):
 - [ ] `markNotificationAsRead`: o `catch {}` vazio esconde erros. Pelo menos registrar com `console.warn` e retornar `{ error }`
 - [x] 🔴 Gerar notificações (PR #5): trigger `gerar_notificacoes_alerta` ([Anexo A.8](#a8-gerar-notificações-quando-um-alerta-é-criado)) notifica quem está no raio e tem a categoria ativa nas preferências. Testado de ponta a ponta: voto → validado → alerta → notificação no Histórico
 - [x] Pré-requisito do trigger: o app salva `perfil_latitude`/`perfil_longitude` ao abrir o Mapa (`useMapData`), **arredondados para 3 casas** (LGPD). Os perfis antigos com precisão total foram arredondados no banco
+- [ ] **Notificações em tempo real (20–21/11, `feat/notificacoes-realtime`):**
+  - [x] Parte 1: `alerta_notificacoes` no Realtime (o Realtime respeita a RLS `notificacoes_select_own`: cada um só recebe as próprias). Hook global `useNotificacoesRealtime` no layout das abas: toast "Novo alerta perto de você" em **qualquer tela**, que abre o alerta ao tocar. Removido o toast duplicado de alerta do Mapa
+  - [ ] Parte 2: notificação **local** na barra do Android (`expo-notifications`, sem Firebase) quando o app está minimizado; com o app aberto, só o toast. Tocar abre o alerta
+  - [ ] Parte 3: número de notificações não lidas na aba Histórico
+  - Limite (dizer na banca): com o app minimizado, o Android mantém o realtime vivo só por alguns minutos; com o app **fechado**, só o push de verdade (FCM) resolve
 - [ ] Push notifications (app fechado): fora do escopo, ver Pós-MVP
 
 ### 3.4 🔴 LGPD e limpeza das policies
@@ -500,6 +496,23 @@ Padrão do projeto (já usado em `Maps/` e `EditReport/`): `index.tsx` só monta
 - [ ] Trocar as outras buscas de `supabaseConfig.auth.getUser()` espalhadas pelas telas por `useCurrentUser()`
 
 ---
+
+### 3.9 📝 Testes de software (artigo)
+
+**Prazo: 22/11.** Objetivo: ter evidência de qualidade para o artigo, com números e tabelas. Três níveis, do mais automático ao mais manual:
+
+1. **Testes unitários automatizados (Jest + `jest-expo`)** das regras de negócio que são funções puras, sem tela nem banco:
+   - [ ] `haversineKm` e `boundingBox` (distância e caixa de busca)
+   - [ ] `reporteAindaValido` e `VALIDADE_MAXIMA_HORAS` (validade por categoria)
+   - [ ] `getNivelRiscoReporte` (risco pela categoria, coerente com o trigger A.10)
+   - [ ] `arredondarCoordenada` (LGPD) e a sigla do estado
+   - [ ] Validação de telefone do `profileSchema` (DDD, celular com 9, fixo, sequências repetidas)
+   - [ ] `normalizeAlertPreferences` / `getEnabledCategories`
+   - [ ] Rodar no CI (`npm test` no `ci.yml`) e gerar o relatório de cobertura (`--coverage`) para o artigo
+2. **Testes de integração do banco:** os blocos de teste em SQL já usados (A.8 notificações, A.10 alerta colaborativo, A.4/A.9 proteção de colunas e moderação) viram **casos de teste documentados**: entrada, resultado esperado, resultado obtido
+3. **Testes funcionais manuais:** executar os casos do [Anexo B](#anexo-b--testes-manuais-com-duas-contas) com duas contas e registrar o resultado (passou/falhou + print), formando a tabela de casos de teste do artigo
+
+Opcional, se houver participantes: **teste de usabilidade com o questionário SUS** (10 perguntas, 5 a 8 pessoas), que dá uma nota de 0 a 100 fácil de citar no artigo.
 
 ## Fase 4 — Organização e entrega (16/11 a 22/11)
 
