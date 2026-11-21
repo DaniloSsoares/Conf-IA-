@@ -9,7 +9,7 @@ import { useNotificacoesRealtime } from '@/src/shared/hooks/useNotificacoesRealt
 
 export default function TabLayout() {
   const [precisaAceitar, setPrecisaAceitar] = useState(false);
-  useNotificacoesRealtime();
+  const naoLidas = useNotificacoesRealtime();
   
   useEffect(() => {
     const verificarTermos = async () => {
@@ -44,7 +44,7 @@ export default function TabLayout() {
   return (
     <>
     <Tabs
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={(props) => <CustomTabBar {...props} naoLidas={naoLidas} />}
       screenOptions={{
         headerShown: false,
       }}

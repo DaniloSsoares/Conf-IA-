@@ -3,18 +3,13 @@ import { AppTheme } from '@/src/shared/constants/theme';
 
 export const getStyles = (theme: AppTheme) => {
   return StyleSheet.create({
-    /* ==============================
-       CONTAINER DA BARRA
-    ============================== */
+    
     wrapper: {
       position: 'absolute',
       left: 16,
       right: 16,
     },
 
-    /* ==============================
-       BARRA PRINCIPAL
-    ============================== */
     tabBar: {
       height: 66,
       width: '100%',
@@ -35,10 +30,6 @@ export const getStyles = (theme: AppTheme) => {
       elevation: 9,
       overflow: 'visible',
     },
-
-    /* ==============================
-       INDICADOR DA ABA SELECIONADA
-    ============================== */
     activeIndicator: {
       position: 'absolute',
       left: 0,
@@ -59,9 +50,6 @@ export const getStyles = (theme: AppTheme) => {
       borderRadius: 22,
     },
 
-    /* ==============================
-       ITEM DA ABA
-    ============================== */
     tabItem: {
       flex: 1,
       height: 66,
@@ -81,10 +69,25 @@ export const getStyles = (theme: AppTheme) => {
       fontWeight: '600',
       marginTop: 2,
     },
+    badge: {
+      position: 'absolute',
+      top: -6,
+      right: -10,
+      minWidth: 16,
+      height: 16,
+      borderRadius: 8,
+      paddingHorizontal: 3,
+      backgroundColor: theme.alertRed,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    badgeText: {
+      color: '#FFFFFF',
+      fontSize: 9,
+      fontWeight: '700',
+    },
 
-    /* ==============================
-       ÁREA DO BOTÃO CENTRAL
-    ============================== */
+
     alertArea: {
       width: 60,
       height: 66,
@@ -93,9 +96,7 @@ export const getStyles = (theme: AppTheme) => {
       marginTop: -18,
     },
 
-    /* ==============================
-       BOTÃO CENTRAL DE ALERTA
-    ============================== */
+
     alertButton: {
       width: 50,
       height: 50,
@@ -114,10 +115,6 @@ export const getStyles = (theme: AppTheme) => {
       shadowRadius: 9,
       elevation: 9,
     },
-
-    /* ==============================
-       PULSO DO BOTÃO CENTRAL
-    ============================== */
     alertPulse: {
       position: 'absolute',
       width: 50,

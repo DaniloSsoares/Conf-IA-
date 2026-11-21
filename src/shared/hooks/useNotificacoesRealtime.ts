@@ -1,23 +1,28 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCurrentUser } from "./useCurrentUser";
 import { supabaseConfig } from "@/src/config/supabase";
 import Toast from "react-native-toast-message";
 import { router } from "expo-router";
-import { getAlertaById } from "../service/alertaNotificationService";
+import { contarNaoLidas, getAlertaById } from "../service/alertaNotificationService";
 import { getCategoryMeta } from "../constants/historyStatus";
 import {
+  aoTocarNaNotificacao,
   notificarAlerta,
   prepararNotificacoes,
 } from "../utils/notificacoesLocais";
 import { AppState } from "react-native";
-import * as Notifications from "expo-notifications";
 
 export function useNotificacoesRealtime() {
   const userId = useCurrentUser();
+  const [naoLidas, setNaoLidas] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
     prepararNotificacoes();
+
+    // Número inicial vem do banco; depois o realtime mantém atualizado
+    const atualizarContador = () => contarNaoLidas(userId).then(setNaoLidas);
+    atualizarContador();
 
     const canal = supabaseConfig
       .channel(`notificacoes-${userId}`)
@@ -35,8 +40,10 @@ export function useNotificacoesRealtime() {
           if (!alerta) {
             return;
           }
+          
+          setNaoLidas((n) => n + 1);
 
-          const titulo = " Novo alerta perto de você";
+          const titulo = "Novo alerta perto de você";
           const corpo =
             alerta.alerta_titulo ||
             getCategoryMeta(alerta.alerta_tipo_ocorrencia).label;
@@ -60,25 +67,36 @@ export function useNotificacoesRealtime() {
           }
         },
       )
+      // Notificação marcada como lida (no Histórico): reconta
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "alerta_notificacoes",
+          filter: `perfil_id=eq.${userId}`,
+        },
+        () => {
+          atualizarContador();
+        },
+      )
       .subscribe();
 
+    // Ao sair (logout) ou trocar de usuário, fecha o canal antigo
     return () => {
       supabaseConfig.removeChannel(canal);
     };
   }, [userId]);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      (resposta) => {
-        const alertaId = resposta.notification.request.content.data?.alertaId;
-        if (alertaId) {
-          router.push({
-            pathname: "/(screens)/ViewHistory",
-            params: { type: "alerta", id: String(alertaId) },
-          });
-        }
-      },
-    );
-    return () => sub.remove();
+    // Tocar na notificação da barra do Android abre o alerta
+    return aoTocarNaNotificacao((alertaId) => {
+      router.push({
+        pathname: "/(screens)/ViewHistory",
+        params: { type: "alerta", id: alertaId },
+      });
+    });
   }, []);
+
+  return naoLidas;
 }
