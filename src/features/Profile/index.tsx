@@ -197,8 +197,9 @@ export default function ProfileScreen() {
               });
               return;
             }
-            // O usuário já não existe no servidor: limpa a sessão guardada no aparelho
-            await supabaseConfig.auth.signOut();
+            // O usuário já não existe no servidor: limpa só a sessão guardada no aparelho
+            // (scope local). O signOut padrão chamaria o servidor por um usuário apagado
+            await supabaseConfig.auth.signOut({ scope: "local" });
             Toast.show({
               type: "success",
               text1: "Conta excluída",

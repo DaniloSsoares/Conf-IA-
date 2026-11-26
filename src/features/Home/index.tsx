@@ -59,8 +59,10 @@ export default function DashboardScreen({ navigation }: any) {
   // true quando a lista mostra reportes (não havia alerta por perto): muda o título da seção
   const [mostrandoReportes, setMostrandoReportes] = useState(false);
   // null = sem localização: a Home não sabe qual é a região e não inventa um nível
-  const [riskLevel, setRiskLevel] = useState<NivelRisco | null>('baixo');
-  const [riskDescription, setRiskDescription] = useState('Situação normal. Nenhum risco relevante identificado no momento.');
+  // Começa em null: antes de os dados chegarem, mostrar "BAIXO / Situação normal"
+  // seria afirmar algo que a Home ainda não sabe
+  const [riskLevel, setRiskLevel] = useState<NivelRisco | null>(null);
+  const [riskDescription, setRiskDescription] = useState('Carregando os dados da sua região...');
 
   // Data Formatada
   const getFormattedDate = () => {
@@ -559,7 +561,11 @@ export default function DashboardScreen({ navigation }: any) {
               </Text>
 
               <Text style={[styles.riskLevel, { color: riskColor }]}>
-                {riskLevel ? RISK_LABEL[riskLevel].toUpperCase() : 'INDISPONÍVEL'}
+                {riskLevel
+                  ? RISK_LABEL[riskLevel].toUpperCase()
+                  : loadingWeather
+                    ? 'CARREGANDO'
+                    : 'INDISPONÍVEL'}
               </Text>
             </View>
 
@@ -567,7 +573,9 @@ export default function DashboardScreen({ navigation }: any) {
               <Ionicons
                 name={
                   riskLevel === null
-                    ? 'location-outline'
+                    ? loadingWeather
+                      ? 'time-outline'
+                      : 'location-outline'
                     : riskLevel === 'baixo'
                     ? 'checkmark-circle'
                     : riskLevel === 'moderado'

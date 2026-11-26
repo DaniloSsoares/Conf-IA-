@@ -51,6 +51,9 @@ export function aoTocarNaNotificacao(abrirAlerta: (alertaId: string) => void): (
     const id = resposta.notification.request.identifier;
     if (id === ultimaRespostaTratada) return;
     ultimaRespostaTratada = id;
+    // O sistema guarda o último toque mesmo depois de o app fechar. Sem limpar, o mesmo
+    // alerta abriria de novo em toda abertura do app (a variável acima zera ao reiniciar)
+    Notifications.clearLastNotificationResponseAsync().catch(() => {});
     const alertaId = resposta.notification.request.content.data?.alertaId;
     if (alertaId) abrirAlerta(String(alertaId));
   };
