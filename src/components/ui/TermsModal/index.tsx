@@ -15,13 +15,13 @@ const SECOES: SecaoTermos[] = [
   {
     titulo: '1. Aceitação dos Termos',
     paragrafos: [
-      'Ao criar uma conta ou utilizar o Conf-IA, você concorda com estes Termos de Uso, incluindo as regras de privacidade descritas na seção 6.',
+      'Ao criar uma conta ou utilizar o Conf-U, você concorda com estes Termos de Uso, incluindo as regras de privacidade descritas na seção 6.',
     ],
   },
   {
     titulo: '2. Propósito do Aplicativo',
     paragrafos: [
-      'O Conf-IA é uma ferramenta colaborativa para que moradores reportem e validem ocorrências na sua região (como alagamentos, deslizamentos, bloqueios de via, quedas de galho, falta de luz e fogo em mata) e acompanhem alertas próximos.',
+      'O Conf-U é uma ferramenta colaborativa para que moradores reportem e validem ocorrências na sua região (como alagamentos, deslizamentos, bloqueios de via, quedas de galho, falta de luz e fogo em mata) e acompanhem alertas próximos.',
       'As informações têm caráter informativo e preventivo e não substituem os órgãos oficiais. Em caso de emergência, ligue para a Defesa Civil (199) ou para o Corpo de Bombeiros (193).',
     ],
   },

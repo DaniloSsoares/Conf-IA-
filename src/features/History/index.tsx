@@ -40,8 +40,14 @@ export default function HistoryScreen() {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const { data: { user } } = await supabaseConfig.auth.getUser();
-      if (!user) return;
+      // getSession lê o usuário do aparelho. O getUser vai ao servidor: sem internet,
+      // ele voltava sem usuário, a função saía aqui e o aviso de conexão nunca aparecia
+      const { data: { session } } = await supabaseConfig.auth.getSession();
+      const user = session?.user;
+      if (!user) {
+        setFalhaAoCarregar(true);
+        return;
+      }
 
       const [notificationsData, reportsData] = await Promise.all([
         getUserNotifications(user.id),
@@ -79,7 +85,8 @@ export default function HistoryScreen() {
     if (carregandoMais) return;
     setCarregandoMais(true);
     try {
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+      const { data: { session } } = await supabaseConfig.auth.getSession();
+      const user = session?.user;
       if (!user) return;
 
       if (tab === 'notificações') {
@@ -163,6 +170,17 @@ export default function HistoryScreen() {
         <ActivityIndicator size="large" color={theme.primary || "#3AA77A"} style={{ marginTop: 40 }} />
       ) : (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          {/* A busca falhou mas já havia itens: mantém a lista e avisa que pode estar desatualizada
+              (com a lista vazia, o aviso aparece no lugar do "nenhum item") */}
+          {falhaAoCarregar && (tab === 'notificações' ? notifications.length > 0 : reports.length > 0) && (
+            <View style={styles.avisoConexao}>
+              <Ionicons name="cloud-offline-outline" size={18} color={theme.alertRed} />
+              <Text style={[styles.avisoConexaoTexto, { color: theme.alertRed }]}>
+                Sem conexão: mostrando os dados da última atualização.
+              </Text>
+            </View>
+          )}
+
           {tab === 'notificações' ? (
             notifications.length === 0 ? (
               renderEmpty(falhaAoCarregar

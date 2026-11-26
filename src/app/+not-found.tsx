@@ -54,7 +54,7 @@ export default function NotFoundScreen() {
           </View>
           <Text style={styles.title}>Página Não Encontrada</Text>
           <Text style={styles.description}>
-            Ops! A rota que você tentou acessar não existe ou foi movida no sistema de navegação do Conf-IA.
+            Ops! A rota que você tentou acessar não existe ou foi movida no sistema de navegação do Conf-U.
           </Text>
 
           <View style={styles.actionsContainer}>

@@ -30,8 +30,6 @@ export function useMapData() {
   const [weatherLoaded, setWeatherLoaded] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
-  // A última busca falhou (sem internet, servidor fora): o Mapa avisa, em vez de
-  // mostrar "0 ocorrências" como se não houvesse perigo
   const [falhaReportes, setFalhaReportes] = useState(false);
   const [falhaAlertas, setFalhaAlertas] = useState(false);
   const isFirstSubscription = useRef(true);
@@ -47,7 +45,7 @@ export function useMapData() {
           return;
         }
 
-        // 1. Última posição conhecida: vem do cache do celular, quase instantânea.
+        // Última posição conhecida: vem do cache do celular, quase instantânea.
         //    O mapa já abre com ela (até 5 min de idade), sem esperar o GPS
         const ultima = await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 });
         if (ultima && ativo) {
@@ -55,7 +53,7 @@ export function useMapData() {
           setLoadingLocation(false);
         }
 
-        // 2. Posição atual, em segundo plano (o GPS pode levar alguns segundos)
+        // Posição atual, em segundo plano (o GPS pode levar alguns segundos)
         const atual = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
@@ -107,7 +105,6 @@ export function useMapData() {
         },
       )
         .then((sub) => {
-          // A tela saiu antes de o GPS responder: desliga na hora
           if (ativo) assinatura = sub;
           else sub.remove();
         })
