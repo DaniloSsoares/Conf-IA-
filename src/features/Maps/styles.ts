@@ -1,5 +1,11 @@
-import { StyleSheet } from 'react-native';
+import { PixelRatio, StyleSheet } from 'react-native';
 import { AppTheme } from '@/src/shared/constants/theme';
+
+
+export const TAMANHO_MARCADOR = Math.floor(100 / PixelRatio.get());
+export const DIAMETRO_MARCADOR = TAMANHO_MARCADOR - 1;
+export const ICONE_MARCADOR = Math.round(DIAMETRO_MARCADOR * 0.56);
+export const TAMANHO_SELO = Math.max(12, Math.round(TAMANHO_MARCADOR * 0.36));
 
 export const darkMapStyle = [
   { elementType: "geometry", stylers: [{ color: "#1d2c4d" }] },
@@ -223,14 +229,14 @@ export const getStyles = (theme: AppTheme) => {
     userMarkerContainer: {
       alignItems: 'center',
       justifyContent: 'center',
-      width: 36,
-      height: 36,
+      width: TAMANHO_MARCADOR,
+      height: TAMANHO_MARCADOR,
     },
     userMarkerPulse: {
       position: 'absolute',
-      width: 36,
-      height: 36,
-      borderRadius: 18,
+      width: TAMANHO_MARCADOR,
+      height: TAMANHO_MARCADOR,
+      borderRadius: TAMANHO_MARCADOR / 2,
       backgroundColor: theme.badgeBg,
     },
     userMarkerDot: {
@@ -249,17 +255,20 @@ export const getStyles = (theme: AppTheme) => {
 
     /* RISK MARKERS */
     markerWrapper: {
+      width: TAMANHO_MARCADOR,
+      height: TAMANHO_MARCADOR,
       alignItems: 'center',
       justifyContent: 'center',
     },
     markerBadgeOfficial: {
       position: 'absolute',
-      top: -4,
-      right: -4,
+      // Dentro da caixa do marcador: o que sai dela não é desenhado (ver TAMANHO_MARCADOR)
+      top: 0,
+      right: 0,
       backgroundColor: theme.primary,
-      width: 16,
-      height: 16,
-      borderRadius: 8,
+      width: TAMANHO_SELO,
+      height: TAMANHO_SELO,
+      borderRadius: TAMANHO_SELO / 2,
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1.5,
@@ -270,12 +279,12 @@ export const getStyles = (theme: AppTheme) => {
     },
     iconHighRisk: {
       backgroundColor: theme.alertRed,
-      width: 42,
-      height: 42,
-      borderRadius: 21,
+      width: DIAMETRO_MARCADOR,
+      height: DIAMETRO_MARCADOR,
+      borderRadius: DIAMETRO_MARCADOR / 2,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2.5,
+      borderWidth: 2,
       borderColor: theme.white,
       elevation: 6,
       shadowColor: theme.alertRed,
@@ -285,12 +294,12 @@ export const getStyles = (theme: AppTheme) => {
     },
     iconMediumRisk: {
       backgroundColor: '#F59E0B',
-      width: 42,
-      height: 42,
-      borderRadius: 21,
+      width: DIAMETRO_MARCADOR,
+      height: DIAMETRO_MARCADOR,
+      borderRadius: DIAMETRO_MARCADOR / 2,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2.5,
+      borderWidth: 2,
       borderColor: theme.white,
       elevation: 6,
       shadowColor: '#F59E0B',
@@ -300,12 +309,12 @@ export const getStyles = (theme: AppTheme) => {
     },
     iconLowRisk: {
       backgroundColor: '#10B981',
-      width: 42,
-      height: 42,
-      borderRadius: 21,
+      width: DIAMETRO_MARCADOR,
+      height: DIAMETRO_MARCADOR,
+      borderRadius: DIAMETRO_MARCADOR / 2,
       alignItems: 'center',
       justifyContent: 'center',
-      borderWidth: 2.5,
+      borderWidth: 2,
       borderColor: theme.white,
       elevation: 6,
       shadowColor: '#10B981',
