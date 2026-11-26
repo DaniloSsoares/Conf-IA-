@@ -27,6 +27,7 @@ import styles from './style';
 import { NivelRisco } from '@/src/shared/types/notification';
 import { RISK_LABEL, getNivelRiscoReporte } from '@/src/shared/constants/nivelRisco';
 import { getCategoryMeta } from '@/src/shared/constants/historyStatus';
+import { NumerosEmergencia } from './components/NumerosEmergencia';
 
 type Local = { latitude: number; longitude: number };
 
@@ -592,6 +593,12 @@ export default function DashboardScreen({ navigation }: any) {
             {riskDescription}
           </Text>
         </View>
+
+        {/* =========================
+            NÚMEROS DE EMERGÊNCIA
+            Logo abaixo do risco: é o que a pessoa procura numa situação de perigo
+        ========================= */}
+        <NumerosEmergencia />
 
         {/* =========================
             CONDIÇÕES CLIMÁTICAS (RESUMO WEATHERAPI)
