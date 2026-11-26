@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getStatusStyle, getCategoryMeta } from '@/src/shared/constants/historyStatus';
 import { MIN_VOTOS_VALIDACAO, Report } from '@/src/shared/types/report';
+import { reporteAindaValido } from '@/src/shared/constants/validade';
 import { useViewHistoryStyles } from '../styles';
 import { ReportVoting } from '../useReportVoting';
 import { Denuncia } from '../useDenuncia';
@@ -29,6 +30,10 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
   const iconColor = isDarkMode ? '#FFFFFF' : (theme.primary || '#0047FF');
   const { totalVotos } = voting;
   const oculto = Boolean(reporte.reporte_oculto);
+  // Passou da validade da categoria: saiu do Mapa e não recebe mais votos. Sem isso,
+  // o 3º voto num reporte velho o validava e criava um alerta "novo" de 6 h,
+  // notificando os vizinhos de uma ocorrência que já acabou
+  const expirado = !reporteAindaValido(reporte.reporte_tipo_ocorrencia, reporte.created_at);
 
   // banco guarda fração 0.00–1.00 (numeric chega como texto, por isso o Number)
   const scorePct = Math.round(Number(reporte.reporte_score_confianca ?? 0) * 100);
@@ -99,6 +104,16 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
         <MetaRow label="Enviado em" value={new Date(reporte.created_at).toLocaleString('pt-BR')} />
       </View>
 
+      {expirado && !oculto && reporte.reporte_status !== 'resolvido' && (
+        <View style={styles.hiddenNotice}>
+          <Ionicons name="time-outline" size={20} color="#F5A623" />
+          <Text style={styles.hiddenNoticeText}>
+            Este reporte expirou: passou da validade da categoria e não aparece mais no mapa.
+            Ele não recebe novos votos.
+          </Text>
+        </View>
+      )}
+
       {!isOwner && !oculto && (
         <View style={styles.reportFlagRow}>
           <ReportFlag
@@ -118,8 +133,10 @@ export function ReporteDetails({ reporte, isOwner, currentUserId, voting, denunc
       <CommentList comentarios={voting.comentarios} currentUserId={currentUserId} denuncia={denuncia} />
 
       {/* Votação por último (como num chat): ao abrir o teclado a tela rola até o fim e o campo fica visível.
-          Não vota em reporte resolvido nem em reporte ocultado por denúncias */}
-      {!isOwner && reporte.reporte_status !== 'resolvido' && !oculto && <VoteSection voting={voting} />}
+          Não vota em reporte resolvido, ocultado por denúncias ou expirado */}
+      {!isOwner && reporte.reporte_status !== 'resolvido' && !oculto && !expirado && (
+        <VoteSection voting={voting} />
+      )}
     </>
   );
 }

@@ -4,17 +4,33 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '@/src/shared/constants/theme';
+import { supabaseConfig } from '@/src/config/supabase';
+
+// Tempo mínimo da tela de abertura, só para o logo não "piscar"
+const ABERTURA_MINIMA_MS = 800;
 
 export default function Index() {
   const router = useRouter();
   const { theme, isDarkMode } = useAppTheme();
 
+  // O Supabase guarda a sessão no aparelho (persistSession). Com sessão, vai direto
+  // para o app; sem sessão, para a Intro. Antes, o app pedia login toda vez que abria
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/(auth)/Intro');
-    }, 2500);
+    let ativo = true;
 
-    return () => clearTimeout(timer);
+    const decidirRota = async () => {
+      const [{ data: { session } }] = await Promise.all([
+        supabaseConfig.auth.getSession(), // lê do aparelho, não faz chamada de rede
+        new Promise((resolve) => setTimeout(resolve, ABERTURA_MINIMA_MS)),
+      ]);
+      if (!ativo) return;
+      router.replace(session ? '/(tabs)' : '/(auth)/Intro');
+    };
+
+    decidirRota();
+    return () => {
+      ativo = false;
+    };
   }, [router]);
 
   const iconColor = isDarkMode ? "#FFFFFF" : (theme.primary || "#3AA77A");

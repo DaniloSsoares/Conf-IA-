@@ -154,6 +154,17 @@ export const getStyles = (theme: any) => {
       color: theme?.subtext || '#858D99',
       textAlign: 'center',
     },
+    loadMoreButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      marginTop: 4,
+      marginBottom: 24,
+    },
+    loadMoreText: {
+      fontSize: 15,
+      fontWeight: '600',
+    },
   });
 };
 

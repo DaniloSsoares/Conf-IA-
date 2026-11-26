@@ -10,6 +10,7 @@ import {
 } from "../types/report";
 import { BoundingBox } from "../utils/haversine";
 import { VALIDADE_MAXIMA_HORAS, reporteAindaValido } from '@/src/shared/constants/validade';
+import { faixaDaPagina } from '@/src/shared/constants/paginacao';
 
 
 export async function uploadReportPhoto(
@@ -44,10 +45,12 @@ export async function uploadReportPhoto(
   }
 }
 
+// fotoFalhou: o reporte foi criado, mas a foto não foi salva. A tela avisa o usuário
+// (antes ele via "Reporte enviado!" e o reporte ficava sem foto em silêncio)
 export async function createReport(
   userId: string,
   input: CreateReportInput,
-): Promise<{ data: Report | null; error: any }> {
+): Promise<{ data: Report | null; error: any; fotoFalhou?: boolean }> {
   try {
     const { data: reportData, error: reportError } = await supabaseConfig
       .from("reportes")
@@ -67,6 +70,7 @@ export async function createReport(
         error: reportError,
       };
     }
+    let fotoFalhou = false;
     if (input.fotoBase64) {
       const photoUrl = await uploadReportPhoto(
         userId,
@@ -88,10 +92,13 @@ export async function createReport(
             "Reporte criado, mas falhou ao salvar a foto:",
             midiaError,
           );
+          fotoFalhou = true;
         }
+      } else {
+        fotoFalhou = true;
       }
     }
-    return { data: reportData as Report, error: null };
+    return { data: reportData as Report, error: null, fotoFalhou };
   } catch (error) {
     return { data: null, error };
   }
@@ -101,7 +108,7 @@ export async function updateReport(
   reportId: string,
   userId: string,
   input: UpdateReportInput,
-): Promise<{ data: Report | null; error: any }> {
+): Promise<{ data: Report | null; error: any; fotoFalhou?: boolean }> {
   try {
     const updatePayload: Record<string, any> = {
       updated_at: new Date().toISOString(),
@@ -145,12 +152,14 @@ export async function updateReport(
       }
     }
 
+    let fotoFalhou = false;
     if (input.fotoBase64) {
       const photoUrl = await uploadReportPhoto(
         userId,
         input.fotoBase64,
         input.fotoExt || "jpg",
       );
+      if (!photoUrl) fotoFalhou = true;
 
       if (photoUrl) {
         await supabaseConfig
@@ -168,11 +177,12 @@ export async function updateReport(
 
         if (midiaError) {
           console.error("Falhou ao salvar a nova foto:", midiaError);
+          fotoFalhou = true;
         }
       }
     }
 
-    return { data: updatedReport as Report, error: null };
+    return { data: updatedReport as Report, error: null, fotoFalhou };
   } catch (error) {
     return { data: null, error };
   }
@@ -206,22 +216,27 @@ export async function deleteReport(
   }
 }
 
-export async function getUserReports(userId: string): Promise<Report[]> {
+// null = a consulta falhou (sem internet, servidor fora): a tela avisa, em vez de
+// mostrar uma lista vazia como se o usuário não tivesse reportes
+export async function getUserReports(userId: string, pagina = 0): Promise<Report[] | null> {
   try {
     const { data, error } = await supabaseConfig
       .from("reportes")
       .select("*, reporte_midias(*)")
       .eq("perfil_id", userId)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(...faixaDaPagina(pagina));
     if (error) throw error;
     return (data as Report[]) || [];
   } catch (error) {
     console.error("Erro ao buscar reportes do usuário:", error);
-    return [];
+    return null;
   }
 }
 
-export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
+// null = a consulta falhou: "não deu para buscar" não pode virar "não há ocorrências"
+// (num app de defesa civil, sem dados não é o mesmo que sem perigo)
+export async function getActiveReports(bounds?: BoundingBox): Promise<Report[] | null> {
   try {
 
     // Só busca o que pode estar válido: criado dentro da maior validade entre as categorias
@@ -252,7 +267,7 @@ export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
 
   } catch (error) {
     console.error("Erro ao buscar reportes ativos:", error);
-    return [];
+    return null;
   }
 }
 

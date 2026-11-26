@@ -4,17 +4,15 @@ import Toast from "react-native-toast-message";
 import { supabaseConfig } from "@/src/config/supabase";
 import { Report } from "@/src/shared/types/report";
 import { getActiveReports } from "@/src/shared/service/reportService";
+import { reporteAindaValido } from "@/src/shared/constants/validade";
 import { getProfile, updateProfile } from "@/src/shared/service/profileService";
 import { getEnabledCategories } from "@/src/shared/constants/alertCategories";
 import { useFocusEffect } from "expo-router";
 import { getCurrentWeather } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
 import { boundingBox, haversineKm } from "@/src/shared/utils/haversine";
-
-// Alerta tem raio próprio: o centro pode estar fora do raio do usuário e ainda
-// assim cobrir a posição dele. A caixa dos alertas é maior por essa margem.
-// Limite conhecido: alertas com raio maior que isso, e centro longe, não chegam.
-const MARGEM_ALERTA_KM = 20;
+import { MARGEM_ALERTA_KM } from "@/src/shared/utils/proximidade";
+import { getActiveAlerts } from "@/src/shared/service/alertaNotificationService";
 
 // O Realtime atualiza na hora; o polling é só a rede de segurança para quando
 // o canal cai sem avisar (troca de rede, app em segundo plano)
@@ -32,6 +30,10 @@ export function useMapData() {
   const [weatherLoaded, setWeatherLoaded] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  // A última busca falhou (sem internet, servidor fora): o Mapa avisa, em vez de
+  // mostrar "0 ocorrências" como se não houvesse perigo
+  const [falhaReportes, setFalhaReportes] = useState(false);
+  const [falhaAlertas, setFalhaAlertas] = useState(false);
   const isFirstSubscription = useRef(true);
 
   useEffect(() => {
@@ -81,6 +83,43 @@ export function useMapData() {
     };
   }, []);
 
+  // Acompanha o deslocamento enquanto o Mapa está na tela (quem está de carro ou de
+  // ônibus via os reportes do ponto onde abriu o app). distanceInterval: só avisa a
+  // cada 200 m, para não refazer as buscas a cada passo. Fora da tela, o GPS para
+  useFocusEffect(
+    useCallback(() => {
+      if (loadingLocation || permissionDenied) return;
+
+      let ativo = true;
+      let assinatura: Location.LocationSubscription | null = null;
+
+      Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.Balanced, distanceInterval: 200 },
+        (posicao) => {
+          const nova = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+          // Mesma regra da posição inicial: menos de 100 m, mantém o objeto (e as buscas)
+          setLocation((anterior) =>
+            anterior &&
+            haversineKm(anterior.latitude, anterior.longitude, nova.latitude, nova.longitude) < 0.1
+              ? anterior
+              : nova,
+          );
+        },
+      )
+        .then((sub) => {
+          // A tela saiu antes de o GPS responder: desliga na hora
+          if (ativo) assinatura = sub;
+          else sub.remove();
+        })
+        .catch((error) => console.warn("Não foi possível acompanhar a localização:", error));
+
+      return () => {
+        ativo = false;
+        assinatura?.remove();
+      };
+    }, [loadingLocation, permissionDenied]),
+  );
+
   useEffect(() => {
     if (!location) return;
     const fetchWeather = async () => {
@@ -127,7 +166,10 @@ export function useMapData() {
     // GPS ainda não respondeu: espera em vez de buscar o país inteiro.
     // Quando a localização chegar, `bounds` muda e o useFocusEffect busca de novo sozinho.
     if (!bounds) return;
-    setReports(await getActiveReports(bounds));
+    const data = await getActiveReports(bounds);
+    // Falhou: mantém o que já estava no mapa e liga o aviso
+    setFalhaReportes(data === null);
+    if (data !== null) setReports(data);
   }, [bounds]);
 
   // Ref para o re-sync do Realtime usar a caixa atual sem recriar o canal
@@ -172,28 +214,12 @@ export function useMapData() {
   const fetchAlertas = useCallback(async () => {
     if (!profileId || !boundsAlertas) return;
 
-    if (categoriasAtivas.length === 0) {
-      setAlerts([]);
-      return;
-    }
-
-    const { data, error } = await supabaseConfig
-      .from("alertas")
-      .select("*")
-      .eq("alerta_status", "ativo")
-      // Alerta da comunidade vence em 6 h; o oficial pode não ter validade (null)
-      .or(`alerta_expira_em.is.null,alerta_expira_em.gt.${new Date().toISOString()}`)
-      .in("alerta_tipo_ocorrencia", categoriasAtivas)
-      .gte("alerta_latitude", boundsAlertas.minLat)
-      .lte("alerta_latitude", boundsAlertas.maxLat)
-      .gte("alerta_longitude", boundsAlertas.minLng)
-      .lte("alerta_longitude", boundsAlertas.maxLng);
-
-    if (error) {
-      console.error("Erro ao buscar alertas:", error);
-      return;
-    }
-    setAlerts(data ?? []);
+    // Mesma consulta da Home (service compartilhado). null = falhou: mantém o que já
+    // estava no mapa em vez de apagar os alertas por causa de uma queda de rede
+    const data = await getActiveAlerts(boundsAlertas, categoriasAtivas);
+    setFalhaAlertas(data === null);
+    if (data === null) return;
+    setAlerts(data);
     // boundsAlertas nas dependências: sem ela, a função guardaria o `undefined` de antes
     // do GPS responder e sairia no `if` para sempre (os alertas nunca carregariam)
   }, [profileId, categoriasAtivas, boundsAlertas]);
@@ -277,10 +303,16 @@ export function useMapData() {
         { event: "UPDATE", schema: "public", table: "reportes" },
         (payload) => {
           const atualizado = payload.new as Report;
+          // A lista tem duas fontes (consulta + Realtime): as regras do getActiveReports
+          // precisam valer aqui também. Sem isso, um voto em qualquer reporte (vencido,
+          // resolvido, longe) o colocava de volta no mapa
+          const continuaNoMapa =
+            (atualizado.reporte_status === "pendente" || atualizado.reporte_status === "validado") &&
+            !atualizado.reporte_oculto &&
+            reporteAindaValido(atualizado.reporte_tipo_ocorrencia, atualizado.created_at) &&
+            estaPerto(atualizado.reporte_latitude, atualizado.reporte_longitude);
           setReports((current) => {
-            // A lista tem duas fontes (consulta + Realtime): o filtro de getActiveReports
-            // precisa valer aqui também, senão um voto num reporte oculto o traz de volta
-            if (atualizado.reporte_status === "rejeitado" || atualizado.reporte_oculto) {
+            if (!continuaNoMapa) {
               return current.filter((r) => r.id !== atualizado.id);
             }
             const existe = current.some((r) => r.id === atualizado.id);
@@ -332,12 +364,20 @@ export function useMapData() {
         { event: "UPDATE", schema: "public", table: "alertas" },
         (payload) => {
           const atualizado = payload.new as any;
-          const relevante = categoriasAtivas.includes(
-            atualizado.alerta_tipo_ocorrencia,
-          );
+          // Mesmas regras da consulta: ativo, dentro da validade, de uma categoria
+          // ligada e com o raio alcançando o usuário
+          const relevante =
+            atualizado.alerta_status === "ativo" &&
+            (!atualizado.alerta_expira_em || new Date(atualizado.alerta_expira_em) > new Date()) &&
+            categoriasAtivas.includes(atualizado.alerta_tipo_ocorrencia) &&
+            estaPerto(
+              atualizado.alerta_latitude,
+              atualizado.alerta_longitude,
+              Number(atualizado.alerta_raio_km ?? 0),
+            );
 
           setAlerts((current) => {
-            if (atualizado.alerta_status !== "ativo" || !relevante) {
+            if (!relevante) {
               return current.filter((a) => a.id !== atualizado.id);
             }
             const existe = current.some((a) => a.id === atualizado.id);
@@ -389,5 +429,6 @@ export function useMapData() {
     weatherLoaded,
     loadingLocation,
     permissionDenied,
+    semConexao: falhaReportes || falhaAlertas,
   };
 }

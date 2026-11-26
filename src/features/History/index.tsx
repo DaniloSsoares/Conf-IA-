@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,6 +13,7 @@ import { getStyles } from './styles';
 import { getStatusStyle, getRiskStyle, getCategoryMeta, formatRelativeTime } from '@/src/shared/constants/historyStatus';
 import ButtonBack from '@/src/components/ui/ButtonBack';
 import { HelpModal } from '@/src/components/ui';
+import { TAMANHO_PAGINA } from '@/src/shared/constants/paginacao';
 
 type Tab = 'notificações' | 'reportes';
 export default function HistoryScreen() {
@@ -23,6 +24,14 @@ export default function HistoryScreen() {
   const [notifications, setNotifications] = useState<AlertNotification[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  // A busca falhou (sem internet, servidor fora): avisa em vez de "nenhum alerta por aqui"
+  const [falhaAoCarregar, setFalhaAoCarregar] = useState(false);
+  // Paginação: a tela busca 20 por vez; "Carregar mais" traz a página seguinte
+  const [temMaisNotificacoes, setTemMaisNotificacoes] = useState(false);
+  const [temMaisReportes, setTemMaisReportes] = useState(false);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+  const paginaNotificacoes = useRef(0);
+  const paginaReportes = useRef(0);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   const primaryColor = theme.primary || "#0047FF";
 
@@ -39,8 +48,19 @@ export default function HistoryScreen() {
         getUserReports(user.id),
       ]);
 
-      setNotifications(notificationsData);
-      setReports(reportsData);
+      setFalhaAoCarregar(notificationsData === null || reportsData === null);
+      // Ao voltar para a tela, recomeça da primeira página. Falhou: mantém o que já estava
+      if (notificationsData !== null) {
+        paginaNotificacoes.current = 0;
+        setNotifications(notificationsData);
+        // Página cheia: provavelmente há mais
+        setTemMaisNotificacoes(notificationsData.length === TAMANHO_PAGINA);
+      }
+      if (reportsData !== null) {
+        paginaReportes.current = 0;
+        setReports(reportsData);
+        setTemMaisReportes(reportsData.length === TAMANHO_PAGINA);
+      }
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
     } finally {
@@ -53,6 +73,35 @@ export default function HistoryScreen() {
       loadData();
     }, [loadData])
   );
+
+  // Traz a próxima página da aba aberta e junta no fim da lista
+  const carregarMais = async () => {
+    if (carregandoMais) return;
+    setCarregandoMais(true);
+    try {
+      const { data: { user } } = await supabaseConfig.auth.getUser();
+      if (!user) return;
+
+      if (tab === 'notificações') {
+        const proxima = paginaNotificacoes.current + 1;
+        const dados = await getUserNotifications(user.id, proxima);
+        if (dados === null) return;
+        paginaNotificacoes.current = proxima;
+        // Sem repetir: uma notificação nova muda a ordem e pode empurrar uma já mostrada
+        setNotifications((atuais) => [...atuais, ...dados.filter((n) => !atuais.some((a) => a.id === n.id))]);
+        setTemMaisNotificacoes(dados.length === TAMANHO_PAGINA);
+      } else {
+        const proxima = paginaReportes.current + 1;
+        const dados = await getUserReports(user.id, proxima);
+        if (dados === null) return;
+        paginaReportes.current = proxima;
+        setReports((atuais) => [...atuais, ...dados.filter((r) => !atuais.some((a) => a.id === r.id))]);
+        setTemMaisReportes(dados.length === TAMANHO_PAGINA);
+      }
+    } finally {
+      setCarregandoMais(false);
+    }
+  };
 
   const handleOpenNotification = async (notification: AlertNotification) => {
     if (!notification.notificacao_lida) {
@@ -82,7 +131,7 @@ export default function HistoryScreen() {
  <View style={styles.header}>
          <ButtonBack/>
           <Text style={styles.headerTitle}>Histórico</Text>
-          <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Ajuda sobre o histórico">
             <Ionicons name="help-circle-outline" size={26} color={primaryColor} />
           </TouchableOpacity>
         </View>
@@ -116,7 +165,9 @@ export default function HistoryScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {tab === 'notificações' ? (
             notifications.length === 0 ? (
-              renderEmpty('Nenhum alerta por aqui ainda.')
+              renderEmpty(falhaAoCarregar
+                ? 'Não foi possível carregar. Verifique sua conexão e volte a esta tela.'
+                : 'Nenhum alerta por aqui ainda.')
             ) : (
               notifications.map((notification) => {
                 const meta = getCategoryMeta(notification.alertas?.alerta_tipo_ocorrencia);
@@ -171,7 +222,9 @@ export default function HistoryScreen() {
               })
             )
           ) : reports.length === 0 ? (
-            renderEmpty('Você ainda não fez nenhum reporte.')
+            renderEmpty(falhaAoCarregar
+              ? 'Não foi possível carregar. Verifique sua conexão e volte a esta tela.'
+              : 'Você ainda não fez nenhum reporte.')
           ) : (
             reports.map((report) => {
               const meta = getCategoryMeta(report.reporte_tipo_ocorrencia);
@@ -220,6 +273,21 @@ export default function HistoryScreen() {
                 </TouchableOpacity>
               );
             })
+          )}
+
+          {(tab === 'notificações' ? temMaisNotificacoes : temMaisReportes) && (
+            <TouchableOpacity
+              style={styles.loadMoreButton}
+              onPress={carregarMais}
+              disabled={carregandoMais}
+              activeOpacity={0.7}
+            >
+              {carregandoMais ? (
+                <ActivityIndicator size="small" color={primaryColor} />
+              ) : (
+                <Text style={[styles.loadMoreText, { color: primaryColor }]}>Carregar mais</Text>
+              )}
+            </TouchableOpacity>
           )}
         </ScrollView>
       )}

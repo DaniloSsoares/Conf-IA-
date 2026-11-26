@@ -7,7 +7,7 @@ export const ALERT_CATEGORIES: {
 }[] = [
     { key: 'alagamento', label: 'Alagamento', icon: 'water' },
     { key: 'deslizamento', label: 'Deslizamento', icon: 'warning' },
-    { key: 'bloqueio_via', label: 'Bloqueio de via', icon: 'car' },
+    { key: 'bloqueio_via', label: 'Via bloqueada', icon: 'car' },
     { key: 'fogo_em_mata', label: 'Fogo em mata', icon: 'flame' },
     { key: 'queda_de_galho', label: 'Queda de galho', icon: 'leaf' },
     { key: 'falta_de_luz', label: 'Falta de luz', icon: 'flash-off' },

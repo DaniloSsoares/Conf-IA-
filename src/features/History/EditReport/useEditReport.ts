@@ -204,7 +204,7 @@ export function useEditReport() {
         return;
       }
 
-      const { error: updateErr } = await updateReport(reportId, userId, {
+      const { error: updateErr, fotoFalhou } = await updateReport(reportId, userId, {
         reporte_tipo_ocorrencia: category,
         reporte_descricao: description,
         reporte_latitude: latitude,
@@ -225,11 +225,19 @@ export function useEditReport() {
         return;
       }
 
-      Toast.show({
-        type: "success",
-        text1: "Reporte Atualizado!",
-        text2: "As alterações foram salvas com sucesso.",
-      });
+      Toast.show(
+        fotoFalhou
+          ? {
+              type: "info",
+              text1: "Reporte atualizado, mas sem a foto nova",
+              text2: "A foto não pôde ser salva. Tente adicioná-la de novo.",
+            }
+          : {
+              type: "success",
+              text1: "Reporte Atualizado!",
+              text2: "As alterações foram salvas com sucesso.",
+            },
+      );
 
       router.back();
     } catch (error) {

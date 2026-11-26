@@ -47,7 +47,7 @@ export default function RegisterScreen() {
   const executeCadastro = async (data: FormData) => {
     try {
       setLoading(true);
-      const { error } = await supabaseConfig.auth.signUp({
+      const { data: cadastro, error } = await supabaseConfig.auth.signUp({
         email: data.email,
         password: data.password,
       });
@@ -63,8 +63,26 @@ export default function RegisterScreen() {
         return;
       }
 
-      
-      await createTerms();
+      // Com a confirmação de e-mail ligada no Supabase, o signUp não cria sessão:
+      // entrar nas abas assim deixaria o app sem usuário (Home sem nome, Mapa sem perfil)
+      if (!cadastro.session) {
+        setLoading(false);
+        Toast.show({
+          type: "info",
+          text1: "Confirme seu e-mail",
+          text2: "Enviamos um link de confirmação. Depois de confirmar, é só entrar.",
+        });
+        router.replace("/(auth)/Login");
+        return;
+      }
+
+      // O aceite é gravado aqui, mas uma falha nele não pode virar "Erro inesperado":
+      // a conta já foi criada, e o layout das abas pede o aceite de novo se faltar
+      try {
+        await createTerms();
+      } catch (termosErro) {
+        console.warn("Conta criada, mas o aceite dos termos não foi gravado:", termosErro);
+      }
 
       setLoading(false);
       Toast.show({

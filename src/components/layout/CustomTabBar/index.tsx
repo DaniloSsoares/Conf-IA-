@@ -159,7 +159,19 @@ export default function CustomTabBar({ state, navigation, naoLidas = 0 }: Bottom
 
           return (
             <View key={route.key} style={styles.tabItem}>
-              <Pressable onPress={() => handleTabPress(route, index)} style={styles.pressable}>
+              <Pressable
+                onPress={() => handleTabPress(route, index)}
+                style={styles.pressable}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: focused }}
+                accessibilityLabel={
+                  isAlert
+                    ? 'Reportar ocorrência'
+                    : route.name === 'History/index' && naoLidas > 0
+                      ? `${info.label}, ${naoLidas} notificações não lidas`
+                      : info.label
+                }
+              >
                 {isAlert ? (
                   <Animated.View style={[styles.alertArea, { transform: [{ scale: alertScale }] }]}>
                     <Animated.View

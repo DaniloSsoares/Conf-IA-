@@ -41,10 +41,28 @@ export async function notificarAlerta(titulo: string, corpo: string, alertaId: s
 
 // Abre o alerta quando a pessoa toca na notificação. Fica aqui para que só este arquivo
 // importe o expo-notifications (ver o comentário do topo). Devolve a função de limpeza
+// Id da última notificação já aberta: o "último toque" continua guardado pelo sistema,
+// e sem isto o mesmo alerta seria aberto de novo a cada login
+let ultimaRespostaTratada: string | null = null;
+
 export function aoTocarNaNotificacao(abrirAlerta: (alertaId: string) => void): () => void {
-  const sub = Notifications.addNotificationResponseReceivedListener((resposta) => {
+  const tratar = (resposta: import("expo-notifications").NotificationResponse | null) => {
+    if (!resposta) return;
+    const id = resposta.notification.request.identifier;
+    if (id === ultimaRespostaTratada) return;
+    ultimaRespostaTratada = id;
+    // O sistema guarda o último toque mesmo depois de o app fechar. Sem limpar, o mesmo
+    // alerta abriria de novo em toda abertura do app (a variável acima zera ao reiniciar)
+    Notifications.clearLastNotificationResponseAsync().catch(() => {});
     const alertaId = resposta.notification.request.content.data?.alertaId;
     if (alertaId) abrirAlerta(String(alertaId));
-  });
+  };
+
+  // Toque com o app aberto ou minimizado
+  const sub = Notifications.addNotificationResponseReceivedListener(tratar);
+  // Toque que ABRIU o app (o Android tinha encerrado o app): o listener acima ainda não
+  // existia nesse momento, então o toque é lido aqui
+  Notifications.getLastNotificationResponseAsync().then(tratar).catch(() => {});
+
   return () => sub.remove();
 }

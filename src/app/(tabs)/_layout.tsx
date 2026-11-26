@@ -11,11 +11,17 @@ export default function TabLayout() {
   const [precisaAceitar, setPrecisaAceitar] = useState(false);
   const naoLidas = useNotificacoesRealtime();
   
+  // Ao entrar nas abas: confere se há sessão e se os termos da versão atual foram aceitos.
+  // getSession lê do aparelho: sem internet, o usuário logado continua no app
   useEffect(() => {
     const verificarTermos = async () => {
-      const { data: { user } } = await supabaseConfig.auth.getUser();
-      if (!user) return;
-      const aceito = await getTerms(user.id);
+      const { data: { session } } = await supabaseConfig.auth.getSession();
+      // Sem sessão (link direto para uma aba, ou sessão encerrada): volta para o Login
+      if (!session) {
+        router.replace('/Login');
+        return;
+      }
+      const aceito = await getTerms(session.user.id);
       if (!aceito) {
         setPrecisaAceitar(true);
       }

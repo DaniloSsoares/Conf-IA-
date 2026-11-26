@@ -1,5 +1,7 @@
 import { supabaseConfig } from "../../config/supabase";
 import { Alerta, AlertNotification } from "../types/notification";
+import { BoundingBox } from "../utils/haversine";
+import { faixaDaPagina } from "../constants/paginacao";
 
 export async function getAlertaById(alertaId: string): Promise<Alerta | null> {
   try {
@@ -17,41 +19,20 @@ export async function getAlertaById(alertaId: string): Promise<Alerta | null> {
   }
 }
 
-export async function getUserNotifications(userId: string): Promise<AlertNotification[]> {
-  try {
+// null = a consulta falhou: o Histórico avisa, em vez de dizer "nenhum alerta por aqui"
+export async function getUserNotifications(userId: string, pagina = 0): Promise<AlertNotification[] | null> {
+  const { data, error } = await supabaseConfig
+    .from("alerta_notificacoes")
+    .select("*, alertas(*)")
+    .eq("perfil_id", userId)
+    .order("notificacao_enviada_em", { ascending: false })
+    .range(...faixaDaPagina(pagina));
 
-    let { data, error } = await supabaseConfig
-      .from("alerta_notificacoes")
-      .select("*, alertas(*)")
-      .eq("perfil_id", userId)
-      .order("notificacao_enviada_em", { ascending: false });
-
-
-    if (error && error.code === "PGRST205") {
-      const fallback = await supabaseConfig
-        .from("alertas_notificacoes")
-        .select("*, alertas(*)")
-        .eq("perfil_id", userId)
-        .order("notificacao_enviada_em", { ascending: false });
-
-      data = fallback.data;
-      error = fallback.error;
-    }
-
-    if (error) {
-      if (error.code !== "PGRST205") {
-        console.warn("Erro ao buscar notificações do usuário:", error.message || error);
-      }
-      return [];
-    }
-
-    return (data as AlertNotification[]) || [];
-  } catch (error: any) {
-    if (error?.code !== "PGRST205") {
-      console.warn("Erro ao buscar notificações do usuário:", error);
-    }
-    return [];
+  if (error) {
+    console.warn("Erro ao buscar notificações do usuário:", error.message);
+    return null;
   }
+  return (data as AlertNotification[]) ?? [];
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<void> {
@@ -82,4 +63,34 @@ export async function contarNaoLidas(userId: string): Promise<number> {
     return 0;
   }
   return count ?? 0;
+}
+
+// Alertas ativos e dentro da validade numa caixa geográfica, só das categorias que o
+// usuário ativou. Devolve null quando a consulta falha, para a tela diferenciar
+// "não há alertas" de "não deu para buscar" (e não mostrar "situação normal" sem dados)
+export async function getActiveAlerts(
+  bounds: BoundingBox,
+  categorias: string[],
+): Promise<Alerta[] | null> {
+  // .in() com lista vazia derruba a consulta: sem categoria ativa, não há o que buscar
+  if (categorias.length === 0) return [];
+
+  const { data, error } = await supabaseConfig
+    .from("alertas")
+    .select("*")
+    .eq("alerta_status", "ativo")
+    // Alerta da comunidade vence em 6 h; o oficial pode não ter validade (null)
+    .or(`alerta_expira_em.is.null,alerta_expira_em.gt.${new Date().toISOString()}`)
+    .in("alerta_tipo_ocorrencia", categorias)
+    .gte("alerta_latitude", bounds.minLat)
+    .lte("alerta_latitude", bounds.maxLat)
+    .gte("alerta_longitude", bounds.minLng)
+    .lte("alerta_longitude", bounds.maxLng)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Erro ao buscar alertas ativos:", error);
+    return null;
+  }
+  return (data as Alerta[]) ?? [];
 }

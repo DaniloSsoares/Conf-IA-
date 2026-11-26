@@ -52,7 +52,7 @@ export default function EditReportScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Voltar">
           <Ionicons name="arrow-back" size={24} color={iconColor} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Editar Reporte</Text>

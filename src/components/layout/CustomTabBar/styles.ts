@@ -65,7 +65,8 @@ export const getStyles = (theme: AppTheme) => {
     },
 
     label: {
-      fontSize: 8,
+      // 8 px era ilegível para muita gente (o público inclui idosos); 11 é o mínimo confortável
+      fontSize: 11,
       fontWeight: '600',
       marginTop: 2,
     },

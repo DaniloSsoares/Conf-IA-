@@ -25,7 +25,7 @@ export default function ButtonBack({ onPress }: ButtonBackProps) {
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={styles.button}>
+    <TouchableOpacity onPress={handlePress} style={styles.button} accessibilityRole="button" accessibilityLabel="Voltar">
       <Ionicons name="arrow-back" size={22} color={iconColor} />
     </TouchableOpacity>
   );

@@ -22,7 +22,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useFocusEffect } from "expo-router";
 import Toast from "react-native-toast-message";
 import { supabaseConfig } from "@/src/config/supabase";
-import { getProfile, updateProfile } from "@/src/shared/service/profileService";
+import { excluirMinhaConta, getProfile, updateProfile } from "@/src/shared/service/profileService";
 import { Profile } from "@/src/shared/types/profile";
 import { formatDate } from "@/src/shared/utils/dateMember";
 import {
@@ -175,12 +175,41 @@ export default function ProfileScreen() {
     }
   };
 
+  // Exclusão de verdade (antes era só um toast). Pede confirmação, porque não tem volta
   const handleDeleteAccount = () => {
-    Toast.show({
-      type: "error",
-      text1: "Excluir Conta",
-      text2: "Tem certeza? Esta ação não pode ser desfeita.",
-    });
+    Alert.alert(
+      "Excluir minha conta",
+      "Sua conta e todos os seus dados (perfil, reportes, votos, comentários e notificações) " +
+        "serão apagados definitivamente. Esta ação não pode ser desfeita.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            const { error } = await excluirMinhaConta();
+            if (error) {
+              console.error("Erro ao excluir a conta:", error);
+              Toast.show({
+                type: "error",
+                text1: "Não foi possível excluir a conta",
+                text2: "Tente novamente em instantes.",
+              });
+              return;
+            }
+            // O usuário já não existe no servidor: limpa só a sessão guardada no aparelho
+            // (scope local). O signOut padrão chamaria o servidor por um usuário apagado
+            await supabaseConfig.auth.signOut({ scope: "local" });
+            Toast.show({
+              type: "success",
+              text1: "Conta excluída",
+              text2: "Seus dados foram apagados.",
+            });
+            router.replace("/Login");
+          },
+        },
+      ],
+    );
   };
   const handleTogglePreference = async (key: keyof AlertPreferences) => {
     const previous = preferences;
