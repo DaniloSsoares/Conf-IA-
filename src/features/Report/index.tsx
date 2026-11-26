@@ -157,7 +157,7 @@ export default function ReportScreen() {
       const { data: { user } } = await supabaseConfig.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await createReport(user.id, {
+      const { error, fotoFalhou } = await createReport(user.id, {
         reporte_tipo_ocorrencia: selectedCategory,
         reporte_descricao: description.trim() || undefined,
         reporte_latitude: location.latitude,
@@ -177,11 +177,19 @@ export default function ReportScreen() {
         return;
       }
 
-      Toast.show({
-        type: 'success',
-        text1: 'Reporte enviado!',
-        text2: 'A ocorrência foi registrada com sucesso.',
-      });
+      Toast.show(
+        fotoFalhou
+          ? {
+              type: 'info',
+              text1: 'Reporte enviado, mas sem a foto',
+              text2: 'A foto não pôde ser salva. Você pode adicioná-la em Histórico → Editar.',
+            }
+          : {
+              type: 'success',
+              text1: 'Reporte enviado!',
+              text2: 'A ocorrência foi registrada com sucesso.',
+            },
+      );
 
       // Limpar formulário
       setSelectedCategory(null);
@@ -210,7 +218,7 @@ export default function ReportScreen() {
         <View style={styles.header}>
          <ButtonBack/>
           <Text style={styles.headerTitle}>Reportar ocorrência</Text>
-          <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setHelpModalVisible(true)} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Como funciona o reporte">
             <Ionicons name="help-circle-outline" size={26} color={theme.primary} />
           </TouchableOpacity>
         </View>
@@ -317,7 +325,7 @@ export default function ReportScreen() {
             {photo ? (
               <View style={styles.previewContainer}>
                 <Image source={{ uri: photo.uri }} style={styles.previewImage} />
-                <TouchableOpacity style={styles.removePhotoButton} onPress={() => setPhoto(null)} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.removePhotoButton} onPress={() => setPhoto(null)} activeOpacity={0.8} accessibilityRole="button" accessibilityLabel="Remover foto">
                   <Ionicons name="close" size={18} color={theme.buttonText} />
                 </TouchableOpacity>
               </View>

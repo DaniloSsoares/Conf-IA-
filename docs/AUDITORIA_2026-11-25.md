@@ -169,10 +169,10 @@ São os que aparecem na demo ou que a banca pode perceber, e todos são rápidos
 ### D3 🟠 `auth.getUser()` faz uma chamada de rede em quase toda tela ⏱️⏱️
 - `getUser()` consulta o servidor de autenticação a cada uso (Home, Mapa, Perfil, Histórico, Reportar, Editar...). `getSession()` lê da memória. Correção: um `AuthContext` com o usuário da sessão, usado por todas as telas (o `useCurrentUser` já é um começo).
 
-### D4 🟠 Fotos enviadas em tamanho original ⏱️⏱️
+### D4 🟠 Fotos enviadas em tamanho original ⏱️⏱️ · ✅ **corrigido** (1280 px, JPEG)
 - [photoPicker.ts:56](../src/shared/utils/photoPicker.ts#L56) usa `quality: 0.7`, mas não reduz a resolução: uma foto de câmera moderna vai com 3 a 6 MB, em base64 (mais 33%). No 4G, o envio demora e pode falhar. Correção: `expo-image-manipulator` para 1280 px de largura antes do upload.
 
-### D5 🟠 Histórico sem paginação ⏱️⏱️
+### D5 🟠 Histórico sem paginação ⏱️⏱️ · ✅ **corrigido** (20 por vez + "Carregar mais")
 - [History/index.tsx:31](../src/features/History/index.tsx#L31) carrega **todas** as notificações (com o alerta junto) e **todos** os reportes do usuário a cada foco. Com o tempo, a tela fica lenta. Correção: `.range(0, 19)` + carregar mais ao rolar.
 
 ### D6 🟠 O realtime do Mapa escuta a tabela inteira ⏱️⏱️⏱️
@@ -181,34 +181,34 @@ São os que aparecem na demo ou que a banca pode perceber, e todos são rápidos
 ### D7 🟡 Espera fixa de 2,5 s na abertura ⏱️ · ✅ **corrigido** (`fix/home-alertas-sessao`)
 - [app/index.tsx:14](../src/app/index.tsx#L14): o app sempre espera 2,5 s antes de seguir. Resolvido junto com o B2.
 
-### D8 🟡 O mapa não acompanha o movimento do usuário ⏱️⏱️
+### D8 🟡 O mapa não acompanha o movimento do usuário ⏱️⏱️ · ✅ **corrigido**
 - A localização do Mapa é buscada uma vez. Quem está se deslocando (de carro, de ônibus) vê os reportes do ponto onde abriu o app. Correção: `watchPositionAsync` com distância mínima de 200 m.
 
 ---
 
 ## 4. UX e acessibilidade
 
-### <a id="u1"></a>U1 🔴 A Intro promete o que o app não faz ⏱️
+### <a id="u1"></a>U1 🔴 A Intro promete o que o app não faz ⏱️ · ✅ **corrigido**
 - **Onde:** [Intro/index.tsx](../src/features/Auth/Intro/index.tsx), slides "Mapa de Riscos" ("visualize em tempo real as áreas de risco com classificação por nível de gravidade") e **"Análise Inteligente" ("IA integrada analisa dados climáticos para prever riscos com antecedência")**.
 - **Problema:** as áreas de risco (2.5) foram cortadas e não há IA. É a primeira tela que a banca vê, e a pergunta "onde está a IA?" já estava prevista no plano.
 - **Correção:** trocar os textos pelo que existe: "Mapa de ocorrências por nível de risco" e "Validação pela comunidade: reportes confirmados viram alertas para os vizinhos".
 
-### U2 🟠 Marcadores sobrepostos no mesmo ponto ⏱️⏱️
+### U2 🟠 Marcadores sobrepostos no mesmo ponto ⏱️⏱️ · ✅ **corrigido** (reporte com alerta não aparece)
 - Um reporte validado e o alerta que nasce dele ficam **exatamente** no mesmo lugar (e o "você está aqui", se o reporte foi feito ali). Só um aparece; o filtro mostra "Todos (3)". Correção: não mostrar o reporte quando já existe um alerta ligado a ele (`alerta_reporte_id`), ou deslocar levemente.
 
-### U3 🟠 Texto da aba com 8 px ⏱️
+### U3 🟠 Texto da aba com 8 px ⏱️ · ✅ **corrigido** (11 px)
 - [CustomTabBar/styles.ts:68](../src/components/layout/CustomTabBar/styles.ts#L68): `fontSize: 8` é ilegível para muita gente (o mínimo recomendado é por volta de 11–12). Público de defesa civil inclui idosos.
 
-### U4 🟠 Botões só com ícone, sem descrição para leitor de tela ⏱️⏱️
+### U4 🟠 Botões só com ícone, sem descrição para leitor de tela ⏱️⏱️ · ✅ **corrigido** (botões principais)
 - Recentralizar o mapa, fechar o card de prévia, filtros, voltar: sem `accessibilityLabel`. O TalkBack lê só "botão".
 
-### U5 🟡 Nomes diferentes para a mesma categoria ⏱️
+### U5 🟡 Nomes diferentes para a mesma categoria ⏱️ · ✅ **corrigido**
 - "Via bloqueada" (reportar, mapa) e "Bloqueio de via" (preferências do Perfil).
 
-### U6 🟡 Sem aviso de "sem conexão" ⏱️⏱️
+### U6 🟡 Sem aviso de "sem conexão" ⏱️⏱️ · ✅ **coberto pelo B6** (aviso quando a busca falha)
 - Ver B6. Uma faixa "Sem internet" (via `@react-native-community/netinfo`) explicaria por que nada carrega.
 
-### U7 🟡 Erros silenciosos ⏱️
+### U7 🟡 Erros silenciosos ⏱️ · ✅ **corrigido** (foto que falha ao salvar)
 - Vários fluxos só fazem `console.error` (ex.: foto que falha depois do reporte criado: o usuário vê "Reporte enviado!" e o reporte fica sem foto).
 
 ---

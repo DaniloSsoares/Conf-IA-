@@ -129,15 +129,23 @@ export default function MapScreen() {
         });
     }, [alerts, location, raioKm]);
 
+    // Reporte que já virou alerta da comunidade: o alerta fica exatamente no mesmo ponto,
+    // um marcador escondia o outro e o filtro contava os dois. Mostra só o alerta
+    const reportesComAlerta = useMemo(
+        () => new Set(alerts.map((a) => a.alerta_reporte_id).filter(Boolean)),
+        [alerts],
+    );
+
     const filteredReports = useMemo(() => {
-        if (!location) return reports;
-        return reports.filter((r) => {
+        const semAlerta = reports.filter((r) => !reportesComAlerta.has(r.id));
+        if (!location) return semAlerta;
+        return semAlerta.filter((r) => {
             const lat = Number(r.reporte_latitude);
             const lng = Number(r.reporte_longitude);
             return !isNaN(lat) && !isNaN(lng)
                 && haversineKm(location.latitude, location.longitude, lat, lng) <= raioKm;
         });
-    }, [reports, location, raioKm]);
+    }, [reports, location, raioKm, reportesComAlerta]);
     
     useEffect(() => {
         setMarcadoresProntos(false);
@@ -145,15 +153,20 @@ export default function MapScreen() {
         return () => clearTimeout(t);
     }, [filteredAlerts, filteredReports, filterType]);
 
+    // A primeira posição pode vir do cache do celular (até 5 min). Quando a posição exata
+    // chega e é diferente, a câmera vai até ela UMA vez. Depois disso, o deslocamento
+    // (watchPosition) move só o ponto azul: puxar a câmera enquanto a pessoa olha outra
+    // parte do mapa atrapalharia. Para voltar, o botão de centralizar
     const primeiraPosicao = useRef<typeof location>(null);
+    const cameraAjustada = useRef(false);
     useEffect(() => {
         if (!location) return;
         if (!primeiraPosicao.current) {
             primeiraPosicao.current = location;
             return;
         }
-        if (location !== primeiraPosicao.current) {
-            primeiraPosicao.current = location;
+        if (!cameraAjustada.current && location !== primeiraPosicao.current) {
+            cameraAjustada.current = true;
             mapRef.current?.animateToRegion({
                 latitude: location.latitude,
                 longitude: location.longitude,
@@ -309,6 +322,8 @@ export default function MapScreen() {
                 <TouchableOpacity
                     style={styles.fabButton}
                     onPress={handleRecenterMap}
+                    accessibilityRole="button"
+                    accessibilityLabel="Centralizar o mapa na minha localização"
                     activeOpacity={0.8}
                 >
                     <Ionicons name="navigate-outline" size={22} color={theme.primary} />
@@ -453,7 +468,12 @@ export default function MapScreen() {
                                 {selectedItem.type === 'alerta' ? origemSelecionada.texto : 'Ocorrência Comunitária'}
                             </Text>
                         </View>
-                        <TouchableOpacity onPress={() => setSelectedItem(null)} style={{ padding: 4 }}>
+                        <TouchableOpacity
+                            onPress={() => setSelectedItem(null)}
+                            style={{ padding: 4 }}
+                            accessibilityRole="button"
+                            accessibilityLabel="Fechar"
+                        >
                             <Ionicons name="close-circle" size={24} color={theme.subtext || "#94A3B8"} />
                         </TouchableOpacity>
                     </View>

@@ -11,7 +11,7 @@ export function DetailsHeader({ title }: { title: string }) {
 
   return (
     <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+      <TouchableOpacity onPress={() => router.back()} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Voltar">
         <Ionicons name="arrow-back" size={22} color={iconColor} />
       </TouchableOpacity>
       <Text style={styles.headerTitle}>{title}</Text>

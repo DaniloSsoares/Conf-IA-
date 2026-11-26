@@ -26,9 +26,11 @@ const slides = [
     id: 2,
     iconName: 'map-outline',
     iconFamily: 'Ionicons',
-    title: 'Mapa de Riscos',
+    // Os textos dizem só o que o app faz: as áreas de risco oficiais (2.5) e a IA
+    // (sistema_ia) ficaram para depois e não podem aparecer como prontas
+    title: 'Mapa de Ocorrências',
     description:
-      'Visualize em tempo real as áreas de risco com classificação por nível de gravidade.',
+      'Veja em tempo real as ocorrências e alertas perto de você, classificados por nível de risco.',
   },
   {
     id: 3,
@@ -40,11 +42,11 @@ const slides = [
   },
   {
     id: 4,
-    iconName: 'analytics-outline',
+    iconName: 'people-outline',
     iconFamily: 'Ionicons',
-    title: 'Análise Inteligente',
+    title: 'Validação pela Comunidade',
     description:
-      'IA integrada analisa dados climáticos para prever riscos com antecedência.',
+      'Moradores confirmam os reportes. Os confirmados viram alertas e avisam quem está por perto.',
   },
 ];
 

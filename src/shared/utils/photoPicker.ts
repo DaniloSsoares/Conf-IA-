@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import Toast from 'react-native-toast-message';
 import { SelectedPhoto } from '@/src/shared/types/photo';
 
@@ -21,7 +22,7 @@ export async function takePhoto(options: PhotoPickerOptions = {}): Promise<Selec
     }
 
     const result = await ImagePicker.launchCameraAsync(buildPickerOptions(options));
-    return toSelectedPhoto(result);
+    return await toSelectedPhoto(result);
   } catch (error) {
     console.error('Erro ao tirar foto:', error);
     Toast.show({ type: 'error', text1: 'Erro', text2: 'Não foi possível capturar a foto.' });
@@ -42,7 +43,7 @@ export async function pickFromGallery(options: PhotoPickerOptions = {}): Promise
     }
 
     const result = await ImagePicker.launchImageLibraryAsync(buildPickerOptions(options));
-    return toSelectedPhoto(result);
+    return await toSelectedPhoto(result);
   } catch (error) {
     console.error('Erro ao escolher foto da galeria:', error);
     Toast.show({ type: 'error', text1: 'Erro', text2: 'Não foi possível selecionar a imagem.' });
@@ -50,35 +51,48 @@ export async function pickFromGallery(options: PhotoPickerOptions = {}): Promise
   }
 }
 
+// Largura máxima da foto enviada. Uma foto de câmera moderna tem 4000 px ou mais
+// (3 a 6 MB); com 1280 px ela fica com uns 200 a 400 KB e continua nítida no celular.
+// No 4G, a diferença é entre segundos e "o envio falhou"
+const LARGURA_MAXIMA = 1280;
+const QUALIDADE_JPEG = 0.7;
+
 function buildPickerOptions({
   allowsEditing = false,
   aspect,
-  quality = 0.7,
+  quality = QUALIDADE_JPEG,
 }: PhotoPickerOptions): ImagePicker.ImagePickerOptions {
   return {
     mediaTypes: ['images'],
     allowsEditing,
     aspect,
     quality,
-    base64: true, // o upload para o Supabase Storage usa base64
+    // Sem base64 aqui: ele é gerado depois de reduzir a foto (gerar da foto original
+    // ocuparia muita memória à toa)
+    base64: false,
   };
 }
 
-function toSelectedPhoto(result: ImagePicker.ImagePickerResult): SelectedPhoto | null {
+async function toSelectedPhoto(result: ImagePicker.ImagePickerResult): Promise<SelectedPhoto | null> {
   if (result.canceled || !result.assets?.length) return null;
 
   const asset = result.assets[0];
-  return {
-    uri: asset.uri,
-    base64: asset.base64 ?? undefined,
-    ext: getExtension(asset),
-  };
-}
+  const contexto = ImageManipulator.manipulate(asset.uri);
+  // Só reduz: uma foto menor que o limite não é ampliada
+  if (asset.width > LARGURA_MAXIMA) {
+    contexto.resize({ width: LARGURA_MAXIMA });
+  }
+  const imagem = await contexto.renderAsync();
+  // Sempre JPEG: é o formato que o upload declara (image/jpeg) e o mais leve para foto
+  const salva = await imagem.saveAsync({
+    compress: QUALIDADE_JPEG,
+    format: SaveFormat.JPEG,
+    base64: true,
+  });
 
-// O mimeType é mais confiável que o fim da uri (que às vezes vem sem extensão)
-function getExtension(asset: ImagePicker.ImagePickerAsset): string {
-  const fromMime = asset.mimeType?.split('/')[1];
-  const fromUri = asset.uri.split('.').pop();
-  const ext = (fromMime || fromUri || 'jpg').toLowerCase();
-  return ext === 'jpeg' ? 'jpg' : ext;
+  return {
+    uri: salva.uri,
+    base64: salva.base64 ?? undefined,
+    ext: 'jpg',
+  };
 }

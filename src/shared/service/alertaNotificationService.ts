@@ -1,6 +1,7 @@
 import { supabaseConfig } from "../../config/supabase";
 import { Alerta, AlertNotification } from "../types/notification";
 import { BoundingBox } from "../utils/haversine";
+import { faixaDaPagina } from "../constants/paginacao";
 
 export async function getAlertaById(alertaId: string): Promise<Alerta | null> {
   try {
@@ -19,12 +20,13 @@ export async function getAlertaById(alertaId: string): Promise<Alerta | null> {
 }
 
 // null = a consulta falhou: o Histórico avisa, em vez de dizer "nenhum alerta por aqui"
-export async function getUserNotifications(userId: string): Promise<AlertNotification[] | null> {
+export async function getUserNotifications(userId: string, pagina = 0): Promise<AlertNotification[] | null> {
   const { data, error } = await supabaseConfig
     .from("alerta_notificacoes")
     .select("*, alertas(*)")
     .eq("perfil_id", userId)
-    .order("notificacao_enviada_em", { ascending: false });
+    .order("notificacao_enviada_em", { ascending: false })
+    .range(...faixaDaPagina(pagina));
 
   if (error) {
     console.warn("Erro ao buscar notificações do usuário:", error.message);

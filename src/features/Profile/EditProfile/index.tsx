@@ -380,7 +380,7 @@ export default function EditProfileScreen() {
         style={{ flex: 1 }}
       >
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton} accessibilityRole="button" accessibilityLabel="Voltar">
             <Ionicons name="arrow-back" size={24} color={iconColor} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Editar Informações</Text>

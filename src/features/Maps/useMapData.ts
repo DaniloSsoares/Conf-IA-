@@ -83,6 +83,43 @@ export function useMapData() {
     };
   }, []);
 
+  // Acompanha o deslocamento enquanto o Mapa está na tela (quem está de carro ou de
+  // ônibus via os reportes do ponto onde abriu o app). distanceInterval: só avisa a
+  // cada 200 m, para não refazer as buscas a cada passo. Fora da tela, o GPS para
+  useFocusEffect(
+    useCallback(() => {
+      if (loadingLocation || permissionDenied) return;
+
+      let ativo = true;
+      let assinatura: Location.LocationSubscription | null = null;
+
+      Location.watchPositionAsync(
+        { accuracy: Location.Accuracy.Balanced, distanceInterval: 200 },
+        (posicao) => {
+          const nova = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+          // Mesma regra da posição inicial: menos de 100 m, mantém o objeto (e as buscas)
+          setLocation((anterior) =>
+            anterior &&
+            haversineKm(anterior.latitude, anterior.longitude, nova.latitude, nova.longitude) < 0.1
+              ? anterior
+              : nova,
+          );
+        },
+      )
+        .then((sub) => {
+          // A tela saiu antes de o GPS responder: desliga na hora
+          if (ativo) assinatura = sub;
+          else sub.remove();
+        })
+        .catch((error) => console.warn("Não foi possível acompanhar a localização:", error));
+
+      return () => {
+        ativo = false;
+        assinatura?.remove();
+      };
+    }, [loadingLocation, permissionDenied]),
+  );
+
   useEffect(() => {
     if (!location) return;
     const fetchWeather = async () => {
