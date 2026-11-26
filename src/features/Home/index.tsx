@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,10 @@ import { supabaseConfig } from '@/src/config/supabase';
 import { getProfile } from '@/src/shared/service/profileService';
 import { getCurrentWeather } from '@/src/shared/service/weatherService';
 import { getActiveReports } from '@/src/shared/service/reportService';
+import { getActiveAlerts } from '@/src/shared/service/alertaNotificationService';
+import { getEnabledCategories } from '@/src/shared/constants/alertCategories';
+import { boundingBox } from '@/src/shared/utils/haversine';
+import { MARGEM_ALERTA_KM, alertaPerto, reportePerto } from '@/src/shared/utils/proximidade';
 import { WeatherData } from '@/src/shared/types/weather';
 import { Profile } from '@/src/shared/types/profile';
 import { useAppTheme } from '@/src/shared/constants/theme';
@@ -23,6 +27,17 @@ import styles from './style';
 import { NivelRisco } from '@/src/shared/types/notification';
 import { RISK_LABEL, getNivelRiscoReporte } from '@/src/shared/constants/nivelRisco';
 import { getCategoryMeta } from '@/src/shared/constants/historyStatus';
+
+type Local = { latitude: number; longitude: number };
+
+// Item da lista da Home: um alerta, ou um reporte quando não há alerta por perto.
+// `tipo` diz qual tela de detalhes abrir
+type ItemRegiao = {
+  id: string;
+  tipo: 'alerta' | 'reporte';
+  titulo: string;
+  descricao: string;
+};
 
 
 export default function DashboardScreen({ navigation }: any) {
@@ -40,8 +55,11 @@ export default function DashboardScreen({ navigation }: any) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
 
   // Alertas e Risco
-  const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
-  const [riskLevel, setRiskLevel] = useState<NivelRisco>('baixo');
+  const [activeAlerts, setActiveAlerts] = useState<ItemRegiao[]>([]);
+  // true quando a lista mostra reportes (não havia alerta por perto): muda o título da seção
+  const [mostrandoReportes, setMostrandoReportes] = useState(false);
+  // null = sem localização: a Home não sabe qual é a região e não inventa um nível
+  const [riskLevel, setRiskLevel] = useState<NivelRisco | null>('baixo');
   const [riskDescription, setRiskDescription] = useState('Situação normal. Nenhum risco relevante identificado no momento.');
 
   // Data Formatada
@@ -57,11 +75,23 @@ export default function DashboardScreen({ navigation }: any) {
     }
   };
 
+  // Uma passada só: usuário e perfil, depois a localização, e então clima e risco
+  // em paralelo (os dois precisam da localização). Antes, o risco era calculado
+  // com os alertas e reportes do país inteiro
   const loadAllData = useCallback(async () => {
-    await Promise.all([
-      loadUserDataAndWeather(),
-      loadActiveAlerts(),
-    ]);
+    try {
+      setLoadingWeather(true);
+      const { data: { user } } = await supabaseConfig.auth.getUser();
+      const profileData = user ? await getProfile(user.id) : null;
+      preencherUsuario(user, profileData);
+
+      const local = await obterLocalizacao(profileData);
+      await Promise.all([carregarClima(local), carregarRegiao(local, profileData)]);
+    } catch (error) {
+      console.error('Erro ao carregar a Home:', error);
+    } finally {
+      setLoadingWeather(false);
+    }
   }, []);
 
   useFocusEffect(
@@ -70,125 +100,137 @@ export default function DashboardScreen({ navigation }: any) {
     }, [loadAllData])
   );
 
-  const loadUserDataAndWeather = async () => {
-    try {
-      setLoadingWeather(true);
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+  const preencherUsuario = (user: any, profileData: Profile | null) => {
+    if (profileData) setUserProfile(profileData);
 
-      let profileData: Profile | null = null;
-      let name = 'Usuário';
-      let initials = 'U';
-
-      if (user) {
-        profileData = await getProfile(user.id);
-        if (profileData) {
-          setUserProfile(profileData);
-          if (profileData.perfil_nome_completo) {
-            name = profileData.perfil_nome_completo;
-          }
-        }
-
-        if (name === 'Usuário') {
-          const metadata = user.user_metadata || {};
-          name =
-            metadata.nome ||
-            metadata.name ||
-            metadata.full_name ||
-            metadata.display_name ||
-            user.email?.split('@')[0] ||
-            'Usuário';
-        }
-
-        const nameParts = name.trim().split(' ');
-        if (nameParts.length >= 2) {
-          initials = `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-        } else if (nameParts[0]) {
-          initials = nameParts[0].substring(0, 2).toUpperCase();
-        }
-      }
-
-      setUserName(name);
-      setUserInitials(initials);
-
-      // Obter Localização para WeatherAPI
-      let lat = profileData?.perfil_latitude || -23.5505;
-      let lon = profileData?.perfil_longitude || -46.6333;
-
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted') {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-          lat = location.coords.latitude;
-          lon = location.coords.longitude;
-        }
-      } catch (locErr) {
-        console.warn('Não foi possível obter localização atual via GPS:', locErr);
-      }
-
-      // Buscar Dados do WeatherAPI / OpenWeather
-      // null quando nenhuma API respondeu: a tela mostra "Clima indisponível"
-      setWeather(await getCurrentWeather(lat, lon));
-    } catch (error) {
-      console.error('Erro ao carregar dados do usuário e clima:', error);
-    } finally {
-      setLoadingWeather(false);
+    let name = profileData?.perfil_nome_completo || '';
+    if (!name && user) {
+      const metadata = user.user_metadata || {};
+      name =
+        metadata.nome ||
+        metadata.name ||
+        metadata.full_name ||
+        metadata.display_name ||
+        user.email?.split('@')[0] ||
+        '';
     }
+    name = name || 'Usuário';
+
+    const nameParts = name.trim().split(' ');
+    const initials =
+      nameParts.length >= 2
+        ? `${nameParts[0][0]}${nameParts[1][0]}`
+        : nameParts[0].substring(0, 2);
+
+    setUserName(name);
+    setUserInitials(initials.toUpperCase() || 'U');
   };
 
-  const loadActiveAlerts = async () => {
+  // Onde o usuário está, na mesma ordem do Mapa: última posição conhecida (cache do
+  // celular, instantânea), senão o GPS, senão a última posição salva no perfil.
+  // Sem nenhuma delas, null: nada de "centro de São Paulo" inventado
+  const obterLocalizacao = async (profileData: Profile | null): Promise<Local | null> => {
     try {
-      // 1. Buscar Alertas Oficiais Ativos da tabela alertas
-      const { data: dbAlerts, error } = await supabaseConfig
-        .from('alertas')
-        .select('*')
-        .eq('alerta_status', 'ativo')
-        // Alerta da comunidade vence em 6 h; o oficial pode não ter validade (null)
-        .or(`alerta_expira_em.is.null,alerta_expira_em.gt.${new Date().toISOString()}`)
-        .order('created_at', { ascending: false });
-
-      let list = dbAlerts || [];
-
-      // 2. Buscar também reportes comunitários ativos para calcular o nível de risco
-      const communityReports = await getActiveReports();
-
-      if (!error && list.length > 0) {
-        setActiveAlerts(list);
-      } else if (communityReports.length > 0) {
-        setActiveAlerts(
-          communityReports.slice(0, 3).map((rep) => ({
-            id: rep.id,
-            alerta_titulo: getCategoryMeta(rep.reporte_tipo_ocorrencia).label,
-            alerta_descricao: rep.reporte_descricao || 'Reportado por usuário próximo',
-            created_at: rep.created_at,
-            alerta_nivel_risco: getNivelRiscoReporte(rep.reporte_tipo_ocorrencia),
-          }))
-        );
-      } else {
-        setActiveAlerts([]);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const posicao =
+          (await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 })) ??
+          (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
+        if (posicao) {
+          return { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+        }
       }
+    } catch (locErr) {
+      console.warn('Não foi possível obter a localização atual:', locErr);
+    }
 
-      // 3. Calcular Nível de Risco Dinâmico
-      const hasCritical = list.some((a) => a.alerta_nivel_risco === 'critico');
-      const hasHigh = list.some((a) => a.alerta_nivel_risco === 'alto');
-      const totalEvents = list.length + communityReports.length;
+    const lat = Number(profileData?.perfil_latitude);
+    const lng = Number(profileData?.perfil_longitude);
+    return profileData?.perfil_latitude != null && !isNaN(lat) && !isNaN(lng)
+      ? { latitude: lat, longitude: lng }
+      : null;
+  };
 
-      if (hasCritical) {
-        setRiskLevel('critico');
-        setRiskDescription('Alerta crítico na sua região! Siga as orientações de segurança.');
-      } else if (hasHigh) {
-        setRiskLevel('alto');
-        setRiskDescription('Atenção elevada. Risco de chuva forte ou alagamento detectado.');
-      } else if (totalEvents > 0) {
-        setRiskLevel('moderado');
-        setRiskDescription('Risco moderado. Ocorrências ativas registradas na região.');
-      } else {
-        setRiskLevel('baixo');
-        setRiskDescription('Situação normal. Nenhum risco relevante identificado no momento.');
-      }
-    } catch (err) {
-      console.error('Erro ao buscar alertas ativos:', err);
+  // null quando nenhuma API respondeu (ou sem localização): a tela mostra "Clima indisponível"
+  const carregarClima = async (local: Local | null) => {
+    setWeather(local ? await getCurrentWeather(local.latitude, local.longitude) : null);
+  };
+
+  // Alertas e reportes perto do usuário, com o mesmo raio e as mesmas categorias do Mapa,
+  // e o nível de risco calculado só com eles
+  const carregarRegiao = async (local: Local | null, profileData: Profile | null) => {
+    if (!local) {
+      setActiveAlerts([]);
+      setMostrandoReportes(false);
+      setRiskLevel(null);
+      setRiskDescription('Ative a localização para ver o risco da sua região.');
+      return;
+    }
+
+    // numeric do banco chega como texto: sem o Number, "5" + 20 viraria "520"
+    const raioKm = Number(profileData?.perfil_raio_notificacao_km ?? 5);
+    const categorias = getEnabledCategories(profileData?.perfil_preferencias_alertas);
+
+    const [alertasBrutos, reportesBrutos] = await Promise.all([
+      getActiveAlerts(boundingBox(local.latitude, local.longitude, raioKm + MARGEM_ALERTA_KM), categorias),
+      getActiveReports(boundingBox(local.latitude, local.longitude, raioKm)),
+    ]);
+
+    // Consulta de alertas falhou: avisa em vez de mostrar "situação normal" sem dados
+    if (alertasBrutos === null) {
+      setActiveAlerts([]);
+      setMostrandoReportes(false);
+      setRiskLevel(null);
+      setRiskDescription('Não foi possível atualizar os alertas. Verifique sua conexão.');
+      return;
+    }
+
+    // A caixa é um quadrado; o raio é um círculo: refina pela distância real
+    const alertas = alertasBrutos.filter((a) => alertaPerto(local, raioKm, a));
+    const reportes = reportesBrutos.filter((r) => reportePerto(local, raioKm, r));
+
+    if (alertas.length > 0) {
+      setMostrandoReportes(false);
+      setActiveAlerts(
+        alertas.map((a) => ({
+          id: a.id,
+          tipo: 'alerta',
+          titulo: a.alerta_titulo || getCategoryMeta(a.alerta_tipo_ocorrencia).label,
+          descricao: a.alerta_descricao || 'Monitorado via Defesa Civil / Conf-IA',
+        })),
+      );
+    } else {
+      // Sem alerta por perto: mostra as ocorrências mais recentes, identificadas como tal
+      setMostrandoReportes(reportes.length > 0);
+      setActiveAlerts(
+        reportes.slice(0, 3).map((r) => ({
+          id: r.id,
+          tipo: 'reporte',
+          titulo: getCategoryMeta(r.reporte_tipo_ocorrencia).label,
+          descricao: r.reporte_descricao || 'Reportado por um morador próximo',
+        })),
+      );
+    }
+
+    // Nível de risco: o pior entre os alertas e os reportes da região
+    // (o risco do reporte vem da categoria, mesma regra do trigger A.10)
+    const niveis: NivelRisco[] = [
+      ...alertas.map((a) => a.alerta_nivel_risco),
+      ...reportes.map((r) => getNivelRiscoReporte(r.reporte_tipo_ocorrencia)),
+    ];
+
+    if (niveis.includes('critico')) {
+      setRiskLevel('critico');
+      setRiskDescription('Alerta crítico na sua região! Siga as orientações de segurança.');
+    } else if (niveis.includes('alto')) {
+      setRiskLevel('alto');
+      setRiskDescription('Atenção elevada. Ocorrências de risco alto perto de você.');
+    } else if (niveis.length > 0) {
+      setRiskLevel('moderado');
+      setRiskDescription('Risco moderado. Ocorrências ativas registradas na região.');
+    } else {
+      setRiskLevel('baixo');
+      setRiskDescription('Situação normal. Nenhum risco relevante identificado no momento.');
     }
   };
 
@@ -199,11 +241,13 @@ export default function DashboardScreen({ navigation }: any) {
         setRefreshing(false);
       }, 600);
     });
-  }, []);
+  }, [loadAllData]);
 
   // Cores adaptativas de Risco (Modo Claro vs Modo Escuro)
   const getRiskColor = (level: string) => {
     switch (level) {
+      case 'indisponivel':
+        return isDarkMode ? '#94A3B8' : '#64748B';
       case 'critico':
         return isDarkMode ? '#FF6B81' : '#E11D48';
       case 'alto':
@@ -218,6 +262,8 @@ export default function DashboardScreen({ navigation }: any) {
 
   const getRiskBgColor = (level: string) => {
     switch (level) {
+      case 'indisponivel':
+        return isDarkMode ? 'rgba(148, 163, 184, 0.18)' : '#F1F5F9';
       case 'critico':
         return isDarkMode ? 'rgba(225, 29, 72, 0.22)' : '#FFE4E6';
       case 'alto':
@@ -230,8 +276,8 @@ export default function DashboardScreen({ navigation }: any) {
     }
   };
 
-  const riskColor = getRiskColor(riskLevel);
-  const riskBackground = getRiskBgColor(riskLevel);
+  const riskColor = getRiskColor(riskLevel ?? 'indisponivel');
+  const riskBackground = getRiskBgColor(riskLevel ?? 'indisponivel');
 
   // Icone do Clima
   // Sem dados do clima: ícone de "offline", nunca um sol inventado
@@ -513,14 +559,16 @@ export default function DashboardScreen({ navigation }: any) {
               </Text>
 
               <Text style={[styles.riskLevel, { color: riskColor }]}>
-                {RISK_LABEL[riskLevel].toUpperCase()}
+                {riskLevel ? RISK_LABEL[riskLevel].toUpperCase() : 'INDISPONÍVEL'}
               </Text>
             </View>
 
             <View style={[styles.iconBadge, { backgroundColor: riskColor }]}>
               <Ionicons
                 name={
-                  riskLevel === 'baixo'
+                  riskLevel === null
+                    ? 'location-outline'
+                    : riskLevel === 'baixo'
                     ? 'checkmark-circle'
                     : riskLevel === 'moderado'
                     ? 'warning'
@@ -716,12 +764,13 @@ export default function DashboardScreen({ navigation }: any) {
                 isDarkMode && { color: theme.text },
               ]}
             >
-              Alertas Ativos
+              {mostrandoReportes ? 'Ocorrências Próximas' : 'Alertas Ativos'}
             </Text>
 
+            {/* "Ver tudo" abre o Mapa, onde ficam todos os alertas e ocorrências da região */}
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('Alerts')}
+              onPress={() => navigation.navigate('Maps')}
             >
               <Text
                 style={[
@@ -747,7 +796,13 @@ export default function DashboardScreen({ navigation }: any) {
                   },
                 ]}
                 activeOpacity={0.8}
-                onPress={() => navigation.navigate('Alerts')}
+                // Abre os detalhes do item (alerta ou reporte). Antes ia para a tela de Reportar
+                onPress={() =>
+                  router.push({
+                    pathname: '/(screens)/ViewHistory',
+                    params: { type: alert.tipo, id: alert.id },
+                  })
+                }
               >
                 <View
                   style={[
@@ -774,7 +829,7 @@ export default function DashboardScreen({ navigation }: any) {
                     ]}
                     numberOfLines={1}
                   >
-                    {alert.alerta_titulo || alert.alerta_tipo_ocorrencia || 'Alerta Meteorológico'}
+                    {alert.titulo}
                   </Text>
 
                   <Text
@@ -784,7 +839,7 @@ export default function DashboardScreen({ navigation }: any) {
                     ]}
                     numberOfLines={1}
                   >
-                    {alert.alerta_descricao || 'Monitorado via Defesa Civil / Conf-IA'}
+                    {alert.descricao}
                   </Text>
                 </View>
 
@@ -817,7 +872,9 @@ export default function DashboardScreen({ navigation }: any) {
                   isDarkMode && { color: theme.subtext },
                 ]}
               >
-                Nenhum alerta crítico ativo no momento.
+                {riskLevel === null
+                  ? 'Sem dados da sua região no momento.'
+                  : 'Nenhum alerta ativo perto de você.'}
               </Text>
             </View>
           )}

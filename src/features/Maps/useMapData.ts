@@ -10,11 +10,8 @@ import { useFocusEffect } from "expo-router";
 import { getCurrentWeather } from "@/src/shared/service/weatherService";
 import { WeatherData } from "@/src/shared/types/weather";
 import { boundingBox, haversineKm } from "@/src/shared/utils/haversine";
-
-// Alerta tem raio próprio: o centro pode estar fora do raio do usuário e ainda
-// assim cobrir a posição dele. A caixa dos alertas é maior por essa margem.
-// Limite conhecido: alertas com raio maior que isso, e centro longe, não chegam.
-const MARGEM_ALERTA_KM = 20;
+import { MARGEM_ALERTA_KM } from "@/src/shared/utils/proximidade";
+import { getActiveAlerts } from "@/src/shared/service/alertaNotificationService";
 
 // O Realtime atualiza na hora; o polling é só a rede de segurança para quando
 // o canal cai sem avisar (troca de rede, app em segundo plano)
@@ -172,28 +169,11 @@ export function useMapData() {
   const fetchAlertas = useCallback(async () => {
     if (!profileId || !boundsAlertas) return;
 
-    if (categoriasAtivas.length === 0) {
-      setAlerts([]);
-      return;
-    }
-
-    const { data, error } = await supabaseConfig
-      .from("alertas")
-      .select("*")
-      .eq("alerta_status", "ativo")
-      // Alerta da comunidade vence em 6 h; o oficial pode não ter validade (null)
-      .or(`alerta_expira_em.is.null,alerta_expira_em.gt.${new Date().toISOString()}`)
-      .in("alerta_tipo_ocorrencia", categoriasAtivas)
-      .gte("alerta_latitude", boundsAlertas.minLat)
-      .lte("alerta_latitude", boundsAlertas.maxLat)
-      .gte("alerta_longitude", boundsAlertas.minLng)
-      .lte("alerta_longitude", boundsAlertas.maxLng);
-
-    if (error) {
-      console.error("Erro ao buscar alertas:", error);
-      return;
-    }
-    setAlerts(data ?? []);
+    // Mesma consulta da Home (service compartilhado). null = falhou: mantém o que já
+    // estava no mapa em vez de apagar os alertas por causa de uma queda de rede
+    const data = await getActiveAlerts(boundsAlertas, categoriasAtivas);
+    if (data === null) return;
+    setAlerts(data);
     // boundsAlertas nas dependências: sem ela, a função guardaria o `undefined` de antes
     // do GPS responder e sairia no `if` para sempre (os alertas nunca carregariam)
   }, [profileId, categoriasAtivas, boundsAlertas]);
