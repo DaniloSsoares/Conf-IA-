@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  Alert,
   StatusBar,
   Image,
 } from "react-native";
@@ -33,6 +32,7 @@ import {
 import { AlertPreferences } from "@/src/shared/types/profile";
 import { ChangePassModel } from "@/src/components/ui/ChangePassModel";
 import { TermsModal } from "@/src/components/ui/TermsModal";
+import { ConfirmModal } from "@/src/components/ui/ConfirmModal";
 import { getTerms } from "@/src/shared/service/termsService";
 
 export default function ProfileScreen() {
@@ -48,6 +48,7 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTermsModalVisible, setIsTermsModalVisible] = useState(false);
+  const [confirmarExclusaoVisivel, setConfirmarExclusaoVisivel] = useState(false);
   const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
 
   const formatarTelefoneBR = (valor?: string | null) => {
@@ -175,41 +176,32 @@ export default function ProfileScreen() {
     }
   };
 
-  // Exclusão de verdade (antes era só um toast). Pede confirmação, porque não tem volta
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      "Excluir minha conta",
-      "Sua conta e todos os seus dados (perfil, reportes, votos, comentários e notificações) " +
-        "serão apagados definitivamente. Esta ação não pode ser desfeita.",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await excluirMinhaConta();
-            if (error) {
-              console.error("Erro ao excluir a conta:", error);
-              Toast.show({
-                type: "error",
-                text1: "Não foi possível excluir a conta",
-                text2: "Tente novamente em instantes.",
-              });
-              return;
-            }
-            // O usuário já não existe no servidor: limpa só a sessão guardada no aparelho
-            // (scope local). O signOut padrão chamaria o servidor por um usuário apagado
-            await supabaseConfig.auth.signOut({ scope: "local" });
-            Toast.show({
-              type: "success",
-              text1: "Conta excluída",
-              text2: "Seus dados foram apagados.",
-            });
-            router.replace("/Login");
-          },
-        },
-      ],
-    );
+  // Exclusão de verdade, com confirmação no modal do app (não tem volta).
+  // O resultado é avisado por toast
+  const handleDeleteAccount = () => setConfirmarExclusaoVisivel(true);
+
+  const excluirConta = async () => {
+    const { error } = await excluirMinhaConta();
+    if (error) {
+      console.error("Erro ao excluir a conta:", error);
+      setConfirmarExclusaoVisivel(false);
+      Toast.show({
+        type: "error",
+        text1: "Não foi possível excluir a conta",
+        text2: "Tente novamente em instantes.",
+      });
+      return;
+    }
+    // O usuário já não existe no servidor: limpa só a sessão guardada no aparelho
+    // (scope local). O signOut padrão chamaria o servidor por um usuário apagado
+    await supabaseConfig.auth.signOut({ scope: "local" });
+    setConfirmarExclusaoVisivel(false);
+    Toast.show({
+      type: "success",
+      text1: "Conta excluída",
+      text2: "Seus dados foram apagados.",
+    });
+    router.replace("/Login");
   };
   const handleTogglePreference = async (key: keyof AlertPreferences) => {
     const previous = preferences;
@@ -449,6 +441,17 @@ export default function ProfileScreen() {
       <ChangePassModel
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
+      />
+
+      <ConfirmModal
+        visible={confirmarExclusaoVisivel}
+        variant="danger"
+        icon="trash-outline"
+        title="Excluir minha conta"
+        message="Sua conta e todos os seus dados (perfil, reportes, votos, comentários e notificações) serão apagados definitivamente. Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        onConfirm={excluirConta}
+        onCancel={() => setConfirmarExclusaoVisivel(false)}
       />
 
       <TermsModal

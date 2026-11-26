@@ -17,6 +17,7 @@ import { getStyles } from "./style";
 import { useEditReport } from "./useEditReport";
 import { CategoryModal } from "./components/CategoryModal";
 import { PhotoModal } from "./components/PhotoModal";
+import { ConfirmModal } from "@/src/components/ui/ConfirmModal";
 
 export default function EditReportScreen() {
   const { theme, isDarkMode } = useAppTheme();
@@ -44,6 +45,9 @@ export default function EditReportScreen() {
     handleUpdateLocation,
     handleSave,
     handleDeleteConfirm,
+    confirmarExclusaoVisivel,
+    setConfirmarExclusaoVisivel,
+    excluirReporte,
   } = useEditReport();
 
   return (
@@ -190,6 +194,17 @@ export default function EditReportScreen() {
         styles={styles}
         iconColor={iconColor}
         theme={theme}
+      />
+
+      <ConfirmModal
+        visible={confirmarExclusaoVisivel}
+        variant="danger"
+        icon="trash-outline"
+        title="Excluir reporte"
+        message="Tem certeza que deseja excluir este reporte permanentemente? Se ele já virou alerta da comunidade, o alerta também é encerrado."
+        confirmText="Excluir"
+        onConfirm={excluirReporte}
+        onCancel={() => setConfirmarExclusaoVisivel(false)}
       />
 
       <PhotoModal

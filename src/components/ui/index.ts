@@ -5,3 +5,4 @@ export { ChangePassModel, ChangePassModelProps } from './ChangePassModel';
 export { TermsModal, TermsModel, TermsModalProps } from './TermsModal';
 
 export { PhotoSourceModal, PhotoSourceModalProps } from './PhotoSourceModal';
+export { ConfirmModal, ConfirmModalProps } from './ConfirmModal';
