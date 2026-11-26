@@ -93,7 +93,15 @@ export default function LoginScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
             <View style={styles.iconWrapper}>
-              <Image source={require('@/src/shared/img/logoSemNome.png')} style={styles.logo} />
+              {/* Logo preta no modo claro e branca no modo escuro (a preta some no fundo escuro) */}
+              <Image
+                source={
+                  isDarkMode
+                    ? require('@/src/shared/img/logoSemNomeBranco.png')
+                    : require('@/src/shared/img/logoSemNome.png')
+                }
+                style={styles.logo}
+              />
             </View>
             <View style={styles.logoContainer}>
               <Text style={styles.logoText}>Conf</Text>
