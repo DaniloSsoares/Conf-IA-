@@ -18,41 +18,19 @@ export async function getAlertaById(alertaId: string): Promise<Alerta | null> {
   }
 }
 
-export async function getUserNotifications(userId: string): Promise<AlertNotification[]> {
-  try {
+// null = a consulta falhou: o Histórico avisa, em vez de dizer "nenhum alerta por aqui"
+export async function getUserNotifications(userId: string): Promise<AlertNotification[] | null> {
+  const { data, error } = await supabaseConfig
+    .from("alerta_notificacoes")
+    .select("*, alertas(*)")
+    .eq("perfil_id", userId)
+    .order("notificacao_enviada_em", { ascending: false });
 
-    let { data, error } = await supabaseConfig
-      .from("alerta_notificacoes")
-      .select("*, alertas(*)")
-      .eq("perfil_id", userId)
-      .order("notificacao_enviada_em", { ascending: false });
-
-
-    if (error && error.code === "PGRST205") {
-      const fallback = await supabaseConfig
-        .from("alertas_notificacoes")
-        .select("*, alertas(*)")
-        .eq("perfil_id", userId)
-        .order("notificacao_enviada_em", { ascending: false });
-
-      data = fallback.data;
-      error = fallback.error;
-    }
-
-    if (error) {
-      if (error.code !== "PGRST205") {
-        console.warn("Erro ao buscar notificações do usuário:", error.message || error);
-      }
-      return [];
-    }
-
-    return (data as AlertNotification[]) || [];
-  } catch (error: any) {
-    if (error?.code !== "PGRST205") {
-      console.warn("Erro ao buscar notificações do usuário:", error);
-    }
-    return [];
+  if (error) {
+    console.warn("Erro ao buscar notificações do usuário:", error.message);
+    return null;
   }
+  return (data as AlertNotification[]) ?? [];
 }
 
 export async function markNotificationAsRead(notificationId: string): Promise<void> {

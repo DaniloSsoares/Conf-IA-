@@ -206,7 +206,9 @@ export async function deleteReport(
   }
 }
 
-export async function getUserReports(userId: string): Promise<Report[]> {
+// null = a consulta falhou (sem internet, servidor fora): a tela avisa, em vez de
+// mostrar uma lista vazia como se o usuário não tivesse reportes
+export async function getUserReports(userId: string): Promise<Report[] | null> {
   try {
     const { data, error } = await supabaseConfig
       .from("reportes")
@@ -217,11 +219,13 @@ export async function getUserReports(userId: string): Promise<Report[]> {
     return (data as Report[]) || [];
   } catch (error) {
     console.error("Erro ao buscar reportes do usuário:", error);
-    return [];
+    return null;
   }
 }
 
-export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
+// null = a consulta falhou: "não deu para buscar" não pode virar "não há ocorrências"
+// (num app de defesa civil, sem dados não é o mesmo que sem perigo)
+export async function getActiveReports(bounds?: BoundingBox): Promise<Report[] | null> {
   try {
 
     // Só busca o que pode estar válido: criado dentro da maior validade entre as categorias
@@ -252,7 +256,7 @@ export async function getActiveReports(bounds?:BoundingBox): Promise<Report[]> {
 
   } catch (error) {
     console.error("Erro ao buscar reportes ativos:", error);
-    return [];
+    return null;
   }
 }
 

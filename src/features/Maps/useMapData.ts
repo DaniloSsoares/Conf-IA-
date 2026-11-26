@@ -4,6 +4,7 @@ import Toast from "react-native-toast-message";
 import { supabaseConfig } from "@/src/config/supabase";
 import { Report } from "@/src/shared/types/report";
 import { getActiveReports } from "@/src/shared/service/reportService";
+import { reporteAindaValido } from "@/src/shared/constants/validade";
 import { getProfile, updateProfile } from "@/src/shared/service/profileService";
 import { getEnabledCategories } from "@/src/shared/constants/alertCategories";
 import { useFocusEffect } from "expo-router";
@@ -29,6 +30,10 @@ export function useMapData() {
   const [weatherLoaded, setWeatherLoaded] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  // A última busca falhou (sem internet, servidor fora): o Mapa avisa, em vez de
+  // mostrar "0 ocorrências" como se não houvesse perigo
+  const [falhaReportes, setFalhaReportes] = useState(false);
+  const [falhaAlertas, setFalhaAlertas] = useState(false);
   const isFirstSubscription = useRef(true);
 
   useEffect(() => {
@@ -124,7 +129,10 @@ export function useMapData() {
     // GPS ainda não respondeu: espera em vez de buscar o país inteiro.
     // Quando a localização chegar, `bounds` muda e o useFocusEffect busca de novo sozinho.
     if (!bounds) return;
-    setReports(await getActiveReports(bounds));
+    const data = await getActiveReports(bounds);
+    // Falhou: mantém o que já estava no mapa e liga o aviso
+    setFalhaReportes(data === null);
+    if (data !== null) setReports(data);
   }, [bounds]);
 
   // Ref para o re-sync do Realtime usar a caixa atual sem recriar o canal
@@ -172,6 +180,7 @@ export function useMapData() {
     // Mesma consulta da Home (service compartilhado). null = falhou: mantém o que já
     // estava no mapa em vez de apagar os alertas por causa de uma queda de rede
     const data = await getActiveAlerts(boundsAlertas, categoriasAtivas);
+    setFalhaAlertas(data === null);
     if (data === null) return;
     setAlerts(data);
     // boundsAlertas nas dependências: sem ela, a função guardaria o `undefined` de antes
@@ -257,10 +266,16 @@ export function useMapData() {
         { event: "UPDATE", schema: "public", table: "reportes" },
         (payload) => {
           const atualizado = payload.new as Report;
+          // A lista tem duas fontes (consulta + Realtime): as regras do getActiveReports
+          // precisam valer aqui também. Sem isso, um voto em qualquer reporte (vencido,
+          // resolvido, longe) o colocava de volta no mapa
+          const continuaNoMapa =
+            (atualizado.reporte_status === "pendente" || atualizado.reporte_status === "validado") &&
+            !atualizado.reporte_oculto &&
+            reporteAindaValido(atualizado.reporte_tipo_ocorrencia, atualizado.created_at) &&
+            estaPerto(atualizado.reporte_latitude, atualizado.reporte_longitude);
           setReports((current) => {
-            // A lista tem duas fontes (consulta + Realtime): o filtro de getActiveReports
-            // precisa valer aqui também, senão um voto num reporte oculto o traz de volta
-            if (atualizado.reporte_status === "rejeitado" || atualizado.reporte_oculto) {
+            if (!continuaNoMapa) {
               return current.filter((r) => r.id !== atualizado.id);
             }
             const existe = current.some((r) => r.id === atualizado.id);
@@ -312,12 +327,20 @@ export function useMapData() {
         { event: "UPDATE", schema: "public", table: "alertas" },
         (payload) => {
           const atualizado = payload.new as any;
-          const relevante = categoriasAtivas.includes(
-            atualizado.alerta_tipo_ocorrencia,
-          );
+          // Mesmas regras da consulta: ativo, dentro da validade, de uma categoria
+          // ligada e com o raio alcançando o usuário
+          const relevante =
+            atualizado.alerta_status === "ativo" &&
+            (!atualizado.alerta_expira_em || new Date(atualizado.alerta_expira_em) > new Date()) &&
+            categoriasAtivas.includes(atualizado.alerta_tipo_ocorrencia) &&
+            estaPerto(
+              atualizado.alerta_latitude,
+              atualizado.alerta_longitude,
+              Number(atualizado.alerta_raio_km ?? 0),
+            );
 
           setAlerts((current) => {
-            if (atualizado.alerta_status !== "ativo" || !relevante) {
+            if (!relevante) {
               return current.filter((a) => a.id !== atualizado.id);
             }
             const existe = current.some((a) => a.id === atualizado.id);
@@ -369,5 +392,6 @@ export function useMapData() {
     weatherLoaded,
     loadingLocation,
     permissionDenied,
+    semConexao: falhaReportes || falhaAlertas,
   };
 }

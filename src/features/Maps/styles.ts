@@ -131,6 +131,14 @@ export const getStyles = (theme: AppTheme) => {
       borderRadius: 12,
       marginBottom: 10,
     },
+    avisoSemConexao: {
+      borderWidth: 1,
+      borderColor: theme.alertRed,
+    },
+    avisoSemConexaoTexto: {
+      color: theme.alertRed,
+      flexShrink: 1,
+    },
     weatherMain: {
       flexDirection: 'row',
       alignItems: 'center',

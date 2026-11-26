@@ -178,9 +178,10 @@ export default function LoginScreen() {
             </View>
 
 
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={styles.forgotPasswordText}>Esqueceu a senha?</Text>
-            </TouchableOpacity>
+            {/* "Esqueceu a senha?" fica escondido até ter o fluxo completo: o e-mail de
+                redefinição do Supabase abre um link que precisa de uma página (ou deep link)
+                configurada em Auth → URL Configuration. Um botão sem ação parece defeito.
+                Pelo app, quem está logado já troca a senha em Perfil → Trocar Senha */}
 
             <TouchableOpacity
               style={styles.loginButton}

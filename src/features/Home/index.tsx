@@ -176,12 +176,12 @@ export default function DashboardScreen({ navigation }: any) {
       getActiveReports(boundingBox(local.latitude, local.longitude, raioKm)),
     ]);
 
-    // Consulta de alertas falhou: avisa em vez de mostrar "situação normal" sem dados
-    if (alertasBrutos === null) {
+    // Alguma consulta falhou: avisa em vez de mostrar "situação normal" sem dados
+    if (alertasBrutos === null || reportesBrutos === null) {
       setActiveAlerts([]);
       setMostrandoReportes(false);
       setRiskLevel(null);
-      setRiskDescription('Não foi possível atualizar os alertas. Verifique sua conexão.');
+      setRiskDescription('Não foi possível atualizar os dados da região. Verifique sua conexão.');
       return;
     }
 

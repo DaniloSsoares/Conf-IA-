@@ -64,23 +64,23 @@ São os que aparecem na demo ou que a banca pode perceber, e todos são rápidos
 - **Correção:** usar a mesma lógica do Mapa: localização do usuário, `boundingBox` com o raio dele, filtro pelas categorias ativas e refinamento com `haversineKm`. O ideal é extrair isso para um hook compartilhado (`useAlertasProximos`) e usar nas duas telas.
 - **Também:** quando não há alertas, a Home mostra **reportes** como se fossem alertas (título "Alagamento", descrição do morador). Isso mistura os dois conceitos que a banca vai ver separados no Mapa.
 
-### <a id="b4"></a>B4 🔴 Excluir um reporte validado deixa o alerta ativo ⏱️
+### <a id="b4"></a>B4 🔴 Excluir um reporte validado deixa o alerta ativo ⏱️ · ✅ **corrigido** (trigger, migration `20261125220000`)
 - **Onde:** a ligação `alertas.alerta_reporte_id` tem `ON DELETE SET NULL`, e o trigger `sincronizar_alerta_colaborativo` só roda em UPDATE. [`deleteReport`](../src/shared/service/reportService.ts#L181) apaga o reporte e o alerta fica **órfão e ativo** até vencer (6 h).
 - **Cenário:** o dono exclui um reporte que já virou alerta; o alerta continua no mapa e nas notificações dos vizinhos, apontando para algo que não existe mais. (Foi exatamente o que apareceu na limpeza do banco em 14/11.)
 - **Correção (banco):** um trigger `BEFORE DELETE ON reportes` que cancela o alerta ligado (`UPDATE alertas SET alerta_status = 'cancelado' WHERE alerta_reporte_id = OLD.id`).
 
-### <a id="b5"></a>B5 🔴 Votar num reporte vencido cria um alerta "novo" ⏱️
+### <a id="b5"></a>B5 🔴 Votar num reporte vencido cria um alerta "novo" ⏱️ · ✅ **corrigido no app** (no banco: A.11)
 - **Onde:** a validade (2.7 mínimo) só existe **no app** (filtro do Mapa). A votação ([ReporteDetails.tsx:122](../src/features/History/ViewHistory/components/ReporteDetails.tsx#L122)) só é bloqueada para `resolvido` e oculto.
 - **Cenário:** um alagamento de 3 dias atrás, aberto pelo Histórico ou por uma notificação antiga, recebe o 3º voto → vira `validado` → o trigger cria um alerta **com validade de 6 h a partir de agora** → os vizinhos são notificados de uma ocorrência velha.
 - **Correção rápida (app):** esconder a `VoteSection` quando `!reporteAindaValido(...)`, com o aviso "Este reporte expirou".
 - **Correção completa (banco):** a versão completa da 2.7 (Anexo A.11), com o status `expirado` preservado pelo trigger de score.
 
-### <a id="b6"></a>B6 🔴 Falha de rede aparece como "nenhuma ocorrência" ⏱️
+### <a id="b6"></a>B6 🔴 Falha de rede aparece como "nenhuma ocorrência" ⏱️ · ✅ **corrigido** (Mapa, Home e Histórico)
 - **Onde:** [`getActiveReports`](../src/shared/service/reportService.ts#L253), `fetchAlertas` e `getUserNotifications` devolvem lista vazia quando dá erro, sem avisar a tela.
 - **Cenário:** sem internet (ou com o Supabase fora), o Mapa mostra "Todos (0)" e a Home mostra "Situação normal". **Num app de defesa civil, "sem dados" não pode parecer "sem perigo".**
 - **Correção:** o service devolve `{ data, error }` (como já fazem `createReport` e `updateReport`), e a tela mostra um aviso "Não foi possível atualizar. Verifique sua conexão" em vez da lista vazia.
 
-### B7 🟠 O realtime do Mapa traz de volta reportes vencidos, longe ou resolvidos ⏱️
+### B7 🟠 O realtime do Mapa traz de volta reportes vencidos, longe ou resolvidos ⏱️ · ✅ **corrigido**
 - **Onde:** [useMapData.ts:275-292](../src/features/Maps/useMapData.ts#L275), o handler de UPDATE de `reportes`.
 - **Cenário:** qualquer voto em qualquer reporte do país dispara um UPDATE; se ele não está na lista, o handler **adiciona** (`[...current, atualizado]`), sem conferir distância, validade nem status `resolvido`. Um reporte vencido que recebe um voto **reaparece** no mapa. (A distância é filtrada depois na tela, mas a validade e o `resolvido` não.)
 - **Correção:** aplicar a mesma regra do `getActiveReports`: só mantém se `pendente`/`validado`, não oculto, `estaPerto(...)` e `reporteAindaValido(...)`. O mesmo vale para o UPDATE de `alertas` (conferir `alerta_expira_em`).
@@ -90,25 +90,25 @@ São os que aparecem na demo ou que a banca pode perceber, e todos são rápidos
 - **Cenário:** um reporte validado de "alagamento na rua A" é editado para "fogo em mata na rua B". Os votos (que confirmaram a rua A) continuam valendo, e o alerta continua na rua A como alagamento.
 - **Correção:** bloquear a edição de categoria e localização quando o reporte já tem votos (só a descrição e a foto), ou zerar os votos ao editar.
 
-### <a id="b9"></a>B9 🟠 "Esqueceu a senha?" não faz nada ⏱️⏱️
+### <a id="b9"></a>B9 🟠 "Esqueceu a senha?" não faz nada ⏱️⏱️ · ✅ **escondido** até ter o fluxo completo
 - **Onde:** [Login/index.tsx:180](../src/features/Auth/Login/index.tsx#L180), `TouchableOpacity` sem `onPress`.
 - **Correção:** `supabaseConfig.auth.resetPasswordForEmail(email)` + toast "Enviamos um link para o seu e-mail". Para a banca, se não der tempo: **esconder o botão**.
 
-### <a id="b10"></a>B10 🟠 "Excluir Minha Conta" só mostra um toast ⏱️⏱️⏱️
+### <a id="b10"></a>B10 🟠 "Excluir Minha Conta" só mostra um toast ⏱️⏱️⏱️ · ✅ **corrigido** (exclusão real, migration `20261125220000`)
 - **Onde:** [Profile/index.tsx:178](../src/features/Profile/index.tsx#L178).
 - **Problema:** o botão diz "Excluir", mostra "Tem certeza? Esta ação não pode ser desfeita." e não exclui nada. A LGPD garante o direito à exclusão, e os termos (seção 6) prometem atender o pedido.
 - **Correção completa:** Edge Function com a chave de serviço que apaga o usuário do `auth.users` (o perfil e os dados vão junto em cascata) + confirmação com `Alert.alert`. **Para a banca:** esconder o botão, ou trocar o texto para "Solicitar exclusão dos dados" com o e-mail da equipe (que também falta nos termos, item 1.8 do plano).
 
-### B11 🟠 O cadastro pode cair nas abas sem usuário logado ⏱️ (conferir no app)
+### B11 🟠 O cadastro pode cair nas abas sem usuário logado ⏱️ (conferir no app) · ✅ **corrigido**
 - **Onde:** [Register/index.tsx](../src/features/Auth/Register/index.tsx), `executeCadastro` chama `router.replace("/(tabs)")` logo depois do `signUp`.
 - **Cenário:** se a **confirmação de e-mail** estiver ligada no Supabase, o `signUp` não cria sessão. O app entra nas abas sem usuário: Home sem nome, Mapa sem perfil, e o aceite dos termos não é gravado.
 - **Correção:** depois do `signUp`, conferir `data.session`; sem sessão, mostrar "Confirme seu e-mail para entrar" e ir para o Login.
 
-### B12 🟠 Um erro nos termos depois do cadastro mostra "Erro inesperado" ⏱️
+### B12 🟠 Um erro nos termos depois do cadastro mostra "Erro inesperado" ⏱️ · ✅ **corrigido**
 - **Onde:** mesmo `executeCadastro`: se o `createTerms()` falhar, o `catch` mostra "Erro inesperado", embora a conta **tenha sido criada**. A pessoa tenta de novo e recebe "usuário já existe".
 - **Correção:** tratar o erro do `createTerms` separado (o aceite obrigatório no layout das abas já cobre o caso).
 
-### B13 🟡 Tocar numa notificação com o app fechado pelo sistema não abre o alerta ⏱️
+### B13 🟡 Tocar numa notificação com o app fechado pelo sistema não abre o alerta ⏱️ · ✅ **corrigido**
 - **Onde:** `aoTocarNaNotificacao` usa só o listener; se o Android encerrou o app, o toque abre o app do zero e o listener não recebe esse toque.
 - **Correção:** chamar também `Notifications.getLastNotificationResponseAsync()` ao montar.
 

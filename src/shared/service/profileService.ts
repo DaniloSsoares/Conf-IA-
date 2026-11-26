@@ -80,3 +80,11 @@ export async function uploadAvatar(
     return null;
   }
 }
+
+// Exclui a conta do usuário logado (LGPD: direito à exclusão). A função do banco
+// excluir_minha_conta (SECURITY DEFINER) apaga o usuário do auth.users; o perfil, os
+// reportes, votos, denúncias, aceites e notificações vão junto, em cascata
+export async function excluirMinhaConta(): Promise<{ error: any }> {
+  const { error } = await supabaseConfig.rpc("excluir_minha_conta");
+  return { error };
+}

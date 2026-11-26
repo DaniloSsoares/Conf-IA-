@@ -23,6 +23,8 @@ export default function HistoryScreen() {
   const [notifications, setNotifications] = useState<AlertNotification[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  // A busca falhou (sem internet, servidor fora): avisa em vez de "nenhum alerta por aqui"
+  const [falhaAoCarregar, setFalhaAoCarregar] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   const primaryColor = theme.primary || "#0047FF";
 
@@ -39,8 +41,10 @@ export default function HistoryScreen() {
         getUserReports(user.id),
       ]);
 
-      setNotifications(notificationsData);
-      setReports(reportsData);
+      setFalhaAoCarregar(notificationsData === null || reportsData === null);
+      // Falhou: mantém o que já estava na tela
+      if (notificationsData !== null) setNotifications(notificationsData);
+      if (reportsData !== null) setReports(reportsData);
     } catch (error) {
       console.error('Erro ao carregar histórico:', error);
     } finally {
@@ -116,7 +120,9 @@ export default function HistoryScreen() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
           {tab === 'notificações' ? (
             notifications.length === 0 ? (
-              renderEmpty('Nenhum alerta por aqui ainda.')
+              renderEmpty(falhaAoCarregar
+                ? 'Não foi possível carregar. Verifique sua conexão e volte a esta tela.'
+                : 'Nenhum alerta por aqui ainda.')
             ) : (
               notifications.map((notification) => {
                 const meta = getCategoryMeta(notification.alertas?.alerta_tipo_ocorrencia);
@@ -171,7 +177,9 @@ export default function HistoryScreen() {
               })
             )
           ) : reports.length === 0 ? (
-            renderEmpty('Você ainda não fez nenhum reporte.')
+            renderEmpty(falhaAoCarregar
+              ? 'Não foi possível carregar. Verifique sua conexão e volte a esta tela.'
+              : 'Você ainda não fez nenhum reporte.')
           ) : (
             reports.map((report) => {
               const meta = getCategoryMeta(report.reporte_tipo_ocorrencia);

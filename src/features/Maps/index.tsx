@@ -48,6 +48,7 @@ export default function MapScreen() {
         weatherLoaded,
         loadingLocation,
         permissionDenied,
+        semConexao,
     } = useMapData();
 
     const handleOpenAlerta = (alerta: any) => {
@@ -242,6 +243,19 @@ export default function MapScreen() {
                             <View style={styles.weatherMain}>
                                 <Ionicons name="cloud-offline-outline" size={20} color={theme.subtext} />
                                 <Text style={styles.weatherDescText}>Clima indisponível</Text>
+                            </View>
+                        </View>
+                    )}
+
+                    {/* A última atualização falhou: o que está no mapa pode estar desatualizado.
+                        Sem este aviso, "0 ocorrências" pareceria "nenhum perigo" */}
+                    {semConexao && (
+                        <View style={[styles.weatherCard, styles.avisoSemConexao]}>
+                            <View style={styles.weatherMain}>
+                                <Ionicons name="warning-outline" size={18} color={theme.alertRed} />
+                                <Text style={[styles.weatherDescText, styles.avisoSemConexaoTexto]}>
+                                    Sem conexão: o mapa pode estar desatualizado
+                                </Text>
                             </View>
                         </View>
                     )}
