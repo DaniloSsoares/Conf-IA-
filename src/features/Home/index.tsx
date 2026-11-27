@@ -12,7 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { supabaseConfig } from '@/src/config/supabase';
-import { getProfile } from '@/src/shared/service/profileService';
+import { getProfile, updateProfile } from '@/src/shared/service/profileService';
+import { arredondarCoordenada } from '@/src/shared/utils/endereco';
 import { getCurrentWeather } from '@/src/shared/service/weatherService';
 import { getActiveReports } from '@/src/shared/service/reportService';
 import { getActiveAlerts } from '@/src/shared/service/alertaNotificationService';
@@ -30,6 +31,29 @@ import { getCategoryMeta } from '@/src/shared/constants/historyStatus';
 import { NumerosEmergencia } from './components/NumerosEmergencia';
 
 type Local = { latitude: number; longitude: number };
+
+// As notificações de alerta são geradas no banco com a localização SALVA no perfil
+// (trigger gerar_notificacoes_alerta). Antes só o Mapa salvava: quem nunca abria o
+// Mapa não recebia notificação, e quem se deslocava recebia as da posição antiga.
+// Arredondada (~100 m), como no Mapa. Só grava se mudou, e sem esperar: uma falha
+// aqui não pode atrasar nem quebrar a Home
+function salvarLocalizacaoNoPerfil(local: Local, profileData: Profile | null) {
+  if (!profileData) return;
+  const latitude = arredondarCoordenada(local.latitude);
+  const longitude = arredondarCoordenada(local.longitude);
+  // numeric do banco chega como texto: por isso o Number
+  if (
+    Number(profileData.perfil_latitude) === latitude &&
+    Number(profileData.perfil_longitude) === longitude
+  ) {
+    return;
+  }
+  updateProfile(profileData.id, { perfil_latitude: latitude, perfil_longitude: longitude })
+    .then(({ error }) => {
+      if (error) console.warn('Não foi possível salvar a localização no perfil:', error);
+    })
+    .catch((error) => console.warn('Não foi possível salvar a localização no perfil:', error));
+}
 
 // Item da lista da Home: um alerta, ou um reporte quando não há alerta por perto.
 // `tipo` diz qual tela de detalhes abrir
@@ -143,7 +167,9 @@ export default function DashboardScreen({ navigation }: any) {
           (await Location.getLastKnownPositionAsync({ maxAge: 5 * 60 * 1000 })) ??
           (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }));
         if (posicao) {
-          return { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+          const local = { latitude: posicao.coords.latitude, longitude: posicao.coords.longitude };
+          salvarLocalizacaoNoPerfil(local, profileData);
+          return local;
         }
       }
     } catch (locErr) {
