@@ -1,19 +1,14 @@
 import { useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
 import Toast from "react-native-toast-message";
 
 import { REPORT_CATEGORIES } from "@/src/shared/constants/reportCategories";
 import { ReportCategory } from "@/src/shared/types/report";
+import { SelectedPhoto } from "@/src/shared/types/photo";
 import { updateReport, deleteReport } from "@/src/shared/service/reportService";
+import { takePhoto } from "@/src/shared/utils/photoPicker";
 import { supabaseConfig } from "@/src/config/supabase";
-
-export interface SelectedPhoto {
-  uri: string;
-  base64?: string;
-  ext?: string;
-}
 
 export function useEditReport() {
   const router = useRouter();
@@ -50,7 +45,6 @@ export function useEditReport() {
   const [confirmarExclusaoVisivel, setConfirmarExclusaoVisivel] = useState(false);
   const [updatingLocation, setUpdatingLocation] = useState<boolean>(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState<boolean>(false);
-  const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
 
   const selectedCategoryMeta = REPORT_CATEGORIES.find((c) => c.id === category);
   const currentPhotoUri = newPhoto ? newPhoto.uri : photoUrl;
@@ -61,72 +55,13 @@ export function useEditReport() {
     setPhotoRemoved(true);
   };
 
-  const handlePickImage = async (useCamera: boolean) => {
-    try {
-      setPhotoModalVisible(false);
-
-      if (useCamera) {
-        const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        if (status !== "granted") {
-          Toast.show({
-            type: "error",
-            text1: "Permissão negada",
-            text2: "Precisamos de acesso à câmera para tirar a foto.",
-          });
-          return;
-        }
-
-        const result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ["images"],
-          quality: 0.7,
-          base64: true,
-        });
-
-        if (!result.canceled && result.assets[0]) {
-          const asset = result.assets[0];
-          const fileExt = asset.uri.split(".").pop() || "jpg";
-          setNewPhoto({
-            uri: asset.uri,
-            base64: asset.base64 || undefined,
-            ext: fileExt,
-          });
-          setPhotoRemoved(false);
-        }
-      } else {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-          Toast.show({
-            type: "error",
-            text1: "Permissão negada",
-            text2: "Precisamos de acesso à galeria para selecionar a foto.",
-          });
-          return;
-        }
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ["images"],
-          quality: 0.7,
-          base64: true,
-        });
-
-        if (!result.canceled && result.assets[0]) {
-          const asset = result.assets[0];
-          const fileExt = asset.uri.split(".").pop() || "jpg";
-          setNewPhoto({
-            uri: asset.uri,
-            base64: asset.base64 || undefined,
-            ext: fileExt,
-          });
-          setPhotoRemoved(false);
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao selecionar foto:", error);
-      Toast.show({
-        type: "error",
-        text1: "Erro na imagem",
-        text2: "Não foi possível selecionar a imagem.",
-      });
+  // Só câmera, como no reporte novo: a foto é registro da ocorrência (Termos, seção 4).
+  // O takePhoto já reduz a foto para 1280 px em JPEG (uns 200 a 400 KB) e trata a permissão
+  const handleTakePhoto = async () => {
+    const foto = await takePhoto();
+    if (foto) {
+      setNewPhoto(foto);
+      setPhotoRemoved(false);
     }
   };
 
@@ -298,10 +233,8 @@ export function useEditReport() {
     selectedCategoryMeta,
     categoryModalVisible,
     setCategoryModalVisible,
-    photoModalVisible,
-    setPhotoModalVisible,
     handleRemovePhoto,
-    handlePickImage,
+    handleTakePhoto,
     handleUpdateLocation,
     handleSave,
     handleDeleteConfirm,
