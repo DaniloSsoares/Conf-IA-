@@ -27,6 +27,7 @@ import styles from './style';
 import { NivelRisco } from '@/src/shared/types/notification';
 import { RISK_LABEL, getNivelRiscoReporte } from '@/src/shared/constants/nivelRisco';
 import { getCategoryMeta } from '@/src/shared/constants/historyStatus';
+import { NumerosEmergencia } from './components/NumerosEmergencia';
 
 type Local = { latitude: number; longitude: number };
 
@@ -83,7 +84,10 @@ export default function DashboardScreen({ navigation }: any) {
   const loadAllData = useCallback(async () => {
     try {
       setLoadingWeather(true);
-      const { data: { user } } = await supabaseConfig.auth.getUser();
+      // getSession lê do aparelho: sem internet, o usuário continua identificado
+      // (o getUser vai ao servidor e voltava vazio offline, e a Home mostrava "Usuário")
+      const { data: { session } } = await supabaseConfig.auth.getSession();
+      const user = session?.user ?? null;
       const profileData = user ? await getProfile(user.id) : null;
       preencherUsuario(user, profileData);
 
@@ -198,7 +202,7 @@ export default function DashboardScreen({ navigation }: any) {
           id: a.id,
           tipo: 'alerta',
           titulo: a.alerta_titulo || getCategoryMeta(a.alerta_tipo_ocorrencia).label,
-          descricao: a.alerta_descricao || 'Monitorado via Defesa Civil / Conf-IA',
+          descricao: a.alerta_descricao || 'Monitorado via Defesa Civil / Conf-U',
         })),
       );
     } else {
@@ -592,6 +596,12 @@ export default function DashboardScreen({ navigation }: any) {
             {riskDescription}
           </Text>
         </View>
+
+        {/* =========================
+            NÚMEROS DE EMERGÊNCIA
+            Logo abaixo do risco: é o que a pessoa procura numa situação de perigo
+        ========================= */}
+        <NumerosEmergencia />
 
         {/* =========================
             CONDIÇÕES CLIMÁTICAS (RESUMO WEATHERAPI)

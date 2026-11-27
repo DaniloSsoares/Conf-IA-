@@ -11,7 +11,7 @@ import { Report } from '@/src/shared/types/report';
 import { NivelRisco } from '@/src/shared/types/notification';
 import { REPORT_CATEGORIES } from '@/src/shared/constants/reportCategories';
 import { RISK_LABEL, getNivelRiscoReporte } from '@/src/shared/constants/nivelRisco';
-import getStyles, { darkMapStyle } from './styles';
+import getStyles, { darkMapStyle, ICONE_MARCADOR, TAMANHO_SELO } from './styles';
 import { useMapData } from './useMapData';
 
 type FilterType = 'todos' | 'alertas' | 'reportes';
@@ -372,11 +372,11 @@ export default function MapScreen() {
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={getIconStyle(alerta.alerta_nivel_risco)}>
-                                    <Ionicons name={iconName as any} size={22} color={theme.white} />
+                                    <Ionicons name={iconName as any} size={ICONE_MARCADOR} color={theme.white} />
                                 </View>
                                 {/* Selo depois do ícone para ficar por cima sem zIndex (ver markerBadgeOfficial) */}
                                 <View style={styles.markerBadgeOfficial}>
-                                    <Ionicons name={origem.icone} size={10} color={theme.white} />
+                                    <Ionicons name={origem.icone} size={Math.round(TAMANHO_SELO * 0.62)} color={theme.white} />
                                 </View>
                             </View>
 
@@ -418,7 +418,7 @@ export default function MapScreen() {
                         >
                             <View style={styles.markerWrapper}>
                                 <View style={getIconStyle(nivel)}>
-                                    <Ionicons name={iconName as any} size={22} color={theme.white} />
+                                    <Ionicons name={iconName as any} size={ICONE_MARCADOR} color={theme.white} />
                                 </View>
                             </View>
 

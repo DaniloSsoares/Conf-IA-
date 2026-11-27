@@ -154,6 +154,22 @@ export const getStyles = (theme: any) => {
       color: theme?.subtext || '#858D99',
       textAlign: 'center',
     },
+    avisoConexao: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      padding: 12,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: theme?.alertRed || '#D74247',
+      backgroundColor: 'rgba(215, 66, 71, 0.08)',
+    },
+    avisoConexaoTexto: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: '600',
+    },
     loadMoreButton: {
       alignItems: 'center',
       justifyContent: 'center',

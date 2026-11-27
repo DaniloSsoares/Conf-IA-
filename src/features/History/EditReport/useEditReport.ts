@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
@@ -48,6 +47,7 @@ export function useEditReport() {
   const [photoRemoved, setPhotoRemoved] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
+  const [confirmarExclusaoVisivel, setConfirmarExclusaoVisivel] = useState(false);
   const [updatingLocation, setUpdatingLocation] = useState<boolean>(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState<boolean>(false);
   const [photoModalVisible, setPhotoModalVisible] = useState<boolean>(false);
@@ -252,46 +252,36 @@ export function useEditReport() {
     }
   };
 
-  const handleDeleteConfirm = () => {
-    Alert.alert(
-      "Excluir Reporte",
-      "Tem certeza que deseja excluir este reporte permanentemente?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            if (!reportId) return;
-            try {
-              setDeleting(true);
-              const { success, error: delErr } = await deleteReport(reportId);
+  // Abre a confirmação no modal do app (ConfirmModal); a exclusão roda ao confirmar
+  const handleDeleteConfirm = () => setConfirmarExclusaoVisivel(true);
 
-              if (!success || delErr) {
-                Toast.show({
-                  type: "error",
-                  text1: "Erro ao excluir",
-                  text2: "Não foi possível deletar o reporte.",
-                });
-                return;
-              }
+  const excluirReporte = async () => {
+    if (!reportId) return;
+    try {
+      setDeleting(true);
+      const { success, error: delErr } = await deleteReport(reportId);
 
-              Toast.show({
-                type: "success",
-                text1: "Reporte Excluído",
-                text2: "O reporte foi removido com sucesso.",
-              });
+      if (!success || delErr) {
+        Toast.show({
+          type: "error",
+          text1: "Erro ao excluir",
+          text2: "Não foi possível deletar o reporte.",
+        });
+        return;
+      }
 
-              router.back();
-            } catch (error) {
-              console.error("Erro ao excluir:", error);
-            } finally {
-              setDeleting(false);
-            }
-          },
-        },
-      ]
-    );
+      setConfirmarExclusaoVisivel(false);
+      Toast.show({
+        type: "success",
+        text1: "Reporte Excluído",
+        text2: "O reporte foi removido com sucesso.",
+      });
+      router.back();
+    } catch (error) {
+      console.error("Erro ao excluir:", error);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return {
@@ -315,5 +305,8 @@ export function useEditReport() {
     handleUpdateLocation,
     handleSave,
     handleDeleteConfirm,
+    confirmarExclusaoVisivel,
+    setConfirmarExclusaoVisivel,
+    excluirReporte,
   };
 }

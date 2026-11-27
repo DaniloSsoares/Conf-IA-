@@ -81,7 +81,15 @@ export default function IntroScreen() {
         {/* Header */}
         <View style={styles.header}>
           
-          <Image source={require('@/src/shared/img/logo.png')} style={styles.logo} />
+          {/* Logo preta no modo claro e branca no modo escuro */}
+          <Image
+            source={
+              isDarkMode
+                ? require('@/src/shared/img/logoBranco.png')
+                : require('@/src/shared/img/logo.png')
+            }
+            style={styles.logo}
+          />
         </View>
 
         <View style={styles.content}>

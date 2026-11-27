@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   logoIa: {
     fontSize: 48,
     fontWeight: '800',
-    color: 'rgba(255, 255, 255, 0.8)', // Lighter white/transparent to contrast nicely
+    color: 'rgba(255, 255, 255, 0.8)', 
     marginLeft: 2,
     letterSpacing: 1,
   },
