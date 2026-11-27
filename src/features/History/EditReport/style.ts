@@ -260,21 +260,6 @@ export const getStyles = (theme: any) => {
       color: theme?.text || (isDark ? "#FFFFFF" : "#2C2B30"),
       fontWeight: "500",
     },
-    photoOptionBtn: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-      paddingVertical: 16,
-      paddingHorizontal: 16,
-      borderRadius: 12,
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#F4F5F7",
-      marginBottom: 10,
-    },
-    photoOptionText: {
-      fontSize: 15,
-      fontWeight: "600",
-      color: theme?.text || (isDark ? "#FFFFFF" : "#2C2B30"),
-    },
   });
 };
 

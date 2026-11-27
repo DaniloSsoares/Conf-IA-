@@ -16,7 +16,6 @@ import { useAppTheme } from "@/src/shared/constants/theme";
 import { getStyles } from "./style";
 import { useEditReport } from "./useEditReport";
 import { CategoryModal } from "./components/CategoryModal";
-import { PhotoModal } from "./components/PhotoModal";
 import { ConfirmModal } from "@/src/components/ui/ConfirmModal";
 
 export default function EditReportScreen() {
@@ -38,10 +37,8 @@ export default function EditReportScreen() {
     selectedCategoryMeta,
     categoryModalVisible,
     setCategoryModalVisible,
-    photoModalVisible,
-    setPhotoModalVisible,
     handleRemovePhoto,
-    handlePickImage,
+    handleTakePhoto,
     handleUpdateLocation,
     handleSave,
     handleDeleteConfirm,
@@ -143,7 +140,7 @@ export default function EditReportScreen() {
               <Image source={{ uri: currentPhotoUri }} style={styles.photoPreview} />
               <TouchableOpacity
                 style={styles.changePhotoOverlayBtn}
-                onPress={() => setPhotoModalVisible(true)}
+                onPress={handleTakePhoto}
               >
                 <Ionicons name="camera-outline" size={14} color="#FFFFFF" />
                 <Text style={styles.changePhotoText}>Alterar Foto</Text>
@@ -152,7 +149,7 @@ export default function EditReportScreen() {
           ) : (
             <TouchableOpacity
               style={styles.addPhotoBox}
-              onPress={() => setPhotoModalVisible(true)}
+              onPress={handleTakePhoto}
               activeOpacity={0.8}
             >
               <Ionicons name="camera-outline" size={32} color={theme.primary || "#0047FF"} />
@@ -205,15 +202,6 @@ export default function EditReportScreen() {
         confirmText="Excluir"
         onConfirm={excluirReporte}
         onCancel={() => setConfirmarExclusaoVisivel(false)}
-      />
-
-      <PhotoModal
-        visible={photoModalVisible}
-        onClose={() => setPhotoModalVisible(false)}
-        onPickImage={handlePickImage}
-        styles={styles}
-        iconColor={iconColor}
-        theme={theme}
       />
     </LinearGradient>
   );
