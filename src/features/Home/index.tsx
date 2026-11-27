@@ -219,10 +219,16 @@ export default function DashboardScreen({ navigation }: any) {
     }
 
     // Nível de risco: o pior entre os alertas e os reportes da região
-    // (o risco do reporte vem da categoria, mesma regra do trigger A.10)
+    // (o risco do reporte vem da categoria, mesma regra do trigger A.10).
+    // Reporte pendente ainda não foi confirmado pela comunidade: conta no máximo como
+    // "moderado". Só o que foi validado (ou um alerta) leva a região a alto/crítico
     const niveis: NivelRisco[] = [
       ...alertas.map((a) => a.alerta_nivel_risco),
-      ...reportes.map((r) => getNivelRiscoReporte(r.reporte_tipo_ocorrencia)),
+      ...reportes.map((r) => {
+        const nivel = getNivelRiscoReporte(r.reporte_tipo_ocorrencia);
+        const acimaDeModerado = nivel === 'alto' || nivel === 'critico';
+        return r.reporte_status === 'pendente' && acimaDeModerado ? 'moderado' : nivel;
+      }),
     ];
 
     if (niveis.includes('critico')) {
@@ -323,7 +329,8 @@ export default function DashboardScreen({ navigation }: any) {
             },
           ]}
           activeOpacity={0.88}
-          onPress={() => navigation.navigate('Profile')}
+          // Troca de aba direto pelo router (mesmo padrão do botão Reportar)
+          onPress={() => router.navigate('/Profile')}
         >
           {userProfile?.perfil_avatar_url ? (
             <Image
@@ -788,7 +795,7 @@ export default function DashboardScreen({ navigation }: any) {
             {/* "Ver tudo" abre o Mapa, onde ficam todos os alertas e ocorrências da região */}
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('Maps')}
+              onPress={() => router.navigate('/Maps')}
             >
               <Text
                 style={[
